@@ -15,6 +15,19 @@ function M.is_windows()
   return M.vim_has('win32')
 end
 
+---@param expr string
+---@return boolean exists
+function M.vim_exists(expr)
+  M.validate({ expr = { expr, { 'string' } } })
+
+  return vim.fn.exists(expr) == 1
+end
+
+---@return boolean active
+function M.virtual_env()
+  return M.vim_exists('$VIRTUAL_ENV')
+end
+
 ---Get rid of all duplicates in the given list.
 ---
 ---If the list is empty it'll just return it as-is.

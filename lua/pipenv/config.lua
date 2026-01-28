@@ -1,3 +1,6 @@
+---@class PipenvOpts
+---@field auto_detect? boolean
+
 local util = require('pipenv.util')
 
 ---@class Pipenv.Config
@@ -5,21 +8,19 @@ local M = {}
 
 ---@return PipenvOpts defaults
 function M.get_defaults()
-  return { ---@class PipenvOpts
-    debug = false,
-    foo = true,
-    bar = false,
+  return { ---@type PipenvOpts
+    auto_detect = true,
   }
 end
 
----@param opts? PipenvOpts
+---@param opts PipenvOpts
+---@overload fun()
 function M.setup(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   M.config = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
 
-  -- ...
-  vim.g.Pipenv_setup = 1 -- OPTIONAL for `health.lua`, delete if you want to
+  vim.g.pipenv_setup = 1
 end
 
 return M
