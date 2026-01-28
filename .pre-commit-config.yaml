@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: remove-crlf
+      - id: forbid-crlf # Forbid files containing CRLF end-lines to be committed
+  - repo: local
+    hooks:
+      - id: run_stylua
+        name: Run StyLua
+        language: system
+        entry: stylua lua
+        files: lua/.*lua$
+        verbose: true
+      - id: run_selene
+        name: Run Selene
+        language: system
+        entry: selene lua
+        files: lua/.*lua$
+        verbose: true
+# vim: set ts=2 sts=2 sw=2 et ai si sta:

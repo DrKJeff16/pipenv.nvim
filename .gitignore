@@ -1,0 +1,72 @@
+# Rocks
+*.rock
+
+# Vim Helptags
+doc/tags
+
+# Local Issue Template
+ISSUE.md
+
+# Patching
+/patches/
+/.patches/
+*.patch
+*.diff
+
+# Compressed Data
+*.7z
+*.Z
+*.bz2
+*.cpio
+*.gz
+*.rar
+*.tar
+*.tbz2
+*.tgz
+*.txz
+*.xz
+*.zip
+*.zst
+
+# Compilation Artifacts
+*.o
+*.so
+*.obj
+*.out
+*.i
+*.s
+*.a
+*.as
+
+# Environment
+.env
+
+# Useless Files
+*.bak
+*.list
+*.lock
+*.log
+*.new
+*.old
+*.pacnew
+*.pacsave
+
+# LuaCov
+luacov*
+
+# Testing
+deps/
+
+# In-place Neovim Configs
+minimal.lua
+repro.lua
+.repro/
+
+# Python Stuff
+.mypy_cache/
+.ropeproject/
+.venv
+Pipfile
+Pipfile.lock
+uv.lock
+venv

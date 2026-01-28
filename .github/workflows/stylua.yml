@@ -1,0 +1,26 @@
+name: Stylua
+on:
+  push:
+    paths:
+      - '**.lua'
+      - '.github/workflows/stylua.yml'
+      - '.stylua.toml'
+      - 'stylua.toml'
+  pull_request:
+    paths:
+      - '**.lua'
+      - '.github/workflows/stylua.yml'
+      - '.stylua.toml'
+      - 'stylua.toml'
+jobs:
+  stylua_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Run StyLua
+        uses: JohnnyMorganz/stylua-action@v4.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check .

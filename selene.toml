@@ -1,0 +1,7 @@
+std = "vim" # Points to the `vim.yml` file
+
+[lints]
+global_usage    = "allow"
+mixed_table     = "allow"
+unused_variable = "allow"
+# vim: set ts=4 sts=4 sw=4 et ai si sta:
