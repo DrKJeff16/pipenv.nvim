@@ -5,7 +5,7 @@
 ---@field [3]? boolean
 ---@field [4]? string
 
----@class MyPlugin.Util
+---@class Pipenv.Util
 local M = {}
 
 ---Checks whether nvim is running on Windows.

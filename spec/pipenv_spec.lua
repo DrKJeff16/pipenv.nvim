@@ -1,12 +1,12 @@
 local assert = require('luassert') ---@type Luassert
 
-describe('my-plugin', function()
-  local M ---@type MyPlugin
+describe('pipenv', function()
+  local M ---@type Pipenv
 
   before_each(function()
     -- Clear module cache to get fresh instance
-    package.loaded['my-plugin'] = nil
-    M = require('my-plugin')
+    package.loaded['pipenv'] = nil
+    M = require('pipenv')
   end)
 
   describe('setup', function()

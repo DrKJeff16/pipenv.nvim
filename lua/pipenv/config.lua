@@ -1,25 +1,25 @@
-local util = require('my-plugin.util')
+local util = require('pipenv.util')
 
----@class MyPlugin.Config
+---@class Pipenv.Config
 local M = {}
 
----@return MyPluginOpts defaults
+---@return PipenvOpts defaults
 function M.get_defaults()
-  return { ---@class MyPluginOpts
+  return { ---@class PipenvOpts
     debug = false,
     foo = true,
     bar = false,
   }
 end
 
----@param opts? MyPluginOpts
+---@param opts? PipenvOpts
 function M.setup(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   M.config = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
 
   -- ...
-  vim.g.MyPlugin_setup = 1 -- OPTIONAL for `health.lua`, delete if you want to
+  vim.g.Pipenv_setup = 1 -- OPTIONAL for `health.lua`, delete if you want to
 end
 
 return M
