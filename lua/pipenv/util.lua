@@ -8,6 +8,61 @@
 ---@class Pipenv.Util
 local M = {}
 
+---@param T any[]
+---@param elem any
+---@return any[] new_tbl
+function M.remove_elem(T, elem)
+  M.validate({ T = { T, { 'table' } } })
+  if vim.tbl_isempty(T) or not vim.islist(T) then
+    return T
+  end
+
+  local new_tbl = {} ---@type any[]
+  for _, v in ipairs(T) do
+    if not vim.deep_equal(v, elem) then
+      table.insert(new_tbl, v)
+    end
+  end
+
+  return new_tbl
+end
+
+---@param data string
+---@return string new_data
+---@nodiscard
+function M.trim_output_header(data)
+  M.validate({ data = { data, { 'string' } } })
+
+  if data == '' then
+    return data
+  end
+
+  local data_tbl = vim.split(data, '\n', { plain = true, trimempty = false })
+  if vim.tbl_isempty(data_tbl) or #data_tbl == 1 then
+    return data
+  end
+
+  data_tbl = M.remove_elem(data_tbl, "To activate this project's virtualenv, run pipenv shell.")
+  data_tbl =
+    M.remove_elem(data_tbl, 'Alternatively, run a command inside the virtualenv with pipenv run.')
+
+  if vim.startswith(data_tbl[1], 'Running command:') then
+    table.remove(data_tbl, 1)
+  end
+  if vim.tbl_isempty(data_tbl) then
+    return data
+  end
+
+  if vim.startswith(data_tbl[1], '/usr/lib') then
+    table.remove(data_tbl, 1)
+  end
+  if vim.tbl_isempty(data_tbl) then
+    return data
+  end
+
+  return table.concat(data_tbl, '\n')
+end
+
 ---@param data string
 ---@param opts? { title?: string, border?: 'none'|'single'|'double'|'rounded'|'solid'|'shadow', ft?: string }
 ---@return integer bufnr

@@ -32,7 +32,7 @@ function M.lock(opts)
   local sys_obj = vim.system({ 'pipenv', 'lock' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = 'pipenv lock' })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
     end
     return
   end
@@ -53,7 +53,7 @@ function M.clean(opts)
   local sys_obj = vim.system({ 'pipenv', 'clean' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = 'pipenv clean' })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv clean' })
     end
     return
   end
@@ -74,7 +74,7 @@ function M.verify(opts)
   local sys_obj = vim.system({ 'pipenv', 'verify' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = 'pipenv verify' })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv verify' })
     end
     return
   end
@@ -104,7 +104,7 @@ function M.sync(opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -155,7 +155,7 @@ function M.install(packages, opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -194,7 +194,7 @@ function M.run(command, opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -233,6 +233,8 @@ function M.requirements(file, opts)
   if not sys_obj.stdout or sys_obj.stdout == '' then
     return
   end
+
+  sys_obj.stdout = Util.trim_output_header(sys_obj.stdout)
 
   if not file or file == '' then
     Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
