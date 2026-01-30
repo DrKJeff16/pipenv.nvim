@@ -4,7 +4,7 @@ local M = {}
 function M.check()
   vim.health.start('pipenv')
 
-  if vim.g.Pipenv_setup == 1 then
+  if vim.g.pipenv_setup == 1 then
     vim.health.ok('`pipenv` has been setup!')
     return
   end
