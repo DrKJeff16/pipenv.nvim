@@ -50,15 +50,18 @@ Some of the subcommands accept any of the following flags:
 - `dev=true|false` - The command is called with a `--dev` flag.
 - `file=</path/to/file>` - The command output will be written to the target `file`.
 
-| Subcommand             | Nargs | Dev | File | Description                             |
-|------------------------|-------|-----|------|-----------------------------------------|
-| `:Pipenv help`         | `0`   | [ ] | [ ]  | Prints the usage message                |
-| `:Pipenv requirements` | `*`   | [X] | [X]  | Runs `pipenv requirements [--dev]`      |
-| `:Pipenv[!] clean`     | `0`   | [ ] | [ ]  | Runs `pipenv clean`                     |
-| `:Pipenv[!] install`   | `*`   | [X] | [ ]  | Runs `pipenv install [--dev] [ARGS...]` |
-| `:Pipenv[!] lock`      | `0`   | [ ] | [ ]  | Runs `pipenv lock`                      |
-| `:Pipenv[!] run`       | `*`   | [ ] | [ ]  | Runs `pipenv run ...`                   |
-| `:Pipenv[!] sync`      | `*`   | [X] | [ ]  | Runs `pipenv sync [--dev]`              |
+| Subcommand               | Nargs | Dev | File | Description                              |
+|--------------------------|-------|-----|------|------------------------------------------|
+| `:Pipenv help`           | `0`   | [ ] | [ ]  | Prints the usage message                 |
+| `:Pipenv list-installed` | `0`   | [ ] | [ ]  | Lists the installed packages in a window |
+| `:Pipenv graph`          | `0`   | [ ] | [ ]  | Same as `:Pipenv list-installed`         |
+| `:Pipenv requirements`   | `*`   | [X] | [X]  | Runs `pipenv requirements [--dev]`       |
+| `:Pipenv[!] clean`       | `0`   | [ ] | [ ]  | Runs `pipenv clean`                      |
+| `:Pipenv[!] install`     | `*`   | [X] | [ ]  | Runs `pipenv install [--dev] [ARGS...]`  |
+| `:Pipenv[!] lock`        | `0`   | [ ] | [ ]  | Runs `pipenv lock`                       |
+| `:Pipenv[!] run`         | `*`   | [ ] | [ ]  | Runs `pipenv run ...`                    |
+| `:Pipenv[!] sync`        | `*`   | [X] | [ ]  | Runs `pipenv sync [--dev]`               |
+| `:Pipenv[!] verify`      | `0`   | [ ] | [ ]  | Runs `pipenv verify`                     |
 
 ---
 
