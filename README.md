@@ -41,7 +41,16 @@ luarocks install --local pipenv.nvim # Local Install
 
 ## Configuration
 
-WIP! As of writing no setup options are needed.
+These are the default options:
+
+```lua
+require('pipenv').setup({
+  output = {
+    width = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed width
+    height = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed height
+  },
+})
+```
 
 ---
 

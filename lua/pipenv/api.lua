@@ -23,6 +23,7 @@
 ---@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
 
 local Util = require('pipenv.util')
+local Config = require('pipenv.config')
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
@@ -93,7 +94,11 @@ function M.retrieve_installed()
 end
 
 function M.list_installed()
-  Util.split_output(table.concat(M.retrieve_installed(), '\n'))
+  Util.open_float(table.concat(M.retrieve_installed(), '\n'), {
+    title = 'Installed Packages',
+    height = Config.config.output.height,
+    width = Config.config.output.width,
+  })
 end
 
 function M.graph()
@@ -105,7 +110,11 @@ function M.graph()
     return
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
-    Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv graph' })
+    Util.open_float(Util.trim_output(sys_obj.stdout), {
+      title = 'pipenv graph',
+      height = Config.config.output.height,
+      width = Config.config.output.width,
+    })
     return
   end
   vim.notify('(pipenv graph): No output given!', INFO)
@@ -128,7 +137,11 @@ function M.lock(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv lock' })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = 'pipenv lock',
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify('(pipenv lock): No output given!', INFO)
@@ -152,7 +165,11 @@ function M.clean(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv clean' })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = 'pipenv clean',
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify('(pipenv clean): No output given!', INFO)
@@ -176,7 +193,11 @@ function M.verify(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv verify' })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = 'pipenv verify',
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify('(pipenv clean): No output given!', INFO)
@@ -209,7 +230,11 @@ function M.sync(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = table.concat(cmd, ' '),
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -263,7 +288,11 @@ function M.install(packages, opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = table.concat(cmd, ' '),
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -314,7 +343,11 @@ function M.uninstall(packages, opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = table.concat(cmd, ' '),
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -356,7 +389,11 @@ function M.run(command, opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.open_float(Util.trim_output(sys_obj.stdout), {
+        title = table.concat(cmd, ' '),
+        height = Config.config.output.height,
+        width = Config.config.output.width,
+      })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -398,7 +435,12 @@ function M.requirements(opts)
   sys_obj.stdout = Util.trim_output(sys_obj.stdout)
 
   if not opts.file or opts.file == '' then
-    Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
+    Util.open_float(sys_obj.stdout, {
+      title = table.concat(cmd, ' '),
+      ft = 'requirements',
+      height = Config.config.output.height,
+      width = Config.config.output.width,
+    })
     return
   end
 

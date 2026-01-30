@@ -5,6 +5,14 @@
 ---@field [3]? boolean
 ---@field [4]? string
 
+---@class Pipenv.Util.OpenFloat
+---@field title? string
+---@field border? 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
+---@field ft? string
+---@field modifiable? boolean
+---@field width? number
+---@field height? number
+
 ---@class Pipenv.Util
 local M = {}
 
@@ -63,16 +71,35 @@ function M.trim_output(data)
 end
 
 ---@param data string
----@param opts? { title?: string, border?: 'none'|'single'|'double'|'rounded'|'solid'|'shadow', ft?: string, modifiable?: boolean }
+---@param opts? Pipenv.Util.OpenFloat
 ---@return integer bufnr
 ---@return integer win
-function M.split_output(data, opts)
+function M.open_float(data, opts)
   M.validate({
     data = { data, { 'string' } },
     opts = { opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
+
+  M.validate({
+    border = { opts.border, { 'string', 'nil' }, true },
+    ft = { opts.ft, { 'string', 'nil' }, true },
+    height = { opts.height, { 'number', 'nil' }, true },
+    modifiable = { opts.modifiable, { 'boolean', 'nil' }, true },
+    title = { opts.title, { 'string', 'nil' }, true },
+    width = { opts.width, { 'number', 'nil' }, true },
+  })
+  opts.ft = opts.ft or 'log'
   opts.modifiable = opts.modifiable ~= nil and opts.modifiable or false
+  opts.height = (opts.height and opts.height > 0) and opts.height or 0.85
+  opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
+  opts.title = opts.title or nil
+  opts.border = (
+    opts.border
+    and vim.list_contains({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
+  )
+      and opts.border
+    or 'single'
 
   local bufnr = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_lines(
@@ -83,23 +110,35 @@ function M.split_output(data, opts)
     vim.split(data, '\n', { plain = true, trimempty = false })
   )
 
-  local width = math.floor(vim.o.columns * 0.8)
-  local height = math.floor(vim.o.lines * 0.85)
+  local width, height ---@type integer, integer
+  if opts.height <= 1 and opts.height > 0 then
+    height = math.floor(vim.o.lines * opts.height)
+  elseif math.floor(opts.height) > 1 then
+    height = math.floor(opts.height)
+  end
+  if opts.width <= 1 and opts.width > 0 then
+    width = math.floor(vim.o.columns * opts.width)
+  elseif math.floor(opts.width) > 1 then
+    width = math.floor(opts.width)
+  end
+
+  local col = vim.o.columns - width > 0 and math.floor((vim.o.columns - width) / 2) - 1 or 0
+  local row = vim.o.lines - height > 0 and math.floor((vim.o.lines - height) / 2) - 1 or 0
   local win = vim.api.nvim_open_win(bufnr, true, {
-    width = width,
+    border = opts.border,
     height = height,
-    style = 'minimal',
-    border = opts.border or 'single',
-    col = math.floor((vim.o.columns - width) / 2) - 1,
-    row = math.floor((vim.o.lines - height) / 2) - 1,
+    width = width,
+    col = col,
+    row = row,
     focusable = true,
-    title = opts.title or 'Output',
     relative = 'editor',
+    style = 'minimal',
+    title = opts.title,
     title_pos = 'center',
     zindex = 100,
   })
 
-  vim.api.nvim_set_option_value('filetype', opts.ft or 'log', { buf = bufnr })
+  vim.api.nvim_set_option_value('filetype', opts.ft, { buf = bufnr })
   vim.api.nvim_set_option_value('fileencoding', 'utf-8', { buf = bufnr })
 
   vim.api.nvim_set_option_value('foldenable', false, { win = win })

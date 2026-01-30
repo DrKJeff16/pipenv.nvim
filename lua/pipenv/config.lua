@@ -1,6 +1,11 @@
+---@class PipenvOpts.Output
+---Can be a number between `0` and `1` (percentage) or a fixed width
+---@field width? number
+---Can be a number between `0` and `1` (percentage) or a fixed height
+---@field height? number
+
 ---@class PipenvOpts
----@field auto_detect? boolean
----@field python_version? string|nil
+---@field output? PipenvOpts.Output
 
 local Util = require('pipenv.util')
 
@@ -10,8 +15,7 @@ local M = {}
 ---@return PipenvOpts defaults
 function M.get_defaults()
   return { ---@type PipenvOpts
-    auto_detect = true,
-    python_version = nil,
+    output = { width = 0.85, height = 0.85 },
   }
 end
 
