@@ -22,6 +22,8 @@ local function complete_fun(_, lead)
   local args = vim.split(lead, '%s+', { trimempty = false })
   if #args == 2 then
     return {
+      'dev=true',
+      'dev=false',
       'clean',
       'help',
       'install',
@@ -33,7 +35,7 @@ local function complete_fun(_, lead)
       'verify',
     }
   end
-  if #args == 3 then
+  if #args >= 3 then
     if
       vim.list_contains({ 'clean', 'graph', 'help', 'list-installed', 'lock', 'run' }, args[2])
     then
@@ -61,7 +63,8 @@ function M.cmd_usage(level)
 
   vim.notify(
     [[
-      Usage:
+      Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [<OPERATION>]
+
       :Pipenv help
       :Pipenv list-installed|graph
 
@@ -77,9 +80,60 @@ function M.cmd_usage(level)
   )
 end
 
+---@param valid string[]
+---@param except string[]
+---@param verbose boolean
+---@param dev boolean
+---@param file nil|string
+function M.popup(valid, except, verbose, dev, file)
+  Util.validate({
+    valid = { valid, { 'table' } },
+    except = { except, { 'table' } },
+    verbose = { verbose, { 'boolean' } },
+    dev = { dev, { 'boolean' } },
+    file = { file, { 'string', 'nil' }, true },
+  })
+
+  local new_valid = {}
+  for _, v in ipairs(valid) do
+    if not (vim.list_contains(new_valid, v) or vim.list_contains(except, v)) then
+      table.insert(new_valid, v)
+    end
+  end
+
+  local opts = { verbose = verbose, dev = dev, file = file }
+  vim.ui.select(
+    new_valid,
+    { prompt = 'Select your operation:' },
+    function(item) ---@param item nil|string|Pipenv.ValidOps
+      if not (item and vim.list_contains(new_valid, item)) then
+        return
+      end
+      if item == 'run' then
+        vim.ui.input({ prompt = 'Type the command to run' }, function(input)
+          Api.run(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+        end)
+        return
+      end
+      if item == 'install' then
+        vim.ui.input(
+          { prompt = 'Type the packages to install (separated by a space)' },
+          function(input)
+            Api.install(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+          end
+        )
+        return
+      end
+      if vim.list_contains({ 'clean', 'verify', 'requirements', 'lock', 'sync' }, item) then
+        Api[item](opts)
+        return
+      end
+    end
+  )
+end
+
 function M.setup()
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
-    local subcommand = ctx.fargs[1] or '' ---@type Pipenv.ValidOps
     local valid = {
       'clean',
       'graph',
@@ -92,8 +146,35 @@ function M.setup()
       'sync',
       'verify',
     }
-    if not vim.list_contains(valid, subcommand) then
-      M.cmd_usage(ERROR)
+
+    local dev, file, subcommand = false, nil, nil ---@type boolean, nil|string, string|Pipenv.ValidOps|nil
+    for _, arg in ipairs(ctx.fargs) do
+      if arg:find('=') then
+        local subsubcmd = vim.split(arg, '=', { plain = true, trimempty = false })
+        if #subsubcmd > 1 then
+          if subsubcmd[1] == 'dev' then
+            if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
+              M.cmd_usage(WARN)
+              return
+            end
+            if subsubcmd[2] == 'true' then
+              dev = true
+            else
+              dev = false
+            end
+          elseif subsubcmd[1] == 'file' then
+            file = subsubcmd[2]
+          end
+        end
+      elseif vim.list_contains(valid, arg) and not subcommand then
+        subcommand = arg ---@type Pipenv.ValidOps
+      else
+        subcommand = '' ---@type string
+      end
+    end
+
+    if not subcommand then
+      M.popup(valid, { 'help', 'list-installed', 'graph' }, ctx.bang, dev, file)
       return
     end
 
@@ -125,50 +206,11 @@ function M.setup()
       return
     end
     if subcommand == 'sync' then
-      local dev = false
-      for i = 2, #ctx.fargs, 1 do
-        local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
-        if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-          M.cmd_usage(ERROR)
-          return
-        end
-        if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-          M.cmd_usage(WARN)
-          return
-        end
-        if subsubcmd[2] == 'true' then
-          dev = true
-        else
-          dev = false
-        end
-      end
-
       Api.sync({ dev = dev, verbose = ctx.bang })
       return
     end
     if subcommand == 'install' then
-      local dev = false
       local pkgs = {} ---@type string[]
-      for i = 2, #ctx.fargs, 1 do
-        if ctx.fargs[i]:match('dev=') then
-          local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
-          if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-            M.cmd_usage(ERROR)
-            return
-          end
-          if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-            M.cmd_usage(WARN)
-            return
-          end
-          if subsubcmd[2] == 'true' then
-            dev = true
-          else
-            dev = false
-          end
-        else
-          table.insert(pkgs, ctx.fargs[i])
-        end
-      end
       if vim.tbl_isempty(pkgs) then
         Api.install(nil, { dev = dev, verbose = ctx.bang })
       else
@@ -177,39 +219,13 @@ function M.setup()
       return
     end
     if subcommand == 'requirements' then
-      ---@type boolean, nil|string
-      local dev, file = false, nil
-      for i = 2, #ctx.fargs, 1 do
-        if ctx.fargs[i]:match('dev=') then
-          local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
-          if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-            M.cmd_usage(ERROR)
-            return
-          end
-          if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-            M.cmd_usage(WARN)
-            return
-          end
-          if subsubcmd[2] == 'true' then
-            dev = true
-          else
-            dev = false
-          end
-        elseif ctx.fargs[i]:match('file=') then
-          local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
-          if #subsubcmd == 1 or subsubcmd[1] ~= 'file' then
-            M.cmd_usage()
-            return
-          end
-          file = subsubcmd[2]
-        end
-      end
-
-      Api.requirements(file, { dev = dev })
+      Api.requirements({ file = file, dev = dev })
       return
     end
+
+    M.cmd_usage(WARN)
   end, {
-    nargs = '+',
+    nargs = '*',
     bang = true,
     desc = 'Pipenv user command',
     complete = complete_fun,

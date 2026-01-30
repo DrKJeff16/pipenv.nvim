@@ -3,6 +3,7 @@
 
 ---@class Pipenv.RequirementsOpts
 ---@field dev? boolean
+---@field file? string[]|string|nil
 
 ---@class Pipenv.SyncOpts: Pipenv.CommandOpts
 ---@field dev? boolean
@@ -260,18 +261,19 @@ function M.run(command, opts)
   end
 end
 
----@param file? string[]|string|nil
 ---@param opts? Pipenv.RequirementsOpts
-function M.requirements(file, opts)
+function M.requirements(opts)
   Util.validate({
-    file = { file, { 'string', 'table', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
   })
-  file = file or nil
   opts = opts or {}
 
-  Util.validate({ dev = { opts.dev, { 'boolean', 'nil' }, true } })
+  Util.validate({
+    dev = { opts.dev, { 'boolean', 'nil' }, true },
+    file = { opts.file, { 'string', 'table', 'nil' }, true },
+  })
   opts.dev = opts.dev ~= nil and opts.dev or false
+  opts.file = opts.file or nil
 
   local cmd = { 'pipenv', 'requirements' }
   if opts.dev then
@@ -293,23 +295,25 @@ function M.requirements(file, opts)
 
   sys_obj.stdout = Util.trim_output_header(sys_obj.stdout)
 
-  if not file or file == '' then
+  if not opts.file or opts.file == '' then
     Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
     return
   end
 
-  local stat = uv.fs_stat(file)
+  local stat = uv.fs_stat(opts.file)
   if stat and stat.size ~= 0 then
-    if vim.fn.confirm(("Overwrite '%s'?"):format(file), '&Yes\n&No', 2) ~= 1 then
+    if vim.fn.confirm(("Overwrite '%s'?"):format(opts.file), '&Yes\n&No', 2) ~= 1 then
       return
     end
   end
 
   if
-    vim.fn.writefile(vim.split(sys_obj.stdout, '\n', { plain = true, trimempty = false }), file)
-    == -1
+    vim.fn.writefile(
+      vim.split(sys_obj.stdout, '\n', { plain = true, trimempty = false }),
+      opts.file
+    ) == -1
   then
-    vim.notify(('(pipenv requirements): Unable to write to `%s`!'):format(file), ERROR)
+    vim.notify(('(pipenv requirements): Unable to write to `%s`!'):format(opts.file), ERROR)
   end
 end
 
