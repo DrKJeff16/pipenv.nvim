@@ -4,6 +4,30 @@ local ERROR = vim.log.levels.ERROR
 local api = require('pipenv.api')
 local util = require('pipenv.util')
 
+---@param lead string
+---@return string[] completions
+local function complete_fun(_, lead)
+  local startswith = vim.startswith
+  local args = vim.split(lead, '%s+', { trimempty = false })
+  if #args == 2 then
+    return { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help' }
+  end
+  if #args == 3 then
+    if vim.list_contains({ 'clean', 'lock', 'run', 'help' }, args[2]) then
+      return {}
+    end
+    if vim.list_contains({ 'install', 'sync', 'requirements' }, args[2]) then
+      for _, arg in ipairs(args) do
+        if vim.list_contains({ 'dev=true', 'dev=false' }, arg) then
+          return {}
+        end
+      end
+      return { 'dev=true', 'dev=false' }
+    end
+  end
+  return {}
+end
+
 ---@class Pipenv.Commands
 local M = {}
 
@@ -14,7 +38,7 @@ function M.cmd_usage(level)
 
   vim.notify(
     [[
-Usage:
+      Usage:
       :Pipenv help
 
       :Pipenv[!] clean
@@ -23,7 +47,7 @@ Usage:
       :Pipenv requirements [dev=true|false] [file=/path/to/file]
       :Pipenv[!] run <command> [<args> [...]\]
       :Pipenv[!] sync [dev=true|false]
-    ]],
+      ]],
     level
   )
 end
@@ -42,11 +66,11 @@ function M.setup()
       return
     end
     if subcommand == 'clean' then
-      api.clean(ctx.bang)
+      api.clean({ verbose = ctx.bang })
       return
     end
     if subcommand == 'lock' then
-      api.lock(ctx.bang)
+      api.lock({ verbose = ctx.bang })
       return
     end
     if subcommand == 'run' then
@@ -59,7 +83,7 @@ function M.setup()
         table.insert(cmds, ctx.fargs[i])
       end
 
-      api.run(cmds, ctx.bang)
+      api.run(cmds, { verbose = ctx.bang })
       return
     end
     if subcommand == 'sync' then
@@ -81,7 +105,7 @@ function M.setup()
         end
       end
 
-      api.sync(dev, ctx.bang)
+      api.sync({ dev = dev, verbose = ctx.bang })
       return
     end
     if subcommand == 'install' then
@@ -108,9 +132,9 @@ function M.setup()
         end
       end
       if vim.tbl_isempty(pkgs) then
-        api.install(nil, dev, ctx.bang)
+        api.install(nil, { dev = dev, verbose = ctx.bang })
       else
-        api.install(pkgs, dev, ctx.bang)
+        api.install(pkgs, { dev = dev, verbose = ctx.bang })
       end
       return
     end
@@ -143,13 +167,14 @@ function M.setup()
         end
       end
 
-      api.requirements(file, dev)
+      api.requirements(file, { dev = dev })
       return
     end
   end, {
     nargs = '+',
     bang = true,
     desc = 'Pipenv user command',
+    complete = complete_fun,
   })
 end
 

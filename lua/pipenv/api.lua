@@ -1,3 +1,18 @@
+---@class Pipenv.CommandOpts
+---@field verbose? boolean
+
+---@class Pipenv.LockOpts: Pipenv.CommandOpts
+---@class Pipenv.CleanOpts: Pipenv.CommandOpts
+---@class Pipenv.RunOpts: Pipenv.CommandOpts
+
+---@class Pipenv.SyncOpts: Pipenv.CommandOpts
+---@field dev? boolean
+
+---@class Pipenv.RequirementsOpts
+---@field dev? boolean
+
+---@class Pipenv.InstallOpts: Pipenv.SyncOpts
+
 local util = require('pipenv.util')
 local uv = vim.uv or vim.loop
 local INFO = vim.log.levels.INFO
@@ -6,13 +21,15 @@ local ERROR = vim.log.levels.ERROR
 ---@class Pipenv.API
 local M = {}
 
----@param verbose? boolean
-function M.lock(verbose)
-  util.validate({ verbose = { verbose, { 'boolean', 'nil' }, true } })
-  verbose = verbose ~= nil and verbose or false
+---@param opts? Pipenv.LockOpts
+function M.lock(opts)
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+
+  local success, msg, err = true, '', ''
   vim
     .system({ 'pipenv', 'lock' }, function(out)
       if out.code ~= 0 then
@@ -29,7 +46,7 @@ function M.lock(verbose)
     :wait(200000)
 
   if success then
-    if msg ~= '' and verbose then
+    if msg ~= '' and opts.verbose then
       vim.notify(msg, INFO)
     end
     return
@@ -40,13 +57,15 @@ function M.lock(verbose)
   end
 end
 
----@param verbose? boolean
-function M.clean(verbose)
-  util.validate({ verbose = { verbose, { 'boolean', 'nil' }, true } })
-  verbose = verbose ~= nil and verbose or false
+---@param opts? Pipenv.CleanOpts
+function M.clean(opts)
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+
+  local success, msg, err = true, '', ''
   vim
     .system({ 'pipenv', 'clean' }, function(out)
       if out.code ~= 0 then
@@ -63,7 +82,7 @@ function M.clean(verbose)
     :wait(200000)
 
   if success then
-    if msg ~= '' and verbose then
+    if msg ~= '' and opts.verbose then
       vim.notify(msg, INFO)
     end
     return
@@ -74,23 +93,24 @@ function M.clean(verbose)
   end
 end
 
----@param dev? boolean
----@param verbose? boolean
-function M.sync(dev, verbose)
+---@param opts? Pipenv.SyncOpts
+function M.sync(opts)
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
+
   util.validate({
-    dev = { dev, { 'boolean', 'nil' }, true },
-    verbose = { verbose, { 'boolean', 'nil' }, true },
+    dev = { opts.dev, { 'boolean', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  dev = dev ~= nil and dev or false
-  verbose = verbose ~= nil and verbose or false
+  opts.dev = opts.dev ~= nil and opts.dev or false
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local cmd = { 'pipenv', 'sync' }
-  if dev then
+  if opts.dev then
     table.insert(cmd, '--dev')
   end
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  local success, msg, err = true, '', ''
   vim
     .system(cmd, function(out)
       if out.code ~= 0 then
@@ -107,7 +127,7 @@ function M.sync(dev, verbose)
     :wait(200000)
 
   if success then
-    if msg ~= '' and verbose then
+    if msg ~= '' and opts.verbose then
       vim.notify(msg, INFO)
     end
     return
@@ -119,20 +139,24 @@ function M.sync(dev, verbose)
 end
 
 ---@param packages? string[]|string|nil
----@param dev? boolean
----@param verbose? boolean
-function M.install(packages, dev, verbose)
+---@param opts? Pipenv.InstallOpts
+function M.install(packages, opts)
   util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
-    dev = { dev, { 'boolean', 'nil' }, true },
-    verbose = { verbose, { 'boolean', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
   })
   packages = packages or nil
-  dev = dev ~= nil and dev or false
-  verbose = verbose ~= nil and verbose or false
+  opts = opts or {}
+
+  util.validate({
+    dev = { opts.dev, { 'boolean', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+  })
+  opts.dev = opts.dev ~= nil and opts.dev or false
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local cmd = { 'pipenv', 'install' }
-  if dev then
+  if opts.dev then
     table.insert(cmd, '--dev')
   end
   if packages then
@@ -152,8 +176,7 @@ function M.install(packages, dev, verbose)
     end
   end
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  local success, msg, err = true, '', ''
   vim
     .system(cmd, function(out)
       if out.code ~= 0 then
@@ -170,7 +193,7 @@ function M.install(packages, dev, verbose)
     :wait(200000)
 
   if success then
-    if msg ~= '' and verbose then
+    if msg ~= '' and opts.verbose then
       vim.notify(msg, INFO)
     end
     return
@@ -182,13 +205,16 @@ function M.install(packages, dev, verbose)
 end
 
 ---@param command string[]|string
----@param verbose? boolean
-function M.run(command, verbose)
+---@param opts? Pipenv.RunOpts
+function M.run(command, opts)
   util.validate({
     command = { command, { 'string', 'table' } },
-    verbose = { verbose, { 'boolean', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
   })
-  verbose = verbose ~= nil and verbose or false
+  opts = opts or {}
+
+  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local cmd = { 'pipenv', 'install' }
   if util.is_type('string', command) then
@@ -203,8 +229,7 @@ function M.run(command, verbose)
     end
   end
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  local success, msg, err = true, '', ''
   vim
     .system(cmd, function(out)
       if out.code ~= 0 then
@@ -221,7 +246,7 @@ function M.run(command, verbose)
     :wait(200000)
 
   if success then
-    if msg ~= '' and verbose then
+    if msg ~= '' and opts.verbose then
       vim.notify(msg, INFO)
     end
     return
@@ -233,22 +258,24 @@ function M.run(command, verbose)
 end
 
 ---@param file? string[]|string|nil
----@param dev? boolean
-function M.requirements(file, dev)
+---@param opts? Pipenv.RequirementsOpts
+function M.requirements(file, opts)
   util.validate({
     file = { file, { 'string', 'table', 'nil' }, true },
-    dev = { dev, { 'boolean', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
   })
   file = file or nil
-  dev = dev ~= nil and dev or false
+  opts = opts or {}
+
+  util.validate({ dev = { opts.dev, { 'boolean', 'nil' }, true } })
+  opts.dev = opts.dev ~= nil and opts.dev or false
 
   local cmd = { 'pipenv', 'requirements' }
-  if dev then
+  if opts.dev then
     table.insert(cmd, '--dev')
   end
 
-  local msg, err = '', ''
-  local success = true ---@type boolean
+  local success, msg, err = true, '', ''
   vim
     .system(cmd, function(out)
       if out.code ~= 0 then
