@@ -19,7 +19,7 @@ jobs:
       - name: Build Project Assets
         run: |
           mkdir -pv pipenv.nvim
-          cp -rv lua README.md LICENSE pipenv.nvim
+          cp -rv lua doc README.md LICENSE pipenv.nvim
           zip -r -9 pipenv.nvim.zip pipenv.nvim
           tar cvJf pipenv.nvim.tar.xz pipenv.nvim
           tar cvzf pipenv.nvim.tar.gz pipenv.nvim
