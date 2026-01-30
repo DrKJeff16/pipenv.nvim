@@ -12,6 +12,7 @@
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
 ---@class Pipenv.LockOpts: Pipenv.CommandOpts
 ---@class Pipenv.RunOpts: Pipenv.CommandOpts
+---@class Pipenv.UninstallOpts: Pipenv.SyncOpts
 ---@class Pipenv.VerifyOpts: Pipenv.CommandOpts
 
 ---@class PipenvJsonPackage
@@ -270,7 +271,7 @@ function M.install(packages, opts)
 end
 
 ---@param packages string[]|string
----@param opts? Pipenv.InstallOpts
+---@param opts? Pipenv.UninstallOpts
 function M.uninstall(packages, opts)
   Util.validate({
     packages = { packages, { 'string', 'table' } },
@@ -289,21 +290,19 @@ function M.uninstall(packages, opts)
   if opts.dev then
     table.insert(cmd, '--dev')
   end
-  if packages then
-    if Util.is_type('string', packages) then
-      ---@cast packages string
-      table.insert(cmd, packages)
-    elseif not vim.tbl_isempty(packages) then
-      ---@cast packages string[]
-      for _, pkg in ipairs(packages) do
-        if Util.is_type('string', pkg) and pkg ~= '' then
-          table.insert(cmd, pkg)
-        end
+  if Util.is_type('string', packages) then
+    ---@cast packages string
+    table.insert(cmd, packages)
+  elseif not vim.tbl_isempty(packages) then
+    ---@cast packages string[]
+    for _, pkg in ipairs(packages) do
+      if Util.is_type('string', pkg) and pkg ~= '' then
+        table.insert(cmd, pkg)
       end
-    else
-      vim.notify('(pipenv uninstall): Empty packages table!', ERROR)
-      return
     end
+  else
+    vim.notify('(pipenv uninstall): Empty packages table!', ERROR)
+    return
   end
 
   local sys_obj = run_cmd(cmd)
