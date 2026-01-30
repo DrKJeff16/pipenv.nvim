@@ -16,7 +16,6 @@
 
 local util = require('pipenv.util')
 local uv = vim.uv or vim.loop
-local INFO = vim.log.levels.INFO
 local ERROR = vim.log.levels.ERROR
 
 ---@class Pipenv.API
@@ -30,31 +29,16 @@ function M.lock(opts)
   util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local success, msg, err = true, '', ''
-  vim
-    .system({ 'pipenv', 'lock' }, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = 'pipenv lock' })
+  local sys_obj = vim.system({ 'pipenv', 'lock' }):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = 'pipenv lock' })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -66,31 +50,16 @@ function M.clean(opts)
   util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local success, msg, err = true, '', ''
-  vim
-    .system({ 'pipenv', 'clean' }, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = 'pipenv clean' })
+  local sys_obj = vim.system({ 'pipenv', 'clean' }):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = 'pipenv clean' })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -102,31 +71,16 @@ function M.verify(opts)
   util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local success, msg, err = true, '', ''
-  vim
-    .system({ 'pipenv', 'verify' }, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = 'pipenv verify' })
+  local sys_obj = vim.system({ 'pipenv', 'verify' }):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = 'pipenv verify' })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -147,31 +101,16 @@ function M.sync(opts)
     table.insert(cmd, '--dev')
   end
 
-  local success, msg, err = true, '', ''
-  vim
-    .system(cmd, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = table.concat(cmd, ' ') })
+  local sys_obj = vim.system(cmd):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -213,31 +152,16 @@ function M.install(packages, opts)
     end
   end
 
-  local success, msg, err = true, '', ''
-  vim
-    .system(cmd, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = table.concat(cmd, ' ') })
+  local sys_obj = vim.system(cmd):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -253,44 +177,30 @@ function M.run(command, opts)
   util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local cmd = { 'pipenv', 'install' }
+  local cmd ---@type string[]
   if util.is_type('string', command) then
     ---@cast command string
-    table.insert(cmd, command)
+    cmd = { 'pipenv', 'run', command }
   elseif vim.tbl_isempty(command) then
     vim.notify('(pipenv run): Empty command table!')
     return
   else
-    for _, c in ipairs(command) do
-      table.insert(command, tostring(c))
-    end
+    ---@cast command string[]
+    cmd = vim.deepcopy(command)
+    table.insert(cmd, 1, 'run')
+    table.insert(cmd, 1, 'pipenv')
   end
 
-  local success, msg, err = true, '', ''
-  vim
-    .system(cmd, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if success then
-    if msg ~= '' and opts.verbose then
-      util.split_output(msg, { title = table.concat(cmd, ' ') })
+  local sys_obj = vim.system(cmd):wait(200000)
+  if sys_obj.code == 0 then
+    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
+      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
 
-  if err ~= '' then
-    vim.notify(err, ERROR)
+  if sys_obj.stderr and sys_obj.stderr ~= '' then
+    vim.notify(sys_obj.stderr, ERROR)
   end
 end
 
@@ -312,31 +222,20 @@ function M.requirements(file, opts)
     table.insert(cmd, '--dev')
   end
 
-  local success, msg, err = true, '', ''
-  vim
-    .system(cmd, function(out)
-      if out.code ~= 0 then
-        if out.stderr and out.stderr ~= '' then
-          err = out.stderr
-        end
-        success = false
-        return
-      end
-      if out.stdout and out.stdout ~= '' then
-        msg = out.stdout
-      end
-    end)
-    :wait(200000)
-
-  if not success then
-    if err ~= '' then
-      vim.notify(err, ERROR)
+  local sys_obj = vim.system(cmd):wait(200000)
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
 
+  if not sys_obj.stdout or sys_obj.stdout == '' then
+    return
+  end
+
   if not file or file == '' then
-    util.split_output(msg, { title = table.concat(cmd, ' '), ft = 'requirements' })
+    util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
     return
   end
 
@@ -347,7 +246,10 @@ function M.requirements(file, opts)
     end
   end
 
-  if vim.fn.writefile(vim.split(msg, '\n', { plain = true, trimempty = false }), file) == -1 then
+  if
+    vim.fn.writefile(vim.split(sys_obj.stdout, '\n', { plain = true, trimempty = false }), file)
+    == -1
+  then
     vim.notify(('(pipenv requirements): Unable to write to `%s`!'):format(file), ERROR)
   end
 end

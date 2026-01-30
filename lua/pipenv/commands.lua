@@ -75,8 +75,10 @@ function M.setup()
         return
       end
       local cmds = {}
-      for i = 2, #ctx.fargs, 1 do
-        table.insert(cmds, ctx.fargs[i])
+      for i, cmd in ipairs(ctx.fargs) do
+        if i > 1 then
+          table.insert(cmds, cmd)
+        end
       end
 
       api.run(cmds, { verbose = ctx.bang })
