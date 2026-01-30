@@ -21,6 +21,7 @@ end
 
 M.clean = Api.clean
 M.install = Api.install
+M.list_installed = Api.list_installed
 M.lock = Api.lock
 M.requirements = Api.requirements
 M.run = Api.run
