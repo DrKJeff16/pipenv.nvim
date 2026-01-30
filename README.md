@@ -90,18 +90,19 @@ Examples:
 
 Below is a table specifying what flags are parsed.
 
-| Subcommand       | Nargs         | Verbose (`!`) | Dev | File | Description                                  |
-|------------------|---------------|---------------|-----|------|----------------------------------------------|
-| `help`           | `0`           | [ ]           | [ ] | [ ]  | Prints the usage message                     |
-| `list-installed` | `0`           | [ ]           | [ ] | [ ]  | Lists the installed packages in a window     |
-| `graph`          | `0`           | [ ]           | [ ] | [ ]  | Returns the output of `pipenv graph`         |
-| `clean`          | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv clean`                          |
-| `install`        | `*`           | [X]           | [X] | [ ]  | Runs `pipenv install [--dev] [ARGS...]`      |
-| `lock`           | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv lock`                           |
-| `requirements`   | `*`           | [X]           | [X] | [X]  | Runs `pipenv requirements [--dev]`           |
-| `run`            | `1` or more   | [X]           | [ ] | [ ]  | Runs `pipenv run ...`                        |
-| `sync`           | `*`           | [X]           | [X] | [ ]  | Runs `pipenv sync [--dev]`                   |
-| `verify`         | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv verify`                         |
+| Subcommand       | Nargs         | Verbose (`!`) | Dev | File | Description                                             |
+|------------------|---------------|---------------|-----|------|---------------------------------------------------------|
+| `help`           | `0`           | [ ]           | [ ] | [ ]  | Prints the usage message                                |
+| `edit`           | `0`           | [ ]           | [ ] | [ ]  | Edit the `Pipfile` or create a blank one if none exists |
+| `list-installed` | `0`           | [ ]           | [ ] | [ ]  | Lists the installed packages in a window                |
+| `graph`          | `0`           | [ ]           | [ ] | [ ]  | Returns the output of `pipenv graph`                    |
+| `clean`          | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv clean`                                     |
+| `install`        | `*`           | [X]           | [X] | [ ]  | Runs `pipenv install [--dev] [ARGS...]`                 |
+| `lock`           | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv lock`                                      |
+| `requirements`   | `*`           | [X]           | [X] | [X]  | Runs `pipenv requirements [--dev]`                      |
+| `run`            | `1` or more   | [X]           | [ ] | [ ]  | Runs `pipenv run ...`                                   |
+| `sync`           | `*`           | [X]           | [X] | [ ]  | Runs `pipenv sync [--dev]`                              |
+| `verify`         | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv verify`                                    |
 
 
 Examples:
@@ -109,6 +110,8 @@ Examples:
 ```vim
 :Pipenv run <COMMANDS>                            " verbose=false
 :Pipenv! run <COMMANDS>                           " verbose=true
+
+:Pipenv! edit                                     " The verbose flag doesn't matter
 
 :Pipenv! sync dev=true                            " verbose=true, dev=false
 :Pipenv! dev=true sync                            " Same as above

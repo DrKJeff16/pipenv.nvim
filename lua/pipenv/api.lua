@@ -24,6 +24,7 @@
 local Util = require('pipenv.util')
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 ---@param cmd string[]
@@ -42,6 +43,29 @@ end
 ---@class Pipenv.API
 local M = {}
 
+function M.edit()
+  local target = './Pipfile'
+  if vim.fn.filereadable(target) ~= 1 then
+    if vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
+      return
+    end
+    if not vim.fn.writefile({}, target) ~= 0 then
+      vim.notify('Could not create Pipfile!', WARN)
+      return
+    end
+  end
+
+  vim.cmd.tabedit(target)
+  vim.schedule(function()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local tab = vim.api.nvim_get_current_tabpage()
+    vim.keymap.set('n', 'q', function()
+      pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+      pcall(vim.api.nvim_cmd, { cmd = 'tabclose', range = { tab } }, { output = false })
+    end, { buffer = bufnr })
+  end)
+end
+
 ---@return string[] installed
 function M.retrieve_installed()
   local sys_obj = run_cmd({ 'pipenv', 'graph', '--json' })
@@ -53,19 +77,17 @@ function M.retrieve_installed()
   end
 
   ---@type boolean, PipenvJsonGraph[]|nil
-  local ok, data = pcall(vim.json.decode, Util.trim_output_header(sys_obj.stdout))
-  if not ok then
+  local ok, data = pcall(vim.json.decode, Util.trim_output(sys_obj.stdout))
+  if not (ok and data) then
     error('Could not parse JSON graph!', ERROR)
   end
 
-  ---@cast data PipenvJsonGraph[]
   local installed = {} ---@type string[]
   for _, pkg in ipairs(data) do
     if pkg.package.package_name and not vim.list_contains(installed, pkg.package.package_name) then
       table.insert(installed, pkg.package.package_name)
     end
   end
-
   return installed
 end
 
@@ -82,7 +104,7 @@ function M.graph()
     return
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
-    Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
+    Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv lock' })
     return
   end
   vim.notify('(pipenv graph): No output given!', INFO)
@@ -105,7 +127,7 @@ function M.lock(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv lock' })
       return
     end
     vim.notify('(pipenv lock): No output given!', INFO)
@@ -129,7 +151,7 @@ function M.clean(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv clean' })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv clean' })
       return
     end
     vim.notify('(pipenv clean): No output given!', INFO)
@@ -153,7 +175,7 @@ function M.verify(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv verify' })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv verify' })
       return
     end
     vim.notify('(pipenv clean): No output given!', INFO)
@@ -186,7 +208,7 @@ function M.sync(opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -240,7 +262,7 @@ function M.install(packages, opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -282,7 +304,7 @@ function M.run(command, opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
       return
     end
     vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
@@ -321,7 +343,7 @@ function M.requirements(opts)
     return
   end
 
-  sys_obj.stdout = Util.trim_output_header(sys_obj.stdout)
+  sys_obj.stdout = Util.trim_output(sys_obj.stdout)
 
   if not opts.file or opts.file == '' then
     Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })

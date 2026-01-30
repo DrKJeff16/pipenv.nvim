@@ -30,9 +30,8 @@ end
 ---@param data string
 ---@return string new_data
 ---@nodiscard
-function M.trim_output_header(data)
+function M.trim_output(data)
   M.validate({ data = { data, { 'string' } } })
-
   if data == '' then
     return data
   end
@@ -64,7 +63,7 @@ function M.trim_output_header(data)
 end
 
 ---@param data string
----@param opts? { title?: string, border?: 'none'|'single'|'double'|'rounded'|'solid'|'shadow', ft?: string }
+---@param opts? { title?: string, border?: 'none'|'single'|'double'|'rounded'|'solid'|'shadow', ft?: string, modifiable?: boolean }
 ---@return integer bufnr
 ---@return integer win
 function M.split_output(data, opts)
@@ -73,6 +72,7 @@ function M.split_output(data, opts)
     opts = { opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
+  opts.modifiable = opts.modifiable ~= nil and opts.modifiable or false
 
   local bufnr = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_lines(
@@ -101,8 +101,6 @@ function M.split_output(data, opts)
 
   vim.api.nvim_set_option_value('filetype', opts.ft or 'log', { buf = bufnr })
   vim.api.nvim_set_option_value('fileencoding', 'utf-8', { buf = bufnr })
-  vim.api.nvim_set_option_value('buftype', 'nowrite', { buf = bufnr })
-  vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
 
   vim.api.nvim_set_option_value('foldenable', false, { win = win })
   vim.api.nvim_set_option_value('list', false, { win = win })
@@ -110,6 +108,12 @@ function M.split_output(data, opts)
   vim.api.nvim_set_option_value('signcolumn', 'no', { win = win })
   vim.api.nvim_set_option_value('spell', false, { win = win })
   vim.api.nvim_set_option_value('wrap', false, { win = win })
+
+  vim.api.nvim_set_option_value('modifiable', opts.modifiable, { buf = bufnr })
+  vim.api.nvim_set_option_value('buftype', opts.modifiable and '' or 'nowrite', { buf = bufnr })
+  if opts.modifiable then
+    vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
+  end
 
   vim.keymap.set('n', 'q', function()
     pcall(vim.api.nvim_buf_delete, bufnr, { force = true })

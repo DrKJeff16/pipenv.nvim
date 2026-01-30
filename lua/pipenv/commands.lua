@@ -1,5 +1,6 @@
 ---@alias Pipenv.ValidOps
 ---|'clean'
+---|'edit'
 ---|'graph'
 ---|'help'
 ---|'install'
@@ -25,6 +26,7 @@ local function complete_fun(_, lead)
       'dev=true',
       'dev=false',
       'clean',
+      'edit',
       'help',
       'install',
       'list-installed',
@@ -37,7 +39,10 @@ local function complete_fun(_, lead)
   end
   if #args >= 3 then
     if
-      vim.list_contains({ 'clean', 'graph', 'help', 'list-installed', 'lock', 'run' }, args[2])
+      vim.list_contains(
+        { 'clean', 'graph', 'help', 'list-installed', 'lock', 'run', 'edit' },
+        args[2]
+      )
     then
       return {}
     end
@@ -126,7 +131,10 @@ function M.popup(valid, except, verbose, dev, file)
         return
       end
       if
-        vim.list_contains({ 'clean', 'verify', 'requirements', 'lock', 'sync', 'graph' }, item)
+        vim.list_contains(
+          { 'clean', 'edit', 'verify', 'requirements', 'lock', 'sync', 'graph' },
+          item
+        )
       then
         Api[item](opts)
         return
@@ -139,6 +147,7 @@ function M.setup()
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
     local valid = {
       'clean',
+      'edit',
       'graph',
       'help',
       'install',
@@ -185,16 +194,12 @@ function M.setup()
       M.cmd_usage(INFO)
       return
     end
-    if subcommand == 'list-installed' then
-      Api.list_installed()
+    if vim.list_contains({ 'list-installed', 'graph', 'edit' }, subcommand) then
+      Api[subcommand]()
       return
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
       Api[subcommand]({ verbose = ctx.bang })
-      return
-    end
-    if subcommand == 'graph' then
-      Api.graph()
       return
     end
     if subcommand == 'run' then
