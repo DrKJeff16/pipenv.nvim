@@ -1,13 +1,22 @@
 local INFO = vim.log.levels.INFO
+local WARN = vim.log.levels.WARN
+local ERROR = vim.log.levels.ERROR
 local api = require('pipenv.api')
+local util = require('pipenv.util')
 
 ---@class Pipenv.Commands
 local M = {}
 
-function M.cmd_usage()
+---@param level? vim.log.levels
+function M.cmd_usage(level)
+  util.validate({ level = { level, { 'number', 'nil' }, true } })
+  level = (level and util.is_int(level)) and level or INFO
+
   vim.notify(
     [[
 Usage:
+      :Pipenv help
+
       :Pipenv[!] clean
       :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
       :Pipenv[!] lock
@@ -15,19 +24,23 @@ Usage:
       :Pipenv[!] run <command> [<args> [...]\]
       :Pipenv[!] sync [dev=true|false]
     ]],
-    INFO
+    level
   )
 end
 
 function M.setup()
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
-    local subcommand = ctx.fargs[1] or '' ---@type 'clean'|'install'|'lock'|'requirements'|'run'|'sync'
-    local valid = { 'clean', 'install', 'lock', 'requirements', 'run', 'sync' }
+    local subcommand = ctx.fargs[1] or '' ---@type 'clean'|'install'|'lock'|'requirements'|'run'|'sync'|'help'
+    local valid = { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help' }
     if not vim.list_contains(valid, subcommand) then
-      M.cmd_usage()
+      M.cmd_usage(ERROR)
       return
     end
 
+    if subcommand == 'help' then
+      M.cmd_usage(INFO)
+      return
+    end
     if subcommand == 'clean' then
       api.clean(ctx.bang)
       return
@@ -38,7 +51,7 @@ function M.setup()
     end
     if subcommand == 'run' then
       if #ctx.fargs == 1 then
-        M.cmd_usage()
+        M.cmd_usage(WARN)
         return
       end
       local cmds = {}
@@ -54,11 +67,11 @@ function M.setup()
       for i = 2, #ctx.fargs, 1 do
         local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
         if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-          M.cmd_usage()
+          M.cmd_usage(ERROR)
           return
         end
         if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-          M.cmd_usage()
+          M.cmd_usage(WARN)
           return
         end
         if subsubcmd[2] == 'true' then
@@ -78,11 +91,11 @@ function M.setup()
         if ctx.fargs[i]:match('dev=') then
           local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
           if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-            M.cmd_usage()
+            M.cmd_usage(ERROR)
             return
           end
           if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-            M.cmd_usage()
+            M.cmd_usage(WARN)
             return
           end
           if subsubcmd[2] == 'true' then
@@ -108,11 +121,11 @@ function M.setup()
         if ctx.fargs[i]:match('dev=') then
           local subsubcmd = vim.split(ctx.fargs[i], '=', { plain = true, trimempty = false })
           if #subsubcmd == 1 or subsubcmd[1] ~= 'dev' then
-            M.cmd_usage()
+            M.cmd_usage(ERROR)
             return
           end
           if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
-            M.cmd_usage()
+            M.cmd_usage(WARN)
             return
           end
           if subsubcmd[2] == 'true' then
@@ -143,7 +156,7 @@ end
 local Commands = setmetatable(M, { ---@type Pipenv.Commands
   __index = M,
   __newindex = function()
-    vim.notify('Pipenv.Commands module is read-only!', vim.log.levels.ERROR)
+    vim.notify('Pipenv.Commands module is read-only!', ERROR)
   end,
 })
 
