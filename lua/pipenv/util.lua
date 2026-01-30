@@ -147,7 +147,6 @@ end
 ---@param ret? boolean Whether to return the called module
 ---@return boolean exists A boolean indicating whether the module exists or not
 ---@return unknown? module
----@overload fun(mod: string): exists: boolean
 function M.mod_exists(mod, ret)
   M.validate({
     mod = { mod, { 'string' } },

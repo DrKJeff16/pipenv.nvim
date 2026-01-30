@@ -1,5 +1,6 @@
 ---@class PipenvOpts
 ---@field auto_detect? boolean
+---@field python_version? string|nil
 
 local util = require('pipenv.util')
 
@@ -10,6 +11,7 @@ local M = {}
 function M.get_defaults()
   return { ---@type PipenvOpts
     auto_detect = true,
+    python_version = nil,
   }
 end
 
