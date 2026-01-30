@@ -104,7 +104,7 @@ function M.graph()
     return
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
-    Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv lock' })
+    Util.split_output(Util.trim_output(sys_obj.stdout), { title = 'pipenv graph' })
     return
   end
   vim.notify('(pipenv graph): No output given!', INFO)
