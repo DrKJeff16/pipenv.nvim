@@ -2,8 +2,8 @@ name: Action Release
 on:
   push:
     tags:
-      - "v*.*.*"
-      - "v*.*.*-*"
+      - "*.*.*"
+      - "*.*.*-*"
   merge_group:
     branches:
       - main
@@ -31,7 +31,7 @@ jobs:
         with:
           latest: true
           prerelease: true
-          pattern: '^v.*'
+          pattern: '^.*'
           debug: true
           throwing: true
         env:
