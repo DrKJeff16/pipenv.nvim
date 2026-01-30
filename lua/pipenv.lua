@@ -20,6 +20,7 @@ function M.setup(opts)
 end
 
 M.clean = Api.clean
+M.graph = Api.graph
 M.install = Api.install
 M.list_installed = Api.list_installed
 M.lock = Api.lock

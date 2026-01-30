@@ -73,6 +73,21 @@ function M.list_installed()
   Util.split_output(table.concat(M.retrieve_installed(), '\n'))
 end
 
+function M.graph()
+  local sys_obj = run_cmd({ 'pipenv', 'graph' })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
+    end
+    return
+  end
+  if sys_obj.stdout and sys_obj.stdout ~= '' then
+    Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
+    return
+  end
+  vim.notify('(pipenv graph): No output given!', INFO)
+end
+
 ---@param opts? Pipenv.LockOpts
 function M.lock(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })

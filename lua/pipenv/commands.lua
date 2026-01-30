@@ -66,8 +66,9 @@ function M.cmd_usage(level)
       Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [<OPERATION>]
 
       :Pipenv help
-      :Pipenv list-installed|graph
+      :Pipenv list-installed
 
+      :Pipenv graph
       :Pipenv[!] clean
       :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
       :Pipenv[!] lock
@@ -124,7 +125,9 @@ function M.popup(valid, except, verbose, dev, file)
         )
         return
       end
-      if vim.list_contains({ 'clean', 'verify', 'requirements', 'lock', 'sync' }, item) then
+      if
+        vim.list_contains({ 'clean', 'verify', 'requirements', 'lock', 'sync', 'graph' }, item)
+      then
         Api[item](opts)
         return
       end
@@ -174,7 +177,7 @@ function M.setup()
     end
 
     if not subcommand then
-      M.popup(valid, { 'help', 'list-installed', 'graph' }, ctx.bang, dev, file)
+      M.popup(valid, { 'help', 'list-installed' }, ctx.bang, dev, file)
       return
     end
 
@@ -188,6 +191,10 @@ function M.setup()
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
       Api[subcommand]({ verbose = ctx.bang })
+      return
+    end
+    if subcommand == 'graph' then
+      Api.graph()
       return
     end
     if subcommand == 'run' then
