@@ -13,18 +13,20 @@ function M.lock(verbose)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system({ 'pipenv', 'lock' }, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system({ 'pipenv', 'lock' }, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if success then
     if msg ~= '' and verbose then
@@ -45,18 +47,20 @@ function M.clean(verbose)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system({ 'pipenv', 'clean' }, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system({ 'pipenv', 'clean' }, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if success then
     if msg ~= '' and verbose then
@@ -87,18 +91,20 @@ function M.sync(dev, verbose)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system(cmd, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system(cmd, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if success then
     if msg ~= '' and verbose then
@@ -148,18 +154,20 @@ function M.install(packages, dev, verbose)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system(cmd, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system(cmd, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if success then
     if msg ~= '' and verbose then
@@ -197,18 +205,20 @@ function M.run(command, verbose)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system(cmd, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system(cmd, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if success then
     if msg ~= '' and verbose then
@@ -239,18 +249,20 @@ function M.requirements(file, dev)
 
   local msg, err = '', ''
   local success = true ---@type boolean
-  vim.system(cmd, function(out)
-    if out.code ~= 0 then
-      if out.stderr and out.stderr ~= '' then
-        err = out.stderr
+  vim
+    .system(cmd, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
       end
-      success = false
-      return
-    end
-    if out.stdout and out.stdout ~= '' then
-      msg = out.stdout
-    end
-  end)
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
 
   if not success then
     if err ~= '' then

@@ -7,13 +7,13 @@ local M = {}
 function M.cmd_usage()
   vim.notify(
     [[
-    Usage:
-    :Pipenv[!] clean
-    :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
-    :Pipenv[!] lock
-    :Pipenv requirements [dev=true|false] [file=/path/to/file]
-    :Pipenv[!] run <command> [<args> [...]\]
-    :Pipenv[!] sync [dev=true|false]
+Usage:
+      :Pipenv[!] clean
+      :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
+      :Pipenv[!] lock
+      :Pipenv requirements [dev=true|false] [file=/path/to/file]
+      :Pipenv[!] run <command> [<args> [...]\]
+      :Pipenv[!] sync [dev=true|false]
     ]],
     INFO
   )
