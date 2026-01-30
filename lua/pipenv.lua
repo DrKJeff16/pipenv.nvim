@@ -25,6 +25,7 @@ M.sync = api.sync
 M.run = api.run
 M.requirements = api.requirements
 M.clean = api.clean
+M.verify = api.verify
 
 local Pipenv = setmetatable(M, { ---@type Pipenv
   __index = M,

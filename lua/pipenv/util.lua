@@ -8,6 +8,62 @@
 ---@class Pipenv.Util
 local M = {}
 
+---@param data string
+---@param opts? { title?: string, border?: 'none'|'single'|'double'|'rounded'|'solid'|'shadow', ft?: string }
+---@return integer bufnr
+---@return integer win
+function M.split_output(data, opts)
+  M.validate({
+    data = { data, { 'string' } },
+    opts = { opts, { 'table', 'nil' }, true },
+  })
+  opts = opts or {}
+
+  local bufnr = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_lines(
+    bufnr,
+    0,
+    -1,
+    true,
+    vim.split(data, '\n', { plain = true, trimempty = false })
+  )
+
+  local width = math.floor(vim.o.columns * 0.8)
+  local height = math.floor(vim.o.lines * 0.85)
+  local win = vim.api.nvim_open_win(bufnr, true, {
+    width = width,
+    height = height,
+    style = 'minimal',
+    border = opts.border or 'single',
+    col = math.floor((vim.o.columns - width) / 2) - 1,
+    row = math.floor((vim.o.lines - height) / 2) - 1,
+    focusable = true,
+    title = opts.title or 'Output',
+    relative = 'editor',
+    title_pos = 'center',
+    zindex = 100,
+  })
+
+  vim.api.nvim_set_option_value('filetype', opts.ft or 'log', { buf = bufnr })
+  vim.api.nvim_set_option_value('fileencoding', 'utf-8', { buf = bufnr })
+  vim.api.nvim_set_option_value('buftype', 'nowrite', { buf = bufnr })
+  vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+
+  vim.api.nvim_set_option_value('foldenable', false, { win = win })
+  vim.api.nvim_set_option_value('list', false, { win = win })
+  vim.api.nvim_set_option_value('number', false, { win = win })
+  vim.api.nvim_set_option_value('signcolumn', 'no', { win = win })
+  vim.api.nvim_set_option_value('spell', false, { win = win })
+  vim.api.nvim_set_option_value('wrap', false, { win = win })
+
+  vim.keymap.set('n', 'q', function()
+    pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+    pcall(vim.api.nvim_win_close, win, true)
+  end, { buffer = bufnr })
+
+  return bufnr, win
+end
+
 ---Checks whether nvim is running on Windows.
 --- ---
 ---@return boolean win32

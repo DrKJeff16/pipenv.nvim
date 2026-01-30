@@ -3,6 +3,7 @@
 
 ---@class Pipenv.LockOpts: Pipenv.CommandOpts
 ---@class Pipenv.CleanOpts: Pipenv.CommandOpts
+---@class Pipenv.VerifyOpts: Pipenv.CommandOpts
 ---@class Pipenv.RunOpts: Pipenv.CommandOpts
 
 ---@class Pipenv.SyncOpts: Pipenv.CommandOpts
@@ -47,7 +48,7 @@ function M.lock(opts)
 
   if success then
     if msg ~= '' and opts.verbose then
-      vim.notify(msg, INFO)
+      util.split_output(msg, { title = 'pipenv lock' })
     end
     return
   end
@@ -83,7 +84,43 @@ function M.clean(opts)
 
   if success then
     if msg ~= '' and opts.verbose then
-      vim.notify(msg, INFO)
+      util.split_output(msg, { title = 'pipenv clean' })
+    end
+    return
+  end
+
+  if err ~= '' then
+    vim.notify(err, ERROR)
+  end
+end
+
+---@param opts? Pipenv.VerifyOpts
+function M.verify(opts)
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
+
+  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+
+  local success, msg, err = true, '', ''
+  vim
+    .system({ 'pipenv', 'verify' }, function(out)
+      if out.code ~= 0 then
+        if out.stderr and out.stderr ~= '' then
+          err = out.stderr
+        end
+        success = false
+        return
+      end
+      if out.stdout and out.stdout ~= '' then
+        msg = out.stdout
+      end
+    end)
+    :wait(200000)
+
+  if success then
+    if msg ~= '' and opts.verbose then
+      util.split_output(msg, { title = 'pipenv verify' })
     end
     return
   end
@@ -128,7 +165,7 @@ function M.sync(opts)
 
   if success then
     if msg ~= '' and opts.verbose then
-      vim.notify(msg, INFO)
+      util.split_output(msg, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -194,7 +231,7 @@ function M.install(packages, opts)
 
   if success then
     if msg ~= '' and opts.verbose then
-      vim.notify(msg, INFO)
+      util.split_output(msg, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -247,7 +284,7 @@ function M.run(command, opts)
 
   if success then
     if msg ~= '' and opts.verbose then
-      vim.notify(msg, INFO)
+      util.split_output(msg, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -299,7 +336,7 @@ function M.requirements(file, opts)
   end
 
   if not file or file == '' then
-    vim.notify(msg, INFO)
+    util.split_output(msg, { title = table.concat(cmd, ' '), ft = 'requirements' })
     return
   end
 

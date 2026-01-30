@@ -7,10 +7,9 @@ local util = require('pipenv.util')
 ---@param lead string
 ---@return string[] completions
 local function complete_fun(_, lead)
-  local startswith = vim.startswith
   local args = vim.split(lead, '%s+', { trimempty = false })
   if #args == 2 then
-    return { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help' }
+    return { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help', 'verify' }
   end
   if #args == 3 then
     if vim.list_contains({ 'clean', 'lock', 'run', 'help' }, args[2]) then
@@ -47,6 +46,7 @@ function M.cmd_usage(level)
       :Pipenv requirements [dev=true|false] [file=/path/to/file]
       :Pipenv[!] run <command> [<args> [...]\]
       :Pipenv[!] sync [dev=true|false]
+      :Pipenv[!] verify
       ]],
     level
   )
@@ -54,7 +54,7 @@ end
 
 function M.setup()
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
-    local subcommand = ctx.fargs[1] or '' ---@type 'clean'|'install'|'lock'|'requirements'|'run'|'sync'|'help'
+    local subcommand = ctx.fargs[1] or '' ---@type 'clean'|'install'|'lock'|'requirements'|'run'|'sync'|'help'|'verify'
     local valid = { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help' }
     if not vim.list_contains(valid, subcommand) then
       M.cmd_usage(ERROR)
@@ -65,12 +65,8 @@ function M.setup()
       M.cmd_usage(INFO)
       return
     end
-    if subcommand == 'clean' then
-      api.clean({ verbose = ctx.bang })
-      return
-    end
-    if subcommand == 'lock' then
-      api.lock({ verbose = ctx.bang })
+    if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
+      api[subcommand]({ verbose = ctx.bang })
       return
     end
     if subcommand == 'run' then

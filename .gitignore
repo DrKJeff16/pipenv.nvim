@@ -68,5 +68,6 @@ repro.lua
 .venv
 Pipfile
 Pipfile.lock
+requirements.txt
 uv.lock
 venv
