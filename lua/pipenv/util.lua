@@ -368,5 +368,12 @@ function M.strip(char, str)
   return M.rstrip(char, M.lstrip(char, str))
 end
 
-return M
+local Util = setmetatable(M, { ---@type Pipenv.Util
+  __index = M,
+  __newindex = function()
+    vim.notify('Pipenv.Util is read-only!', vim.log.levels.ERROR)
+  end,
+})
+
+return Util
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

@@ -1,31 +1,31 @@
 local ERROR = vim.log.levels.ERROR
-local util = require('pipenv.util')
-local config = require('pipenv.config')
-local api = require('pipenv.api')
+local Util = require('pipenv.util')
+local Config = require('pipenv.config')
+local Api = require('pipenv.api')
 
 ---@class Pipenv
 local M = {}
 
 ---@param opts? PipenvOpts
 function M.setup(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  if not util.executable('pipenv') then
+  if not Util.executable('pipenv') then
     error('Pipenv not found in your PATH!', ERROR)
   end
 
-  config.setup(opts or {})
+  Config.setup(opts or {})
 
   require('pipenv.commands').setup()
 end
 
-M.lock = api.lock
-M.install = api.install
-M.sync = api.sync
-M.run = api.run
-M.requirements = api.requirements
-M.clean = api.clean
-M.verify = api.verify
+M.clean = Api.clean
+M.install = Api.install
+M.lock = Api.lock
+M.requirements = Api.requirements
+M.run = Api.run
+M.sync = Api.sync
+M.verify = Api.verify
 
 local Pipenv = setmetatable(M, { ---@type Pipenv
   __index = M,

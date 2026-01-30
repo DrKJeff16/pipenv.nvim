@@ -14,7 +14,7 @@
 
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
 
-local util = require('pipenv.util')
+local Util = require('pipenv.util')
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 
@@ -23,16 +23,16 @@ local M = {}
 
 ---@param opts? Pipenv.LockOpts
 function M.lock(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'lock' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = 'pipenv lock' })
+      Util.split_output(sys_obj.stdout, { title = 'pipenv lock' })
     end
     return
   end
@@ -44,16 +44,16 @@ end
 
 ---@param opts? Pipenv.CleanOpts
 function M.clean(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'clean' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = 'pipenv clean' })
+      Util.split_output(sys_obj.stdout, { title = 'pipenv clean' })
     end
     return
   end
@@ -65,16 +65,16 @@ end
 
 ---@param opts? Pipenv.VerifyOpts
 function M.verify(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'verify' }):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = 'pipenv verify' })
+      Util.split_output(sys_obj.stdout, { title = 'pipenv verify' })
     end
     return
   end
@@ -86,10 +86,10 @@ end
 
 ---@param opts? Pipenv.SyncOpts
 function M.sync(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  util.validate({
+  Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
@@ -104,7 +104,7 @@ function M.sync(opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -117,14 +117,14 @@ end
 ---@param packages? string[]|string|nil
 ---@param opts? Pipenv.InstallOpts
 function M.install(packages, opts)
-  util.validate({
+  Util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
   })
   packages = packages or nil
   opts = opts or {}
 
-  util.validate({
+  Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
@@ -136,13 +136,13 @@ function M.install(packages, opts)
     table.insert(cmd, '--dev')
   end
   if packages then
-    if util.is_type('string', packages) then
+    if Util.is_type('string', packages) then
       ---@cast packages string
       table.insert(cmd, packages)
     elseif not vim.tbl_isempty(packages) then
       ---@cast packages string[]
       for _, pkg in ipairs(packages) do
-        if util.is_type('string', pkg) and pkg ~= '' then
+        if Util.is_type('string', pkg) and pkg ~= '' then
           table.insert(cmd, pkg)
         end
       end
@@ -155,7 +155,7 @@ function M.install(packages, opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -168,17 +168,17 @@ end
 ---@param command string[]|string
 ---@param opts? Pipenv.RunOpts
 function M.run(command, opts)
-  util.validate({
+  Util.validate({
     command = { command, { 'string', 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
 
-  util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local cmd ---@type string[]
-  if util.is_type('string', command) then
+  if Util.is_type('string', command) then
     ---@cast command string
     cmd = { 'pipenv', 'run', command }
   elseif vim.tbl_isempty(command) then
@@ -194,7 +194,7 @@ function M.run(command, opts)
   local sys_obj = vim.system(cmd):wait(200000)
   if sys_obj.code == 0 then
     if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
+      Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' ') })
     end
     return
   end
@@ -207,14 +207,14 @@ end
 ---@param file? string[]|string|nil
 ---@param opts? Pipenv.RequirementsOpts
 function M.requirements(file, opts)
-  util.validate({
+  Util.validate({
     file = { file, { 'string', 'table', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
   })
   file = file or nil
   opts = opts or {}
 
-  util.validate({ dev = { opts.dev, { 'boolean', 'nil' }, true } })
+  Util.validate({ dev = { opts.dev, { 'boolean', 'nil' }, true } })
   opts.dev = opts.dev ~= nil and opts.dev or false
 
   local cmd = { 'pipenv', 'requirements' }
@@ -235,7 +235,7 @@ function M.requirements(file, opts)
   end
 
   if not file or file == '' then
-    util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
+    Util.split_output(sys_obj.stdout, { title = table.concat(cmd, ' '), ft = 'requirements' })
     return
   end
 

@@ -1,8 +1,8 @@
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
-local api = require('pipenv.api')
-local util = require('pipenv.util')
+local Api = require('pipenv.api')
+local Util = require('pipenv.util')
 
 ---@param lead string
 ---@return string[] completions
@@ -32,8 +32,8 @@ local M = {}
 
 ---@param level? vim.log.levels
 function M.cmd_usage(level)
-  util.validate({ level = { level, { 'number', 'nil' }, true } })
-  level = (level and util.is_int(level)) and level or INFO
+  Util.validate({ level = { level, { 'number', 'nil' }, true } })
+  level = (level and Util.is_int(level)) and level or INFO
 
   vim.notify(
     [[
@@ -66,7 +66,7 @@ function M.setup()
       return
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
-      api[subcommand]({ verbose = ctx.bang })
+      Api[subcommand]({ verbose = ctx.bang })
       return
     end
     if subcommand == 'run' then
@@ -81,7 +81,7 @@ function M.setup()
         end
       end
 
-      api.run(cmds, { verbose = ctx.bang })
+      Api.run(cmds, { verbose = ctx.bang })
       return
     end
     if subcommand == 'sync' then
@@ -103,7 +103,7 @@ function M.setup()
         end
       end
 
-      api.sync({ dev = dev, verbose = ctx.bang })
+      Api.sync({ dev = dev, verbose = ctx.bang })
       return
     end
     if subcommand == 'install' then
@@ -130,9 +130,9 @@ function M.setup()
         end
       end
       if vim.tbl_isempty(pkgs) then
-        api.install(nil, { dev = dev, verbose = ctx.bang })
+        Api.install(nil, { dev = dev, verbose = ctx.bang })
       else
-        api.install(pkgs, { dev = dev, verbose = ctx.bang })
+        Api.install(pkgs, { dev = dev, verbose = ctx.bang })
       end
       return
     end
@@ -165,7 +165,7 @@ function M.setup()
         end
       end
 
-      api.requirements(file, { dev = dev })
+      Api.requirements(file, { dev = dev })
       return
     end
   end, {

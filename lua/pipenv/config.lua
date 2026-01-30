@@ -2,7 +2,7 @@
 ---@field auto_detect? boolean
 ---@field python_version? string|nil
 
-local util = require('pipenv.util')
+local Util = require('pipenv.util')
 
 ---@class Pipenv.Config
 local M = {}
@@ -18,7 +18,7 @@ end
 ---@param opts PipenvOpts
 ---@overload fun()
 function M.setup(opts)
-  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
   -- TODO: Actually use these options in the codebase
   M.config = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
