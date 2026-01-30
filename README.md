@@ -76,6 +76,17 @@ The valid subcommands are:
 
 ### Without Subcommands
 
+<table>
+  <tr>
+    <td>
+      <p align="center">
+        <img alt="Showcase" src="https://github.com/user-attachments/assets/ff2d08f6-f70d-4dd4-9ea4-df18a78a9a56" /><br />
+        <em>The UI spawned when running without subcommands.</em>
+      </p>
+    </td>
+  </tr>
+</table>
+
 You can run `:Pipenv[!]` without any of the subcommands listed above. This will open a UI
 prompting to do any of the valid Pipenv operations.
 
