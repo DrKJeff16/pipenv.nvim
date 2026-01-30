@@ -26,12 +26,25 @@ local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local INFO = vim.log.levels.INFO
 
+---@param cmd string[]
+---@param timeout? integer
+---@return vim.SystemCompleted sys_obj
+local function run_cmd(cmd, timeout)
+  Util.validate({
+    cmd = { cmd, { 'table' } },
+    timeout = { timeout, { 'number', 'nil' }, true },
+  })
+  timeout = (timeout and Util.is_int(timeout)) and timeout or 300000
+
+  return vim.system(cmd, { text = true }):wait(timeout)
+end
+
 ---@class Pipenv.API
 local M = {}
 
 ---@return string[] installed
 function M.retrieve_installed()
-  local sys_obj = vim.system({ 'pipenv', 'graph', '--json' }):wait(200000)
+  local sys_obj = run_cmd({ 'pipenv', 'graph', '--json' })
   if sys_obj.code ~= 0 then
     error(sys_obj.stderr or 'Could not parse JSON graph!', ERROR)
   end
@@ -68,7 +81,7 @@ function M.lock(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local sys_obj = vim.system({ 'pipenv', 'lock' }):wait(200000)
+  local sys_obj = run_cmd({ 'pipenv', 'lock' })
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -92,7 +105,7 @@ function M.clean(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local sys_obj = vim.system({ 'pipenv', 'clean' }):wait(200000)
+  local sys_obj = run_cmd({ 'pipenv', 'clean' })
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -116,7 +129,7 @@ function M.verify(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local sys_obj = vim.system({ 'pipenv', 'verify' }):wait(200000)
+  local sys_obj = run_cmd({ 'pipenv', 'verify' })
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -149,7 +162,7 @@ function M.sync(opts)
     table.insert(cmd, '--dev')
   end
 
-  local sys_obj = vim.system(cmd):wait(200000)
+  local sys_obj = run_cmd(cmd)
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -203,7 +216,7 @@ function M.install(packages, opts)
     end
   end
 
-  local sys_obj = vim.system(cmd):wait(200000)
+  local sys_obj = run_cmd(cmd)
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -245,7 +258,7 @@ function M.run(command, opts)
     table.insert(cmd, 1, 'pipenv')
   end
 
-  local sys_obj = vim.system(cmd):wait(200000)
+  local sys_obj = run_cmd(cmd)
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
@@ -280,7 +293,7 @@ function M.requirements(opts)
     table.insert(cmd, '--dev')
   end
 
-  local sys_obj = vim.system(cmd):wait(200000)
+  local sys_obj = run_cmd(cmd)
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
       vim.notify(sys_obj.stderr, ERROR)
