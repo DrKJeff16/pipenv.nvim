@@ -9,6 +9,7 @@
 ---|'requirements'
 ---|'run'
 ---|'sync'
+---|'uninstall'
 ---|'verify'
 
 local INFO = vim.log.levels.INFO
@@ -34,25 +35,55 @@ local function complete_fun(_, lead)
       'requirements',
       'run',
       'sync',
+      'uninstall',
       'verify',
     }
   end
+
   if #args >= 3 then
-    if
-      vim.list_contains(
-        { 'clean', 'graph', 'help', 'list-installed', 'lock', 'run', 'edit' },
-        args[2]
-      )
-    then
-      return {}
+    local subcmd, dev = false, false
+    for _, sub in ipairs({
+      'clean',
+      'edit',
+      'help',
+      'install',
+      'list-installed',
+      'lock',
+      'requirements',
+      'run',
+      'sync',
+      'uninstall',
+      'verify',
+    }) do
+      if vim.list_contains(args, sub) then
+        subcmd = true
+        break
+      end
     end
-    if vim.list_contains({ 'install', 'requirements', 'sync' }, args[2]) then
-      for _, arg in ipairs(args) do
-        if vim.list_contains({ 'dev=true', 'dev=false' }, arg) then
+    for _, sub in ipairs({ 'dev=true', 'dev=false' }) do
+      if vim.list_contains(args, sub) then
+        dev = true
+        break
+      end
+    end
+    if dev and not subcmd then
+      return { 'uninstall', 'install', 'requirements', 'sync' }
+    end
+    if not subcmd then
+      if
+        vim.list_contains(
+          { 'clean', 'graph', 'help', 'list-installed', 'lock', 'run', 'edit' },
+          args[2]
+        )
+      then
+        return {}
+      end
+      if vim.list_contains({ 'uninstall', 'install', 'requirements', 'sync' }, args[2]) then
+        if dev then
           return {}
         end
+        return { 'dev=true', 'dev=false' }
       end
-      return { 'dev=true', 'dev=false' }
     end
   end
   return {}
@@ -121,11 +152,11 @@ function M.popup(valid, except, verbose, dev, file)
         end)
         return
       end
-      if item == 'install' then
+      if vim.list_contains({ 'install', 'uninstall' }, item) then
         vim.ui.input(
-          { prompt = 'Type the packages to install (separated by a space)' },
+          { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
           function(input)
-            Api.install(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+            Api[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
           end
         )
         return
@@ -156,6 +187,7 @@ function M.setup()
       'requirements',
       'run',
       'sync',
+      'uninstall',
       'verify',
     }
 

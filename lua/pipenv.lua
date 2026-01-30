@@ -27,6 +27,7 @@ M.lock = Api.lock
 M.requirements = Api.requirements
 M.run = Api.run
 M.sync = Api.sync
+M.uninstall = Api.uninstall
 M.verify = Api.verify
 
 local Pipenv = setmetatable(M, { ---@type Pipenv

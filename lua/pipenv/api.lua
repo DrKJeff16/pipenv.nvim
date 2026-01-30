@@ -269,6 +269,59 @@ function M.install(packages, opts)
   end
 end
 
+---@param packages string[]|string
+---@param opts? Pipenv.InstallOpts
+function M.uninstall(packages, opts)
+  Util.validate({
+    packages = { packages, { 'string', 'table' } },
+    opts = { opts, { 'table', 'nil' }, true },
+  })
+  opts = opts or {}
+
+  Util.validate({
+    dev = { opts.dev, { 'boolean', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+  })
+  opts.dev = opts.dev ~= nil and opts.dev or false
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+
+  local cmd = { 'pipenv', 'uninstall' }
+  if opts.dev then
+    table.insert(cmd, '--dev')
+  end
+  if packages then
+    if Util.is_type('string', packages) then
+      ---@cast packages string
+      table.insert(cmd, packages)
+    elseif not vim.tbl_isempty(packages) then
+      ---@cast packages string[]
+      for _, pkg in ipairs(packages) do
+        if Util.is_type('string', pkg) and pkg ~= '' then
+          table.insert(cmd, pkg)
+        end
+      end
+    else
+      vim.notify('(pipenv uninstall): Empty packages table!', ERROR)
+      return
+    end
+  end
+
+  local sys_obj = run_cmd(cmd)
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
+    end
+    return
+  end
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      return
+    end
+    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+  end
+end
+
 ---@param command string[]|string
 ---@param opts? Pipenv.RunOpts
 function M.run(command, opts)

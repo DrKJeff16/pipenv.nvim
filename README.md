@@ -71,6 +71,7 @@ The valid subcommands are:
 - `requirements`
 - `run`
 - `sync`
+- `uninstall`
 - `verify`
 
 ### Without Subcommands
@@ -105,6 +106,7 @@ Below is a table specifying what flags are parsed.
 | `requirements`   | `*`           | [X]           | [X] | [X]  | Runs `pipenv requirements [--dev]`                      |
 | `run`            | `1` or more   | [X]           | [ ] | [ ]  | Runs `pipenv run ...`                                   |
 | `sync`           | `*`           | [X]           | [X] | [ ]  | Runs `pipenv sync [--dev]`                              |
+| `uninstall`      | `*`           | [X]           | [X] | [ ]  | Runs `pipenv uninstall [--dev] [ARGS...]`               |
 | `verify`         | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv verify`                                    |
 
 
