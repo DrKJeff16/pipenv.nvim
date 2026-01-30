@@ -61,11 +61,12 @@ only it won't make a difference!
 
 The valid subcommands are:
 
-- `help`
-- `list-installed`
-- `graph`
 - `clean`
+- `edit`
+- `graph`
+- `help`
 - `install`
+- `list-installed`
 - `lock`
 - `requirements`
 - `run`
