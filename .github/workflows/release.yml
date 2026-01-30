@@ -1,0 +1,55 @@
+name: Action Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "v*.*.*-*"
+  merge_group:
+    branches:
+      - main
+  release:
+    types:
+      - created
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build Project Assets
+        run: |
+          mkdir -pv pipenv.nvim
+          cp -rv lua README.md LICENSE pipenv.nvim
+          zip -r -9 pipenv.nvim.zip pipenv.nvim
+          tar cvJf pipenv.nvim.tar.xz pipenv.nvim
+          tar cvzf pipenv.nvim.tar.gz pipenv.nvim
+          sha512sum pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| sha512sums.txt
+          md5sum pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| md5sums.txt
+          rm -rfv pipenv.nvim
+      - name: Get Release
+        uses: joutvhu/get-release@v1.0.3
+        with:
+          latest: true
+          prerelease: true
+          pattern: '^v.*'
+          debug: true
+          throwing: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Release File
+        run: |
+          echo ${{ github.sha }} > Release.txt
+          cat Release.txt
+      - name: Release
+        uses: softprops/action-gh-release@v2.5.0
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            Release.txt
+            pipenv.nvim.tar.gz
+            pipenv.nvim.tar.xz
+            pipenv.nvim.zip
+            md5sums.txt
+            sha512sums.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+# vim: set ts=2 sts=2 sw=2 et ai si sta:
