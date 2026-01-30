@@ -175,6 +175,11 @@ function M.popup(valid, except, verbose, dev, file)
 end
 
 function M.setup()
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
     local valid = {
       'clean',

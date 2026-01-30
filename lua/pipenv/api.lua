@@ -46,6 +46,11 @@ end
 local M = {}
 
 function M.edit()
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   local target = './Pipfile'
   if vim.fn.filereadable(target) ~= 1 then
     if vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
@@ -94,6 +99,11 @@ function M.retrieve_installed()
 end
 
 function M.list_installed()
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.open_float(table.concat(M.retrieve_installed(), '\n'), {
     title = 'Installed Packages',
     height = Config.config.output.height,
@@ -102,6 +112,11 @@ function M.list_installed()
 end
 
 function M.graph()
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   local sys_obj = run_cmd({ 'pipenv', 'graph' })
   if sys_obj.code ~= 0 then
     if sys_obj.stderr and sys_obj.stderr ~= '' then
@@ -150,6 +165,11 @@ end
 
 ---@param opts? Pipenv.CleanOpts
 function M.clean(opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
@@ -178,6 +198,11 @@ end
 
 ---@param opts? Pipenv.VerifyOpts
 function M.verify(opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
@@ -206,6 +231,11 @@ end
 
 ---@param opts? Pipenv.SyncOpts
 function M.sync(opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
@@ -244,6 +274,11 @@ end
 ---@param packages? string[]|string|nil
 ---@param opts? Pipenv.InstallOpts
 function M.install(packages, opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
@@ -302,6 +337,11 @@ end
 ---@param packages string[]|string
 ---@param opts? Pipenv.UninstallOpts
 function M.uninstall(packages, opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({
     packages = { packages, { 'string', 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
@@ -357,6 +397,11 @@ end
 ---@param command string[]|string
 ---@param opts? Pipenv.RunOpts
 function M.run(command, opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({
     command = { command, { 'string', 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
@@ -402,6 +447,11 @@ end
 
 ---@param opts? Pipenv.RequirementsOpts
 function M.requirements(opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
   })

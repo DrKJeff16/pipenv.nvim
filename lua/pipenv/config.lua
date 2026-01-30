@@ -24,9 +24,7 @@ end
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  -- TODO: Actually use these options in the codebase
   M.config = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
-
   vim.g.pipenv_setup = 1
 end
 
