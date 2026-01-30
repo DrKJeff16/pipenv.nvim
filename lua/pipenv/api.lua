@@ -1,18 +1,24 @@
 ---@class Pipenv.CommandOpts
 ---@field verbose? boolean
 
----@class Pipenv.LockOpts: Pipenv.CommandOpts
----@class Pipenv.CleanOpts: Pipenv.CommandOpts
----@class Pipenv.VerifyOpts: Pipenv.CommandOpts
----@class Pipenv.RunOpts: Pipenv.CommandOpts
+---@class Pipenv.RequirementsOpts
+---@field dev? boolean
 
 ---@class Pipenv.SyncOpts: Pipenv.CommandOpts
 ---@field dev? boolean
 
----@class Pipenv.RequirementsOpts
----@field dev? boolean
-
+---@class Pipenv.CleanOpts: Pipenv.CommandOpts
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
+---@class Pipenv.LockOpts: Pipenv.CommandOpts
+---@class Pipenv.RunOpts: Pipenv.CommandOpts
+---@class Pipenv.VerifyOpts: Pipenv.CommandOpts
+
+---@class PipenvJsonPackage
+---@field key string
+---@field package_name string
+---@field installed_version string
+
+---@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
 
 local Util = require('pipenv.util')
 local uv = vim.uv or vim.loop
@@ -20,6 +26,37 @@ local ERROR = vim.log.levels.ERROR
 
 ---@class Pipenv.API
 local M = {}
+
+---@return string[] installed
+function M.retrieve_installed()
+  local sys_obj = vim.system({ 'pipenv', 'graph', '--json' }):wait(200000)
+  if sys_obj.code ~= 0 then
+    error(sys_obj.stderr or 'Could not parse JSON graph!', ERROR)
+  end
+  if not sys_obj.stdout or sys_obj.stdout == '' then
+    error(sys_obj.stderr or 'Could not parse JSON graph!', ERROR)
+  end
+
+  ---@type boolean, PipenvJsonGraph[]|nil
+  local ok, data = pcall(vim.json.decode, Util.trim_output_header(sys_obj.stdout))
+  if not ok then
+    error('Could not parse JSON graph!', ERROR)
+  end
+
+  ---@cast data PipenvJsonGraph[]
+  local installed = {} ---@type string[]
+  for _, pkg in ipairs(data) do
+    if pkg.package.package_name and not vim.list_contains(installed, pkg.package.package_name) then
+      table.insert(installed, pkg.package.package_name)
+    end
+  end
+
+  return installed
+end
+
+function M.list_installed()
+  Util.split_output(table.concat(M.retrieve_installed(), '\n'))
+end
 
 ---@param opts? Pipenv.LockOpts
 function M.lock(opts)

@@ -1,3 +1,15 @@
+---@alias Pipenv.ValidOps
+---|'clean'
+---|'graph'
+---|'help'
+---|'install'
+---|'list-installed'
+---|'lock'
+---|'requirements'
+---|'run'
+---|'sync'
+---|'verify'
+
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
@@ -9,13 +21,25 @@ local Util = require('pipenv.util')
 local function complete_fun(_, lead)
   local args = vim.split(lead, '%s+', { trimempty = false })
   if #args == 2 then
-    return { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help', 'verify' }
+    return {
+      'clean',
+      'help',
+      'install',
+      'list-installed',
+      'lock',
+      'requirements',
+      'run',
+      'sync',
+      'verify',
+    }
   end
   if #args == 3 then
-    if vim.list_contains({ 'clean', 'lock', 'run', 'help' }, args[2]) then
+    if
+      vim.list_contains({ 'clean', 'graph', 'help', 'list-installed', 'lock', 'run' }, args[2])
+    then
       return {}
     end
-    if vim.list_contains({ 'install', 'sync', 'requirements' }, args[2]) then
+    if vim.list_contains({ 'install', 'requirements', 'sync' }, args[2]) then
       for _, arg in ipairs(args) do
         if vim.list_contains({ 'dev=true', 'dev=false' }, arg) then
           return {}
@@ -39,6 +63,7 @@ function M.cmd_usage(level)
     [[
       Usage:
       :Pipenv help
+      :Pipenv list-installed|graph
 
       :Pipenv[!] clean
       :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
@@ -54,8 +79,19 @@ end
 
 function M.setup()
   vim.api.nvim_create_user_command('Pipenv', function(ctx)
-    local subcommand = ctx.fargs[1] or '' ---@type 'clean'|'install'|'lock'|'requirements'|'run'|'sync'|'help'|'verify'
-    local valid = { 'clean', 'install', 'lock', 'requirements', 'run', 'sync', 'help' }
+    local subcommand = ctx.fargs[1] or '' ---@type Pipenv.ValidOps
+    local valid = {
+      'clean',
+      'graph',
+      'help',
+      'install',
+      'list-installed',
+      'lock',
+      'requirements',
+      'run',
+      'sync',
+      'verify',
+    }
     if not vim.list_contains(valid, subcommand) then
       M.cmd_usage(ERROR)
       return
@@ -63,6 +99,10 @@ function M.setup()
 
     if subcommand == 'help' then
       M.cmd_usage(INFO)
+      return
+    end
+    if subcommand == 'list-installed' then
+      Api.list_installed()
       return
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
