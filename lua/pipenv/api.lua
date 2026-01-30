@@ -23,6 +23,7 @@
 local Util = require('pipenv.util')
 local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
+local INFO = vim.log.levels.INFO
 
 ---@class Pipenv.API
 local M = {}
@@ -67,15 +68,18 @@ function M.lock(opts)
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'lock' }):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv lock' })
+      return
+    end
+    vim.notify('(pipenv lock): No output given!', INFO)
   end
 end
 
@@ -88,15 +92,18 @@ function M.clean(opts)
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'clean' }):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv clean' })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv clean' })
+      return
+    end
+    vim.notify('(pipenv clean): No output given!', INFO)
   end
 end
 
@@ -109,15 +116,18 @@ function M.verify(opts)
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
   local sys_obj = vim.system({ 'pipenv', 'verify' }):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv verify' })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = 'pipenv verify' })
+      return
+    end
+    vim.notify('(pipenv clean): No output given!', INFO)
   end
 end
 
@@ -139,15 +149,18 @@ function M.sync(opts)
   end
 
   local sys_obj = vim.system(cmd):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      return
+    end
+    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
   end
 end
 
@@ -190,15 +203,18 @@ function M.install(packages, opts)
   end
 
   local sys_obj = vim.system(cmd):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      return
+    end
+    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
   end
 end
 
@@ -229,15 +245,18 @@ function M.run(command, opts)
   end
 
   local sys_obj = vim.system(cmd):wait(200000)
-  if sys_obj.code == 0 then
-    if sys_obj.stdout and sys_obj.stdout ~= '' and opts.verbose then
-      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+  if sys_obj.code ~= 0 then
+    if sys_obj.stderr and sys_obj.stderr ~= '' then
+      vim.notify(sys_obj.stderr, ERROR)
     end
     return
   end
-
-  if sys_obj.stderr and sys_obj.stderr ~= '' then
-    vim.notify(sys_obj.stderr, ERROR)
+  if opts.verbose then
+    if sys_obj.stdout and sys_obj.stdout ~= '' then
+      Util.split_output(Util.trim_output_header(sys_obj.stdout), { title = table.concat(cmd, ' ') })
+      return
+    end
+    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
   end
 end
 
@@ -268,6 +287,7 @@ function M.requirements(file, opts)
   end
 
   if not sys_obj.stdout or sys_obj.stdout == '' then
+    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
     return
   end
 
