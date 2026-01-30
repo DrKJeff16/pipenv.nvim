@@ -2,9 +2,22 @@
 
 Pipenv support utilities for Neovim.
 
+---
+
+## Table Of Contents
+
+- [Installation](#installation)
+  - [`lazy.nvim`](#lazynvim)
+  - [LuaRocks](#luarocks)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [License](#license)
+
+---
+
 ## Installation
 
-For `lazy.nvim`:
+### `lazy.nvim`
 
 ```lua
 {
@@ -13,11 +26,18 @@ For `lazy.nvim`:
 }
 ```
 
+### LuaRocks
+
+```bash
+luarocks install pipenv.nvim         # Global Install
+luarocks install --local pipenv.nvim # Local Install
+```
+
 ---
 
 ## Configuration
 
-As of writing no setup options are needed.
+WIP! As of writing no setup options are needed.
 
 ---
 
