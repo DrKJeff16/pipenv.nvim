@@ -164,7 +164,13 @@ function M.list_installed()
     return
   end
 
-  Util.open_float(table.concat(M.retrieve_installed(), '\n'), {
+  local installed = M.retrieve_installed()
+  if vim.tbl_isempty(installed) then
+    vim.notify('No installed scripts found!', WARN)
+    return
+  end
+
+  Util.open_float(table.concat(installed, '\n'), {
     title = 'Installed Packages',
     height = 0.7,
     width = 0.4,
