@@ -10,16 +10,16 @@ repos:
       - id: forbid-crlf # Forbid files containing CRLF end-lines to be committed
   - repo: local
     hooks:
-      - id: run_stylua
-        name: Run StyLua
+      - id: format
+        name: Format with StyLua
         language: system
-        entry: stylua lua
+        entry: make format
         files: lua/.*lua$
         verbose: true
-      - id: run_selene
-        name: Run Selene
+      - id: lint
+        name: Lint using selene
         language: system
-        entry: selene lua
+        entry: make lint
         files: lua/.*lua$
         verbose: true
 # vim: set ts=2 sts=2 sw=2 et ai si sta:
