@@ -186,6 +186,10 @@ function M.list_scripts()
     vim.notify('Unable to retrieve scripts from Pipfile!', ERROR)
     return
   end
+  if vim.tbl_isempty(data) then
+    vim.notify('No scripts in Pipfile!', WARN)
+    return
+  end
 
   Util.open_float(table.concat(M.retrieve_scripts(), '\n'), {
     title = 'Installed Packages',
