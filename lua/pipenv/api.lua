@@ -64,7 +64,11 @@ local function run_cmd(cmd, timeout)
   })
   timeout = (timeout and Util.is_int(timeout) and timeout > 0) and timeout or 300000
 
-  return vim.system(cmd, { text = true }):wait(timeout)
+  local opts = { text = true } ---@type vim.SystemOpts
+  if Config.env and not vim.tbl_isempty(Config.env) then
+    opts.env = Config.env
+  end
+  return vim.system(cmd, opts):wait(timeout)
 end
 
 ---@class Pipenv.API
@@ -227,10 +231,7 @@ function M.graph(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -270,10 +271,7 @@ function M.lock(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -323,10 +321,7 @@ function M.clean(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -375,10 +370,7 @@ function M.verify(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -429,10 +421,7 @@ function M.sync(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -489,10 +478,7 @@ function M.install(packages, opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -567,10 +553,7 @@ function M.uninstall(packages, opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
@@ -644,10 +627,7 @@ function M.run(command, opts)
   if Util.is_type('string', command) then
     ---@cast command string
     cmd = { 'pipenv' }
-    if Config.opts.python_version and Config.opts.python_version ~= '' then
-      table.insert(cmd, '--python')
-      table.insert(cmd, Config.opts.python_version)
-    elseif opts.python and opts.python ~= '' then
+    if opts.python and opts.python ~= '' then
       table.insert(cmd, '--python')
       table.insert(cmd, opts.python)
     end
@@ -659,10 +639,7 @@ function M.run(command, opts)
   else
     ---@cast command string[]
     cmd = vim.deepcopy(command)
-    if Config.opts.python_version and Config.opts.python_version ~= '' then
-      table.insert(cmd, 1, Config.opts.python_version)
-      table.insert(cmd, 1, '--python')
-    elseif opts.python and opts.python ~= '' then
+    if opts.python and opts.python ~= '' then
       table.insert(cmd, 1, opts.python)
       table.insert(cmd, 1, '--python')
     end
@@ -718,10 +695,7 @@ function M.requirements(opts)
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
-  if Config.opts.python_version and Config.opts.python_version ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, Config.opts.python_version)
-  elseif opts.python and opts.python ~= '' then
+  if opts.python and opts.python ~= '' then
     table.insert(cmd, '--python')
     table.insert(cmd, opts.python)
   end
