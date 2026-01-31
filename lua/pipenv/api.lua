@@ -171,9 +171,9 @@ function M.list_installed()
   end
 
   Util.open_float(table.concat(installed, '\n'), {
-    title = 'Installed Packages',
     height = 0.7,
     width = 0.4,
+    title = 'Installed Packages',
     zindex = Config.opts.output.zindex,
   })
 end
@@ -197,10 +197,10 @@ function M.list_scripts()
     return
   end
 
-  Util.open_float(table.concat(M.retrieve_scripts(), '\n'), {
-    title = 'Installed Packages',
+  Util.open_float(table.concat(data, '\n'), {
     height = 0.4,
     width = 0.3,
+    title = 'Installed Packages',
     zindex = Config.opts.output.zindex,
   })
 end
@@ -226,9 +226,9 @@ function M.graph()
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
     Util.open_float(Util.trim_output(sys_obj.stdout), {
-      title = cmd_str,
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      title = cmd_str,
       zindex = Config.opts.output.zindex,
     })
     return
@@ -257,9 +257,9 @@ function M.lock(opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -297,9 +297,9 @@ function M.clean(opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -337,9 +337,9 @@ function M.verify(opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -385,9 +385,9 @@ function M.sync(opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -454,9 +454,9 @@ function M.install(packages, opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -520,9 +520,9 @@ function M.uninstall(packages, opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -577,9 +577,9 @@ function M.run(command, opts)
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = cmd_str,
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -634,10 +634,10 @@ function M.requirements(opts)
 
   if not opts.file or opts.file == '' then
     Util.open_float(sys_obj.stdout, {
-      title = cmd_str,
       ft = 'requirements',
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      title = cmd_str,
       zindex = Config.opts.output.zindex,
     })
     return
