@@ -1,9 +1,14 @@
 ---@class Pipenv.CommandOpts
 ---@field verbose? boolean
+---@field python? string
 
 ---@class Pipenv.RequirementsOpts
 ---@field dev? boolean
 ---@field file? string[]|string|nil
+---@field python? string
+
+---@class Pipenv.GraphOpts
+---@field python? string
 
 ---@class Pipenv.SyncOpts: Pipenv.CommandOpts
 ---@field dev? boolean
@@ -200,12 +205,13 @@ function M.list_scripts()
   Util.open_float(table.concat(data, '\n'), {
     height = 0.4,
     width = 0.3,
-    title = 'Installed Packages',
+    title = 'Scripts',
     zindex = Config.opts.output.zindex,
   })
 end
 
-function M.graph()
+---@param opts? Pipenv.GraphOpts
+function M.graph(opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -214,7 +220,22 @@ function M.graph()
     return
   end
 
-  local cmd = { 'pipenv', 'graph' }
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  opts = opts or {}
+
+  Util.validate({ python = { opts.python, { 'string', 'nil' }, true } })
+  opts.python = opts.python or nil
+
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'graph')
+
   local sys_obj = run_cmd(cmd)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
@@ -241,10 +262,23 @@ function M.lock(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
+  })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'lock' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'lock')
+
   local sys_obj = run_cmd(cmd)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
@@ -281,11 +315,23 @@ function M.clean(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
+  })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'clean' }
-  local sys_obj = run_cmd({ 'pipenv', 'clean' })
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'clean')
+  local sys_obj = run_cmd(cmd)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -321,10 +367,22 @@ function M.verify(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
 
-  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
+  })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'verify' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'verify')
   local sys_obj = run_cmd(cmd)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
@@ -364,11 +422,21 @@ function M.sync(opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'sync' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'sync')
   if opts.dev then
     table.insert(cmd, '--dev')
   end
@@ -414,11 +482,21 @@ function M.install(packages, opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'install' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'install')
   if opts.dev then
     table.insert(cmd, '--dev')
   end
@@ -482,11 +560,21 @@ function M.uninstall(packages, opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'uninstall' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'uninstall')
   if opts.dev then
     table.insert(cmd, '--dev')
   end
@@ -545,19 +633,39 @@ function M.run(command, opts)
   })
   opts = opts or {}
 
-  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  Util.validate({
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
+  })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  opts.python = opts.python or nil
 
   local cmd ---@type string[]
   if Util.is_type('string', command) then
     ---@cast command string
-    cmd = { 'pipenv', 'run', command }
+    cmd = { 'pipenv' }
+    if Config.opts.python_version and Config.opts.python_version ~= '' then
+      table.insert(cmd, '--python')
+      table.insert(cmd, Config.opts.python_version)
+    elseif opts.python and opts.python ~= '' then
+      table.insert(cmd, '--python')
+      table.insert(cmd, opts.python)
+    end
+    table.insert(cmd, 'run')
+    table.insert(cmd, command)
   elseif vim.tbl_isempty(command) then
     vim.notify('(pipenv run): Empty command table!')
     return
   else
     ---@cast command string[]
     cmd = vim.deepcopy(command)
+    if Config.opts.python_version and Config.opts.python_version ~= '' then
+      table.insert(cmd, 1, Config.opts.python_version)
+      table.insert(cmd, 1, '--python')
+    elseif opts.python and opts.python ~= '' then
+      table.insert(cmd, 1, opts.python)
+      table.insert(cmd, 1, '--python')
+    end
     table.insert(cmd, 1, 'run')
     table.insert(cmd, 1, 'pipenv')
   end
@@ -603,11 +711,22 @@ function M.requirements(opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     file = { opts.file, { 'string', 'table', 'nil' }, true },
+    python = { opts.python, { 'string', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.file = opts.file or nil
+  opts.python = opts.python or nil
 
-  local cmd = { 'pipenv', 'requirements' }
+  local cmd = { 'pipenv' }
+  if Config.opts.python_version and Config.opts.python_version ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, Config.opts.python_version)
+  elseif opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'requirements')
+
   if opts.dev then
     table.insert(cmd, '--dev')
   end

@@ -17,6 +17,7 @@
 
 ---@class PipenvOpts
 ---@field output? PipenvOpts.Output
+---@field python_version? string|nil
 
 local Util = require('pipenv.util')
 
@@ -27,6 +28,7 @@ local M = {}
 function M.get_defaults()
   return { ---@type PipenvOpts
     output = { width = 0.85, height = 0.85, zindex = 100 },
+    python_version = nil,
   }
 end
 

@@ -123,13 +123,15 @@ end
 ---@param verbose boolean
 ---@param dev boolean
 ---@param file nil|string
-function M.popup(valid, except, verbose, dev, file)
+---@param python nil|string
+function M.popup(valid, except, verbose, dev, file, python)
   Util.validate({
     valid = { valid, { 'table' } },
     except = { except, { 'table' } },
     verbose = { verbose, { 'boolean' } },
     dev = { dev, { 'boolean' } },
     file = { file, { 'string', 'nil' }, true },
+    python = { python, { 'string', 'nil' }, true },
   })
 
   local new_valid = {}
@@ -139,7 +141,9 @@ function M.popup(valid, except, verbose, dev, file)
     end
   end
 
-  local opts = { verbose = verbose, dev = dev, file = file }
+  local opts = { verbose = verbose, dev = dev, file = file, python = python }
+  vim.notify(vim.inspect(opts))
+
   vim.ui.select(
     new_valid,
     { prompt = 'Select your operation:' },
@@ -198,34 +202,36 @@ function M.setup()
       'verify',
     }
 
-    local dev, file, subcommand = false, nil, nil ---@type boolean, nil|string, string|Pipenv.ValidOps|nil
+    local dev, file, python, subcommand, subsubcmd = false, nil, nil, nil, {} ---@type boolean, nil|string, nil|string, string|Pipenv.ValidOps|nil, string[]
     for _, arg in ipairs(ctx.fargs) do
       if arg:find('=') then
-        local subsubcmd = vim.split(arg, '=', { plain = true, trimempty = false })
-        if #subsubcmd > 1 then
-          if subsubcmd[1] == 'dev' then
-            if not vim.list_contains({ 'true', 'false' }, subsubcmd[2]) then
+        local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = false })
+        if #subsubcommand > 1 then
+          if subsubcommand[1] == 'dev' then
+            if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
               M.cmd_usage(WARN)
               return
             end
-            if subsubcmd[2] == 'true' then
+            if subsubcommand[2] == 'true' then
               dev = true
             else
               dev = false
             end
-          elseif subsubcmd[1] == 'file' then
-            file = subsubcmd[2]
+          elseif subsubcommand[1] == 'file' then
+            file = subsubcommand[2]
+          elseif subsubcommand[1] == 'python' then
+            python = subsubcommand[2]
           end
         end
       elseif vim.list_contains(valid, arg) and not subcommand then
         subcommand = arg ---@type Pipenv.ValidOps
       else
-        subcommand = '' ---@type string
+        table.insert(subsubcmd, arg)
       end
     end
 
     if not subcommand then
-      M.popup(valid, { 'help', 'list-installed' }, ctx.bang, dev, file)
+      M.popup(valid, { 'help', 'list-installed' }, ctx.bang, dev, file, python)
       return
     end
 
@@ -246,7 +252,7 @@ function M.setup()
       return
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
-      Api[subcommand]({ verbose = ctx.bang })
+      Api[subcommand]({ verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'run' then
@@ -261,24 +267,22 @@ function M.setup()
         end
       end
 
-      Api.run(cmds, { verbose = ctx.bang })
+      Api.run(cmds, { verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'sync' then
-      Api.sync({ dev = dev, verbose = ctx.bang })
+      Api.sync({ dev = dev, verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'install' then
-      local pkgs = {} ---@type string[]
-      if vim.tbl_isempty(pkgs) then
-        Api.install(nil, { dev = dev, verbose = ctx.bang })
-      else
-        Api.install(pkgs, { dev = dev, verbose = ctx.bang })
-      end
+      Api.install(
+        vim.tbl_isempty(subsubcmd) and nil or subsubcmd,
+        { dev = dev, verbose = ctx.bang, python = python }
+      )
       return
     end
     if subcommand == 'requirements' then
-      Api.requirements({ file = file, dev = dev })
+      Api.requirements({ file = file, dev = dev, python = python })
       return
     end
 
