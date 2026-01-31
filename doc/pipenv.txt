@@ -1,4 +1,4 @@
-*pipenv.txt*           For NVIM >=v0.9.0          Last change: 2026 January 30
+*pipenv.txt*           For NVIM >=v0.9.0          Last change: 2026 January 31
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -19,6 +19,7 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 - |pipenv-usage|
     - |pipenv-without-subcommands|
     - |pipenv-with-subcommands|
+- |pipenv-api|
 - |pipenv-license|
 
 ------------------------------------------------------------------------------
@@ -160,6 +161,26 @@ Examples:
     :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
 <
 
+------------------------------------------------------------------------------
+
+API                                                               *pipenv-api*
+
+Most of the API is publicly available on the main module (see api.lua
+<https://github.com/DrKJeff16/pipenv.nvim/blob/main/lua/pipenv/api.lua>). It
+contains all the operations used by the `:Pipenv` user command.
+
+  Function               Used By
+  ---------------------- ------------------------
+  Api.clean()            :Pipenv clean
+  Api.graph()            :Pipenv graph
+  Api.install()          :Pipenv install
+  Api.list_installed()   :Pipenv list-installed
+  Api.lock()             :Pipenv lock
+  Api.requirements()     :Pipenv requirements
+  Api.run()              :Pipenv run
+  Api.sync()             :Pipenv sync
+  Api.uninstall()        :Pipenv uninstall
+  Api.verify()           :Pipenv verify
 ------------------------------------------------------------------------------
 
 LICENSE                                                       *pipenv-license*
