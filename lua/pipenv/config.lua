@@ -1,8 +1,19 @@
 ---@class PipenvOpts.Output
----Can be a number between `0` and `1` (percentage) or a fixed width
+---Can be a number between `0` and `1` (percentage) or a fixed width.
+--- ---
+---Default: `0.85`
+--- ---
 ---@field width? number
----Can be a number between `0` and `1` (percentage) or a fixed height
+---Can be a number between `0` and `1` (percentage) or a fixed height.
+--- ---
+---Default: `0.85`
+--- ---
 ---@field height? number
+---The `zindex` value of the output window.
+--- ---
+---Default: `100`
+--- ---
+---@field zindex? integer
 
 ---@class PipenvOpts
 ---@field output? PipenvOpts.Output
@@ -15,7 +26,7 @@ local M = {}
 ---@return PipenvOpts defaults
 function M.get_defaults()
   return { ---@type PipenvOpts
-    output = { width = 0.85, height = 0.85 },
+    output = { width = 0.85, height = 0.85, zindex = 100 },
   }
 end
 

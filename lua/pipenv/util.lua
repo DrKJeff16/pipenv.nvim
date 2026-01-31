@@ -12,6 +12,7 @@
 ---@field modifiable? boolean
 ---@field width? number
 ---@field height? number
+---@field zindex? integer
 
 ---@class Pipenv.Util
 local M = {}
@@ -163,12 +164,14 @@ function M.open_float(data, opts)
     modifiable = { opts.modifiable, { 'boolean', 'nil' }, true },
     title = { opts.title, { 'string', 'nil' }, true },
     width = { opts.width, { 'number', 'nil' }, true },
+    zindex = { opts.zindex, { 'number', 'nil' }, true },
   })
   opts.ft = opts.ft or 'log'
   opts.modifiable = opts.modifiable ~= nil and opts.modifiable or false
   opts.height = (opts.height and opts.height > 0) and opts.height or 0.85
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
+  opts.zindex = (opts.zindex and opts.zindex > 0 and M.is_int(opts.zindex)) and opts.zindex or 100
   opts.border = (
     opts.border
     and vim.list_contains({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
@@ -210,7 +213,7 @@ function M.open_float(data, opts)
     style = 'minimal',
     title = opts.title,
     title_pos = 'center',
-    zindex = 100,
+    zindex = opts.zindex,
   })
 
   vim.api.nvim_set_option_value('filetype', opts.ft, { buf = bufnr })

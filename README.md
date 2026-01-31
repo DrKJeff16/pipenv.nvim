@@ -49,6 +49,7 @@ require('pipenv').setup({
   output = {
     width = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed width
     height = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed height
+    zindex = 100, -- The `zindex` value of the output window
   },
 })
 ```

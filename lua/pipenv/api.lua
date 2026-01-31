@@ -129,6 +129,7 @@ function M.list_installed()
     title = 'Installed Packages',
     height = 0.7,
     width = 0.4,
+    zindex = Config.config.output.zindex,
   })
 end
 
@@ -156,6 +157,7 @@ function M.graph()
       title = cmd_str,
       height = Config.config.output.height,
       width = Config.config.output.width,
+      zindex = Config.config.output.zindex,
     })
     return
   end
@@ -186,6 +188,7 @@ function M.lock(opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -225,6 +228,7 @@ function M.clean(opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -264,6 +268,7 @@ function M.verify(opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -311,6 +316,7 @@ function M.sync(opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -379,6 +385,7 @@ function M.install(packages, opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -444,6 +451,7 @@ function M.uninstall(packages, opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -500,6 +508,7 @@ function M.run(command, opts)
         title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
+        zindex = Config.config.output.zindex,
       })
       return
     end
@@ -557,6 +566,7 @@ function M.requirements(opts)
       ft = 'requirements',
       height = Config.config.output.height,
       width = Config.config.output.width,
+      zindex = Config.config.output.zindex,
     })
     return
   end
