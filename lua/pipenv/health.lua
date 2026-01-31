@@ -34,7 +34,13 @@ function M.check()
 
   vim.health.start('Config')
   for name, opt in pairs(require('pipenv.config').config) do
-    vim.health.ok(('`%s`: %s'):format(name, vim.inspect(opt)))
+    local str, warning = Util.format_per_type(type(opt), opt)
+    str = ('`%s`: %s'):format(name, str)
+    if Util.is_type('boolean', warning) and warning then
+      vim.health.warn(str)
+    else
+      vim.health.ok(str)
+    end
   end
 
   vim.health.start('Requirements')

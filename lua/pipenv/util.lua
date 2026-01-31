@@ -16,6 +16,62 @@
 ---@class Pipenv.Util
 local M = {}
 
+---@param t type
+---@param data nil|number|string|boolean|table|function
+---@param sep? string
+---@param constraints? string[]
+---@return string
+---@return boolean|nil
+function M.format_per_type(t, data, sep, constraints)
+  M.validate({
+    t = { t, { 'string' } },
+    sep = { sep, { 'string', 'nil' }, true },
+    constraints = { constraints, { 'table', 'nil' }, true },
+  })
+  sep = sep or ''
+  constraints = constraints or nil
+
+  if t == 'string' then
+    local res = ('%s`"%s"`'):format(sep, data)
+    if not M.is_type('table', constraints) then
+      return res
+    end
+    if constraints ~= nil and vim.list_contains(constraints, data) then
+      return res
+    end
+    return res, true
+  end
+  if vim.list_contains({ 'number', 'boolean' }, t) then
+    return ('%s`%s`'):format(sep, tostring(data))
+  end
+  if t == 'function' then
+    return ('%s`%s`'):format(sep, t)
+  end
+
+  local msg = ''
+  if t == 'nil' then
+    return ('%s%s `nil`'):format(sep, msg)
+  end
+  if t ~= 'table' then
+    return ('%s%s `?`'):format(sep, msg)
+  end
+  if vim.tbl_isempty(data) then
+    return ('%s%s `{}`'):format(sep, msg)
+  end
+
+  sep = ('%s '):format(sep)
+  for k, v in pairs(data) do
+    k = M.is_type('number', k) and ('[%s]'):format(tostring(k)) or k
+    msg = ('%s\n%s%s: '):format(msg, sep, k)
+    if not M.is_type('string', v) then
+      msg = ('%s%s'):format(msg, M.format_per_type(type(v), v, sep))
+    else
+      msg = ('%s`"%s"`'):format(msg, v)
+    end
+  end
+  return msg
+end
+
 ---@param T any[]
 ---@param elem any
 ---@return any[] new_tbl
