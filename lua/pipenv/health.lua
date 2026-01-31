@@ -32,6 +32,11 @@ function M.check()
   end
   vim.health.ok('`pipenv.nvim` has been setup!')
 
+  vim.health.start('Config')
+  for name, opt in pairs(require('pipenv.config').config) do
+    vim.health.ok(('`%s`: %s'):format(name, vim.inspect(opt)))
+  end
+
   vim.health.start('Requirements')
   for _, exe in ipairs({ { 'python', 2 }, { 'pipenv', 3 } }) do
     if not Util.executable(exe[1]) then
