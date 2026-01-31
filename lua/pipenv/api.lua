@@ -29,6 +29,26 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
+---@param create? boolean
+---@return boolean pipfile
+local function has_pipfile(create)
+  Util.validate({ create = { create, { 'boolean', 'nil' }, true } })
+  create = create ~= nil and create or false
+
+  if not vim.fn.filereadable('./Pipfile') then
+    if not create or vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
+      vim.notify('No Pipfile found!', ERROR)
+      return false
+    end
+    if not vim.fn.writefile({}, './Pipfile') ~= 0 then
+      vim.notify('Could not create Pipfile!', WARN)
+      return false
+    end
+  end
+
+  return true
+end
+
 ---@param cmd string[]
 ---@param timeout? integer
 ---@return vim.SystemCompleted sys_obj
@@ -50,19 +70,11 @@ function M.edit()
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
-
-  local target = './Pipfile'
-  if vim.fn.filereadable(target) ~= 1 then
-    if vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
-      return
-    end
-    if not vim.fn.writefile({}, target) ~= 0 then
-      vim.notify('Could not create Pipfile!', WARN)
-      return
-    end
+  if not has_pipfile(true) then
+    return
   end
 
-  vim.cmd.tabedit(target)
+  vim.cmd.tabedit('./Pipfile')
   vim.schedule(function()
     local bufnr = vim.api.nvim_get_current_buf()
     local tab = vim.api.nvim_get_current_tabpage()
@@ -109,6 +121,9 @@ function M.list_installed()
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
+  if not has_pipfile() then
+    return
+  end
 
   Util.open_float(table.concat(M.retrieve_installed(), '\n'), {
     title = 'Installed Packages',
@@ -120,6 +135,9 @@ end
 function M.graph()
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
     return
   end
 
@@ -181,6 +199,9 @@ function M.clean(opts)
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
+  if not has_pipfile() then
+    return
+  end
 
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
@@ -217,6 +238,9 @@ function M.verify(opts)
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
+  if not has_pipfile() then
+    return
+  end
 
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   opts = opts or {}
@@ -251,6 +275,9 @@ end
 function M.sync(opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
     return
   end
 
@@ -296,6 +323,9 @@ end
 function M.install(packages, opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
     return
   end
 
@@ -363,6 +393,9 @@ function M.uninstall(packages, opts)
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
+  if not has_pipfile() then
+    return
+  end
 
   Util.validate({
     packages = { packages, { 'string', 'table' } },
@@ -425,6 +458,9 @@ function M.run(command, opts)
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
+  if not has_pipfile() then
+    return
+  end
 
   Util.validate({
     command = { command, { 'string', 'table' } },
@@ -475,6 +511,9 @@ end
 function M.requirements(opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
     return
   end
 
