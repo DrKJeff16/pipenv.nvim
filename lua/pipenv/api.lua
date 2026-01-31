@@ -403,9 +403,6 @@ function M.install(packages, opts)
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
   end
-  if not has_pipfile() then
-    return
-  end
 
   Util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
