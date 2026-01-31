@@ -9,7 +9,6 @@ local M = {}
 ---@param opts? PipenvOpts
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
-
   if not Util.executable('pipenv') then
     error('Pipenv not found in your PATH!', ERROR)
   end

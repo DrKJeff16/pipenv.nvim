@@ -16,6 +16,25 @@
 ---@class Pipenv.Util
 local M = {}
 
+---@param T table
+---@param keys (string|integer)[]
+---@param reference table
+---@return table T
+function M.deep_clean(T, keys, reference)
+  if vim.tbl_isempty(T) then
+    return T
+  end
+
+  for k, v in pairs(T) do
+    if not vim.list_contains(keys, k) or (type(v) == 'table' and type(reference[k]) ~= 'table') then
+      T[k] = nil
+    elseif type(v) == 'table' and type(reference[k]) == 'table' then
+      T[k] = M.deep_clean(v, vim.tbl_keys(reference[k]), reference[k])
+    end
+  end
+  return T
+end
+
 ---@param t type
 ---@param data nil|number|string|boolean|table|function
 ---@param sep? string
