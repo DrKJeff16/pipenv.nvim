@@ -32,14 +32,14 @@ end
 
 function M.clean_setup_opts()
   local defaults = M.get_defaults()
-  M.config = Util.deep_clean(M.config, vim.tbl_keys(defaults), defaults)
+  M.opts = Util.deep_clean(M.opts, vim.tbl_keys(defaults), defaults)
 end
 
 ---@param opts? PipenvOpts
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  M.config = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
+  M.opts = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
   M.clean_setup_opts()
 
   vim.g.pipenv_setup = 1

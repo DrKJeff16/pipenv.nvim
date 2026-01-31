@@ -33,7 +33,7 @@ function M.check()
   vim.health.ok('`pipenv.nvim` has been setup!')
 
   vim.health.start('Config')
-  for name, opt in pairs(require('pipenv.config').config) do
+  for name, opt in pairs(require('pipenv.config').opts) do
     local str, warning = Util.format_per_type(type(opt), opt)
     str = ('`%s`: %s'):format(name, str)
     if Util.is_type('boolean', warning) and warning then

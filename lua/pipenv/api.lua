@@ -174,7 +174,7 @@ function M.list_installed()
     title = 'Installed Packages',
     height = 0.7,
     width = 0.4,
-    zindex = Config.config.output.zindex,
+    zindex = Config.opts.output.zindex,
   })
 end
 
@@ -201,7 +201,7 @@ function M.list_scripts()
     title = 'Installed Packages',
     height = 0.4,
     width = 0.3,
-    zindex = Config.config.output.zindex,
+    zindex = Config.opts.output.zindex,
   })
 end
 
@@ -227,9 +227,9 @@ function M.graph()
   if sys_obj.stdout and sys_obj.stdout ~= '' then
     Util.open_float(Util.trim_output(sys_obj.stdout), {
       title = cmd_str,
-      height = Config.config.output.height,
-      width = Config.config.output.width,
-      zindex = Config.config.output.zindex,
+      height = Config.opts.output.height,
+      width = Config.opts.output.width,
+      zindex = Config.opts.output.zindex,
     })
     return
   end
@@ -258,9 +258,9 @@ function M.lock(opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -298,9 +298,9 @@ function M.clean(opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -338,9 +338,9 @@ function M.verify(opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -386,9 +386,9 @@ function M.sync(opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -455,9 +455,9 @@ function M.install(packages, opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -521,9 +521,9 @@ function M.uninstall(packages, opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -578,9 +578,9 @@ function M.run(command, opts)
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         title = cmd_str,
-        height = Config.config.output.height,
-        width = Config.config.output.width,
-        zindex = Config.config.output.zindex,
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        zindex = Config.opts.output.zindex,
       })
       return
     end
@@ -636,9 +636,9 @@ function M.requirements(opts)
     Util.open_float(sys_obj.stdout, {
       title = cmd_str,
       ft = 'requirements',
-      height = Config.config.output.height,
-      width = Config.config.output.width,
-      zindex = Config.config.output.zindex,
+      height = Config.opts.output.height,
+      width = Config.opts.output.width,
+      zindex = Config.opts.output.zindex,
     })
     return
   end
