@@ -122,21 +122,21 @@ Examples:
 
 Below is a table specifying what flags are parsed.
 
-| Subcommand       | Nargs         | Verbose (`!`) | Dev | File | Python | Description                                             |
-|------------------|---------------|---------------|-----|------|--------|---------------------------------------------------------|
-| `help`           | `0`           | [ ]           | [ ] | [ ]  | [ ]    | Prints the usage message                                |
-| `edit`           | `0`           | [ ]           | [ ] | [ ]  | [ ]    | Edit the `Pipfile` or create a blank one if none exists |
-| `list-installed` | `0`           | [ ]           | [ ] | [ ]  | [ ]    | Lists the installed packages in a window                |
-| `scripts`        | `0`           | [ ]           | [ ] | [ ]  | [ ]    | Lists the defined scripts in the Pipfile                |
-| `graph`          | `0`           | [ ]           | [ ] | [ ]  | [X]    | Returns the output of `pipenv graph`                    |
-| `clean`          | `0`           | [X]           | [ ] | [ ]  | [X]    | Runs `pipenv clean`                                     |
-| `install`        | `*`           | [X]           | [X] | [ ]  | [X]    | Runs `pipenv install [--dev] [ARGS...]`                 |
-| `lock`           | `0`           | [X]           | [ ] | [ ]  | [X]    | Runs `pipenv lock`                                      |
-| `requirements`   | `*`           | [X]           | [X] | [X]  | [X]    | Runs `pipenv requirements [--dev]`                      |
-| `run`            | `1` or more   | [X]           | [ ] | [ ]  | [X]    | Runs `pipenv run ...`                                   |
-| `sync`           | `*`           | [X]           | [X] | [ ]  | [X]    | Runs `pipenv sync [--dev]`                              |
-| `uninstall`      | `*`           | [X]           | [X] | [ ]  | [X]    | Runs `pipenv uninstall [--dev] [ARGS...]`               |
-| `verify`         | `0`           | [X]           | [ ] | [ ]  | [X]    | Runs `pipenv verify`                                    |
+| Subcommand       | Nargs         | Verbose | Dev | File | Python | Description                                             |
+|------------------|---------------|---------|-----|------|--------|---------------------------------------------------------|
+| `help`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Prints the usage message                                |
+| `edit`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Edit the `Pipfile` or create a blank one if none exists |
+| `list-installed` | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the installed packages in a window                |
+| `scripts`        | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the defined scripts in the Pipfile                |
+| `graph`          | `0`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv graph`                    |
+| `clean`          | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv clean`                                     |
+| `install`        | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv install [--dev] [ARGS...]`                 |
+| `lock`           | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv lock`                                      |
+| `requirements`   | `*`           | [X]     | [X] | [X]  | [X]    | Runs `pipenv requirements [--dev]`                      |
+| `run`            | `1` or more   | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv run ...`                                   |
+| `sync`           | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv sync [--dev]`                              |
+| `uninstall`      | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv uninstall [--dev] [ARGS...]`               |
+| `verify`         | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv verify`                                    |
 
 
 Examples:
