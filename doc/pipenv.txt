@@ -89,6 +89,7 @@ The valid subcommands are:
 - `lock`
 - `requirements`
 - `run`
+- `scripts`
 - `sync`
 - `uninstall`
 - `verify`
@@ -127,6 +128,9 @@ Below is a table specifying what flags are parsed.
 
   list-installed   0         [ ]       [ ]   [ ]    Lists the installed packages in a
                                                     window
+
+  scripts          0         [ ]       [ ]   [ ]    Lists the defined scripts in the
+                                                    Pipfile
 
   graph            0         [ ]       [ ]   [ ]    Returns the output of pipenv graph
 
