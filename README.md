@@ -15,6 +15,7 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 - [Usage](#usage)
   - [Without Subcommands](#without-subcommands)
   - [With Subcommands](#with-subcommands)
+- [API](#api)
 - [License](#license)
 
 ---
@@ -143,6 +144,27 @@ Examples:
 
 :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
 ```
+
+---
+
+## API
+
+Most of the API is publicly available on the main module
+(see [api.lua](https://github.com/DrKJeff16/pipenv.nvim/blob/main/lua/pipenv/api.lua)).
+It contains all the operations used by the `:Pipenv` user command.
+
+| Function               | Used By                  |
+|------------------------|--------------------------|
+| `Api.clean()`          | `:Pipenv clean`          |
+| `Api.graph()`          | `:Pipenv graph`          |
+| `Api.install()`        | `:Pipenv install`        |
+| `Api.list_installed()` | `:Pipenv list-installed` |
+| `Api.lock()`           | `:Pipenv lock`           |
+| `Api.requirements()`   | `:Pipenv requirements`   |
+| `Api.run()`            | `:Pipenv run`            |
+| `Api.sync()`           | `:Pipenv sync`           |
+| `Api.uninstall()`      | `:Pipenv uninstall`      |
+| `Api.verify()`         | `:Pipenv verify`         |
 
 ---
 
