@@ -231,7 +231,11 @@ function M.setup()
       M.cmd_usage(INFO)
       return
     end
-    if vim.list_contains({ 'list-installed', 'graph', 'edit' }, subcommand) then
+    if subcommand == 'list-installed' then
+      Api.list_installed()
+      return
+    end
+    if vim.list_contains({ 'graph', 'edit' }, subcommand) then
       Api[subcommand]()
       return
     end

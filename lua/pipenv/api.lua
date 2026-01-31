@@ -37,7 +37,7 @@ local function run_cmd(cmd, timeout)
     cmd = { cmd, { 'table' } },
     timeout = { timeout, { 'number', 'nil' }, true },
   })
-  timeout = (timeout and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout) and timeout > 0) and timeout or 300000
 
   return vim.system(cmd, { text = true }):wait(timeout)
 end
@@ -77,10 +77,16 @@ end
 function M.retrieve_installed()
   local sys_obj = run_cmd({ 'pipenv', 'graph', '--json' })
   if sys_obj.code ~= 0 then
-    error(sys_obj.stderr or 'Could not parse JSON graph!', ERROR)
+    error(
+      (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr or 'Could not parse JSON graph!',
+      ERROR
+    )
   end
   if not sys_obj.stdout or sys_obj.stdout == '' then
-    error(sys_obj.stderr or 'Could not parse JSON graph!', ERROR)
+    error(
+      (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr or 'Could not parse JSON graph!',
+      ERROR
+    )
   end
 
   ---@type boolean, PipenvJsonGraph[]|nil
@@ -106,8 +112,8 @@ function M.list_installed()
 
   Util.open_float(table.concat(M.retrieve_installed(), '\n'), {
     title = 'Installed Packages',
-    height = Config.config.output.height,
-    width = Config.config.output.width,
+    height = 0.7,
+    width = 0.4,
   })
 end
 
@@ -117,22 +123,25 @@ function M.graph()
     return
   end
 
-  local sys_obj = run_cmd({ 'pipenv', 'graph' })
+  local cmd = { 'pipenv', 'graph' }
+  local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
     Util.open_float(Util.trim_output(sys_obj.stdout), {
-      title = 'pipenv graph',
+      title = cmd_str,
       height = Config.config.output.height,
       width = Config.config.output.width,
     })
     return
   end
-  vim.notify('(pipenv graph): No output given!', INFO)
+  vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
 end
 
 ---@param opts? Pipenv.LockOpts
@@ -143,23 +152,26 @@ function M.lock(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local sys_obj = run_cmd({ 'pipenv', 'lock' })
+  local cmd = { 'pipenv', 'lock' }
+  local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = 'pipenv lock',
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify('(pipenv lock): No output given!', INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -176,23 +188,26 @@ function M.clean(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
+  local cmd = { 'pipenv', 'clean' }
   local sys_obj = run_cmd({ 'pipenv', 'clean' })
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = 'pipenv clean',
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify('(pipenv clean): No output given!', INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -209,23 +224,26 @@ function M.verify(opts)
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
 
-  local sys_obj = run_cmd({ 'pipenv', 'verify' })
+  local cmd = { 'pipenv', 'verify' }
+  local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = 'pipenv verify',
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify('(pipenv clean): No output given!', INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -252,22 +270,24 @@ function M.sync(opts)
   end
 
   local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = table.concat(cmd, ' '),
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -315,22 +335,24 @@ function M.install(packages, opts)
   end
 
   local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = table.concat(cmd, ' '),
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -375,22 +397,24 @@ function M.uninstall(packages, opts)
   end
 
   local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = table.concat(cmd, ' '),
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -426,22 +450,24 @@ function M.run(command, opts)
   end
 
   local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
       Util.open_float(Util.trim_output(sys_obj.stdout), {
-        title = table.concat(cmd, ' '),
+        title = cmd_str,
         height = Config.config.output.height,
         width = Config.config.output.width,
       })
       return
     end
-    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
   end
 end
 
@@ -470,15 +496,17 @@ function M.requirements(opts)
   end
 
   local sys_obj = run_cmd(cmd)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
   if sys_obj.code ~= 0 then
-    if sys_obj.stderr and sys_obj.stderr ~= '' then
-      vim.notify(sys_obj.stderr, ERROR)
-    end
+    vim.notify(err, ERROR)
     return
   end
 
   if not sys_obj.stdout or sys_obj.stdout == '' then
-    vim.notify(('(%s): No output given!'):format(table.concat(cmd, ' ')), INFO)
+    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
     return
   end
 
@@ -486,7 +514,7 @@ function M.requirements(opts)
 
   if not opts.file or opts.file == '' then
     Util.open_float(sys_obj.stdout, {
-      title = table.concat(cmd, ' '),
+      title = cmd_str,
       ft = 'requirements',
       height = Config.config.output.height,
       width = Config.config.output.width,
@@ -507,7 +535,7 @@ function M.requirements(opts)
       opts.file
     ) == -1
   then
-    vim.notify(('(pipenv requirements): Unable to write to `%s`!'):format(opts.file), ERROR)
+    vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
   end
 end
 
