@@ -8,6 +8,7 @@
 ---|'lock'
 ---|'requirements'
 ---|'run'
+---|'scripts'
 ---|'sync'
 ---|'uninstall'
 ---|'verify'
@@ -34,6 +35,7 @@ local function complete_fun(_, lead)
       'lock',
       'requirements',
       'run',
+      'scripts',
       'sync',
       'uninstall',
       'verify',
@@ -51,6 +53,7 @@ local function complete_fun(_, lead)
       'lock',
       'requirements',
       'run',
+      'scripts',
       'sync',
       'uninstall',
       'verify',
@@ -72,7 +75,7 @@ local function complete_fun(_, lead)
     if not subcmd then
       if
         vim.list_contains(
-          { 'clean', 'graph', 'help', 'list-installed', 'lock', 'run', 'edit' },
+          { 'clean', 'graph', 'help', 'list-installed', 'lock', 'run', 'edit', 'scripts' },
           args[2]
         )
       then
@@ -97,24 +100,22 @@ function M.cmd_usage(level)
   Util.validate({ level = { level, { 'number', 'nil' }, true } })
   level = (level and Util.is_int(level)) and level or INFO
 
-  vim.notify(
-    [[
-      Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [<OPERATION>]
+  local msg = [[Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [<OPERATION>]
 
-      :Pipenv help
-      :Pipenv list-installed
+  :Pipenv help
+  :Pipenv list-installed
+  :Pipenv scripts
 
-      :Pipenv graph
-      :Pipenv[!] clean
-      :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
-      :Pipenv[!] lock
-      :Pipenv requirements [dev=true|false] [file=/path/to/file]
-      :Pipenv[!] run <command> [<args> [...]\]
-      :Pipenv[!] sync [dev=true|false]
-      :Pipenv[!] verify
-      ]],
-    level
-  )
+  :Pipenv graph
+  :Pipenv[!] clean
+  :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
+  :Pipenv[!] lock
+  :Pipenv requirements [dev=true|false] [file=/path/to/file]
+  :Pipenv[!] run <command> [<args> [...]\]
+  :Pipenv[!] sync [dev=true|false]
+  :Pipenv[!] verify]]
+
+  vim.notify(msg, level)
 end
 
 ---@param valid string[]
@@ -191,6 +192,7 @@ function M.setup()
       'lock',
       'requirements',
       'run',
+      'scripts',
       'sync',
       'uninstall',
       'verify',
@@ -229,6 +231,10 @@ function M.setup()
 
     if subcommand == 'help' then
       M.cmd_usage(INFO)
+      return
+    end
+    if subcommand == 'scripts' then
+      Api.list_scripts()
       return
     end
     if subcommand == 'list-installed' then

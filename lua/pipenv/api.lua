@@ -85,6 +85,45 @@ function M.edit()
   end)
 end
 
+---@return string[]|nil res
+function M.retrieve_scripts()
+  if not has_pipfile() then
+    return
+  end
+  local stat = uv.fs_stat('Pipfile')
+  if not stat or stat.size == 0 then
+    return
+  end
+  local fd = uv.fs_open('Pipfile', 'r', tonumber('644', 8))
+  if not fd then
+    return
+  end
+
+  local data = uv.fs_read(fd, stat.size)
+  uv.fs_close(fd)
+  if not data then
+    return
+  end
+
+  local l_data = vim.split(data, '\n', { plain = true, trimempty = false })
+  local res, scripts = {}, false ---@type string[], boolean
+  for _, line in ipairs(l_data) do
+    if vim.startswith(line, '[scripts]') and not scripts then
+      scripts = true
+    elseif scripts then
+      if vim.startswith(line, '[') then
+        break
+      end
+      local split_line = vim.split(line, ' ', { plain = true, trimempty = false })
+      if #split_line >= 3 and split_line[2] == '=' then
+        table.insert(res, split_line[1])
+      end
+    end
+  end
+
+  return res
+end
+
 ---@return string[] installed
 function M.retrieve_installed()
   local sys_obj = run_cmd({ 'pipenv', 'graph', '--json' })
@@ -129,6 +168,29 @@ function M.list_installed()
     title = 'Installed Packages',
     height = 0.7,
     width = 0.4,
+    zindex = Config.config.output.zindex,
+  })
+end
+
+function M.list_scripts()
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
+    return
+  end
+
+  local data = M.retrieve_scripts()
+  if not data then
+    vim.notify('Unable to retrieve scripts from Pipfile!', ERROR)
+    return
+  end
+
+  Util.open_float(table.concat(M.retrieve_scripts(), '\n'), {
+    title = 'Installed Packages',
+    height = 0.4,
+    width = 0.3,
     zindex = Config.config.output.zindex,
   })
 end

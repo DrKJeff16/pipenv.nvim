@@ -81,6 +81,7 @@ The valid subcommands are:
 - `lock`
 - `requirements`
 - `run`
+- `scripts`
 - `sync`
 - `uninstall`
 - `verify`
@@ -121,6 +122,7 @@ Below is a table specifying what flags are parsed.
 | `help`           | `0`           | [ ]           | [ ] | [ ]  | Prints the usage message                                |
 | `edit`           | `0`           | [ ]           | [ ] | [ ]  | Edit the `Pipfile` or create a blank one if none exists |
 | `list-installed` | `0`           | [ ]           | [ ] | [ ]  | Lists the installed packages in a window                |
+| `scripts`        | `0`           | [ ]           | [ ] | [ ]  | Lists the defined scripts in the Pipfile                |
 | `graph`          | `0`           | [ ]           | [ ] | [ ]  | Returns the output of `pipenv graph`                    |
 | `clean`          | `0`           | [X]           | [ ] | [ ]  | Runs `pipenv clean`                                     |
 | `install`        | `*`           | [X]           | [X] | [ ]  | Runs `pipenv install [--dev] [ARGS...]`                 |
