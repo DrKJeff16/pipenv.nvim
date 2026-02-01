@@ -10,6 +10,8 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 
 - [Installation](#installation)
   - [`lazy.nvim`](#lazynvim)
+  - [`pckr.nvim`](#pckrnvim)
+  - [`paq-nvim`](#paq-nvim)
   - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
   - [Customizing Pipenv](#customizing-pipenv)
@@ -30,6 +32,26 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
   'DrKJeff16/pipenv.nvim',
   opts = {},
 }
+```
+
+### `pckr.nvim`
+
+```lua
+require('pckr').add({
+  {
+    'DrKJeff16/pipenv.nvim',
+    config = function()
+      require('pipenv').setup()
+    end,
+  },
+})
+```
+
+### `paq-nvim`
+
+```lua
+local paq = require('paq')
+paq({ 'DrKJeff16/pipenv.nvim' })
 ```
 
 ### LuaRocks
@@ -141,7 +163,11 @@ The valid subcommands are:
   <tr>
     <td>
       <p align="center">
-        <img alt="Showcase" src="https://github.com/user-attachments/assets/ff2d08f6-f70d-4dd4-9ea4-df18a78a9a56" /><br />
+        <img
+        alt="Showcase"
+        src="https://github.com/user-attachments/assets/ff2d08f6-f70d-4dd4-9ea4-df18a78a9a56"
+        />
+        <br />
         <em>The UI spawned when running without subcommands.</em>
       </p>
     </td>
@@ -211,9 +237,11 @@ It contains all the operations used by the `:Pipenv` user command.
 | Function               | Used By                  |
 |------------------------|--------------------------|
 | `Api.clean()`          | `:Pipenv clean`          |
+| `Api.edit()`           | `:Pipenv edit`           |
 | `Api.graph()`          | `:Pipenv graph`          |
 | `Api.install()`        | `:Pipenv install`        |
 | `Api.list_installed()` | `:Pipenv list-installed` |
+| `Api.list_scripts()`   | `:Pipenv scripts`        |
 | `Api.lock()`           | `:Pipenv lock`           |
 | `Api.requirements()`   | `:Pipenv requirements`   |
 | `Api.run()`            | `:Pipenv run`            |
