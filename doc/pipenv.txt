@@ -83,11 +83,13 @@ These are the default options:
         height = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed height
         zindex = 100, -- The `zindex` value of the output window
       },
-      install = {}, -- See the `Customizing Pipenv` section
-      virtual_env = {}, -- See the `Customizing Pipenv` section
-      file_location = {}, -- See the `Customizing Pipenv` section
-      security = {}, -- See the `Customizing Pipenv` section
-      behavior = {}, -- See the `Customizing Pipenv` section
+      env = { -- See the `Customizing Pipenv` section
+        install = {},
+        virtual_env = {},
+        file_location = {},
+        security = {},
+        behavior = {},
+      },
     })
 <
 
@@ -102,67 +104,67 @@ See the Pipenv Documentation
 <https://pipenv.pypa.io/en/latest/configuration.html#available-environment-variables>
 for more info.
 
-  ---------------------------------------------------------------------------
-  Setup Option                      Type      Environment Variable
-  --------------------------------- --------- -------------------------------
-  behavior.auto_accept              boolean   PIPENV_YES
+  -------------------------------------------------------------------------------
+  Setup Option                          Type      Environment Variable
+  ------------------------------------- --------- -------------------------------
+  env.behavior.auto_accept              boolean   PIPENV_YES
 
-  behavior.clear_cache              boolean   PIPENV_CLEAR
+  env.behavior.clear_cache              boolean   PIPENV_CLEAR
 
-  behavior.fancy_shell              boolean   PIPENV_SHELL_FANCY
+  env.behavior.fancy_shell              boolean   PIPENV_SHELL_FANCY
 
-  behavior.ignore_pipfile           boolean   PIPENV_IGNORE_PIPFILE
+  env.behavior.ignore_pipfile           boolean   PIPENV_IGNORE_PIPFILE
 
-  behavior.no_asdf                  boolean   PIPENV_DONT_USE_ASDF
+  env.behavior.no_asdf                  boolean   PIPENV_DONT_USE_ASDF
 
-  behavior.no_load_env              boolean   PIPENV_DONT_LOAD_ENV
+  env.behavior.no_load_env              boolean   PIPENV_DONT_LOAD_ENV
 
-  behavior.no_pyenv                 boolean   PIPENV_DONT_USE_PYENV
+  env.behavior.no_pyenv                 boolean   PIPENV_DONT_USE_PYENV
 
-  behavior.no_spin                  boolean   PIPENV_NOSPIN
+  env.behavior.no_spin                  boolean   PIPENV_NOSPIN
 
-  behavior.quiet                    boolean   PIPENV_QUIET
+  env.behavior.quiet                    boolean   PIPENV_QUIET
 
-  behavior.requests_timeout         number    PIPENV_REQUESTS_TIMEOUT
+  env.behavior.requests_timeout         number    PIPENV_REQUESTS_TIMEOUT
 
-  behavior.site_packages            boolean   PIPENV_SITE_PACKAGES
+  env.behavior.site_packages            boolean   PIPENV_SITE_PACKAGES
 
-  behavior.verbose                  boolean   PIPENV_VERBOSE
+  env.behavior.verbose                  boolean   PIPENV_VERBOSE
 
-  file_location.cache_dir           string    PIPENV_CACHE_DIR
+  env.file_location.cache_dir           string    PIPENV_CACHE_DIR
 
-  file_location.dotenv_location     string    PIPENV_DOTENV_LOCATION
+  env.file_location.dotenv_location     string    PIPENV_DOTENV_LOCATION
 
-  file_location.pipfile_path        string    PIPENV_PIPFILE
+  env.file_location.pipfile_path        string    PIPENV_PIPFILE
 
-  install.install_dependencies      boolean   PIPENV_INSTALL_DEPENDENCIES
+  env.install.install_dependencies      boolean   PIPENV_INSTALL_DEPENDENCIES
 
-  install.install_timeout           number    PIPENV_INSTALL_TIMEOUT
+  env.install.install_timeout           number    PIPENV_INSTALL_TIMEOUT
 
-  install.max_depth                 number    PIPENV_MAX_DEPTH
+  env.install.max_depth                 number    PIPENV_MAX_DEPTH
 
-  install.pypi_mirror               string    PIPENV_PYPI_MIRROR
+  env.install.pypi_mirror               string    PIPENV_PYPI_MIRROR
 
-  install.resolve_vcs               boolean   PIPENV_RESOLVE_VCS
+  env.install.resolve_vcs               boolean   PIPENV_RESOLVE_VCS
 
-  install.skip_lock                 boolean   PIPENV_SKIP_LOCK
+  env.install.skip_lock                 boolean   PIPENV_SKIP_LOCK
 
-  install.timeout                   number    PIPENV_TIMEOUT
+  env.install.timeout                   number    PIPENV_TIMEOUT
 
-  security.pyup_api_key             string    PIPENV_PYUP_API_KEY
+  env.security.pyup_api_key             string    PIPENV_PYUP_API_KEY
 
-  virtual_env.ignore_virtual_envs   boolean   PIPENV_IGNORE_VIRTUALENVS
+  env.virtual_env.ignore_virtual_envs   boolean   PIPENV_IGNORE_VIRTUALENVS
 
-  virtual_env.python_path           string    PIPENV_PYTHON
+  env.virtual_env.python_path           string    PIPENV_PYTHON
 
-  virtual_env.python_version        string    PIPENV_DEFAULT_PYTHON_VERSION
+  env.virtual_env.python_version        string    PIPENV_DEFAULT_PYTHON_VERSION
 
-  virtual_env.venv_in_project       boolean   PIPENV_VENV_IN_PROJECT
+  env.virtual_env.venv_in_project       boolean   PIPENV_VENV_IN_PROJECT
 
-  virtual_env.venv_name             string    PIPENV_CUSTOM_VENV_NAME
+  env.virtual_env.venv_name             string    PIPENV_CUSTOM_VENV_NAME
 
-  virtual_env.venv_path             string    PIPENV_VIRTUALENV
-  ---------------------------------------------------------------------------
+  env.virtual_env.venv_path             string    PIPENV_VIRTUALENV
+  -------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 
 USAGE                                                           *pipenv-usage*
