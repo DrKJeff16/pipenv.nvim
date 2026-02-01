@@ -5,8 +5,9 @@
 ---@field [3]? boolean
 ---@field [4]? string
 
----@class Pipenv.Util.OpenFloat
+---@class Pipenv.Util.OpenWinOpts
 ---@field border? 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
+---@field float? boolean
 ---@field ft? string
 ---@field modifiable? boolean
 ---@field split? 'right'|'left'|'below'|'above'
@@ -150,18 +151,15 @@ function M.trim_output(data)
 end
 
 ---@param data string
----@param opts? Pipenv.Util.OpenFloat
----@param float? boolean
+---@param opts? Pipenv.Util.OpenWinOpts
 ---@return integer bufnr
 ---@return integer win
-function M.open_float(data, opts, float)
+function M.open_win(data, opts)
   M.validate({
     data = { data, { 'string' } },
     opts = { opts, { 'table', 'nil' }, true },
-    float = { float, { 'boolean', 'nil' }, true },
   })
   opts = opts or {}
-  float = float ~= nil and float or true
 
   M.validate({
     border = { opts.border, { 'string', 'nil' }, true },
@@ -174,7 +172,6 @@ function M.open_float(data, opts, float)
     zindex = { opts.zindex, { 'number', 'nil' }, true },
   })
   opts.ft = opts.ft or 'log'
-  opts.modifiable = opts.modifiable ~= nil and opts.modifiable or false
   opts.height = (opts.height and opts.height > 0) and opts.height or 0.85
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
@@ -213,7 +210,7 @@ function M.open_float(data, opts, float)
   local col = vim.o.columns - width > 0 and math.floor((vim.o.columns - width) / 2) - 1 or 0
   local row = vim.o.lines - height > 0 and math.floor((vim.o.lines - height) / 2) - 1 or 0
   ---@type vim.api.keyset.win_config
-  local win_opts = not float and { split = 'right', vertical = true, style = 'minimal' }
+  local win_opts = not opts.float and { split = opts.split, style = 'minimal' }
     or {
       border = opts.border,
       height = height,

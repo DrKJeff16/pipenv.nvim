@@ -150,12 +150,13 @@ function M.list_installed()
     return
   end
 
-  Util.open_float(table.concat(installed, '\n'), {
+  Util.open_win(table.concat(installed, '\n'), {
     height = 0.7,
     width = 0.4,
     title = 'Installed Packages',
     split = Config.opts.output.split,
     border = Config.opts.output.border,
+    float = Config.opts.output.float,
     zindex = Config.opts.output.zindex,
   })
 end
@@ -179,14 +180,15 @@ function M.list_scripts()
     return
   end
 
-  Util.open_float(table.concat(data, '\n'), {
+  Util.open_win(table.concat(data, '\n'), {
     height = 0.4,
     width = 0.3,
     title = 'Scripts',
     split = Config.opts.output.split,
     border = Config.opts.output.border,
+    float = Config.opts.output.float,
     zindex = Config.opts.output.zindex,
-  }, Config.opts.output.float)
+  })
 end
 
 ---@param opts? Pipenv.GraphOpts
@@ -230,12 +232,13 @@ function M.graph(opts, timeout, cmd_opts)
     return
   end
   if sys_obj.stdout and sys_obj.stdout ~= '' then
-    Util.open_float(Util.trim_output(sys_obj.stdout), {
+    Util.open_win(Util.trim_output(sys_obj.stdout), {
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      title = cmd_str,
       split = Config.opts.output.split,
       border = Config.opts.output.border,
-      title = cmd_str,
+      float = Config.opts.output.float,
       zindex = Config.opts.output.zindex,
     })
     return
@@ -281,12 +284,13 @@ function M.lock(opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -341,12 +345,13 @@ function M.clean(opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -401,12 +406,13 @@ function M.verify(opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -466,12 +472,13 @@ function M.sync(opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -547,12 +554,13 @@ function M.install(packages, opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -628,12 +636,13 @@ function M.uninstall(packages, opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -707,12 +716,13 @@ function M.run(command, opts, timeout, cmd_opts)
   end
   if opts.verbose then
     if sys_obj.stdout and sys_obj.stdout ~= '' then
-      Util.open_float(Util.trim_output(sys_obj.stdout), {
+      Util.open_win(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        title = cmd_str,
         split = Config.opts.output.split,
         border = Config.opts.output.border,
-        title = cmd_str,
+        float = Config.opts.output.float,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -780,13 +790,14 @@ function M.requirements(opts, timeout, cmd_opts)
   sys_obj.stdout = Util.trim_output(sys_obj.stdout)
 
   if not opts.file or opts.file == '' then
-    Util.open_float(sys_obj.stdout, {
+    Util.open_win(sys_obj.stdout, {
       ft = 'requirements',
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      title = cmd_str,
       split = Config.opts.output.split,
       border = Config.opts.output.border,
-      title = cmd_str,
+      float = Config.opts.output.float,
       zindex = Config.opts.output.zindex,
     })
     return
