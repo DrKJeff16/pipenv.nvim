@@ -11,7 +11,7 @@
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#installation-and-dependencies
 --- ---
----@class PipenvOpts.InstallAndDeps
+---@class PipenvOpts.Env.InstallAndDeps
 ---If `false` then `$PIPENV_INSTALL_DEPENDENCIES` will be set to `0`.
 --- ---
 ---@field install_dependencies? boolean
@@ -36,7 +36,7 @@
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#virtual-environment
 --- ---
----@class PipenvOpts.VirtualEnv
+---@class PipenvOpts.Env.VirtualEnv
 ---If `true` then `$PIPENV_IGNORE_VIRTUALENVS` will be set to `1`.
 --- ---
 ---@field ignore_virtual_envs? boolean
@@ -58,14 +58,14 @@
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#security
 --- ---
----@class PipenvOpts.Security
+---@class PipenvOpts.Env.Security
 ---If non-nil then `$PIPENV_PYUP_Core_KEY` will be set to its value.
 --- ---
 ---@field pyup_api_key? string
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
 --- ---
----@class PipenvOpts.Behavior
+---@class PipenvOpts.Env.Behavior
 ---If `true` then `$PIPENV_DONT_LOAD_ENV` will be set to `1`.
 --- ---
 ---@field no_load_env? boolean
@@ -105,7 +105,7 @@
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
 --- ---
----@class PipenvOpts.FileLocations
+---@class PipenvOpts.Env.FileLocations
 ---If non-nil then `$PIPENV_CACHE_DIR` will be set to its value.
 --- ---
 ---@field cache_dir? string
@@ -116,13 +116,16 @@
 --- ---
 ---@field dotenv_location? string
 
+---@class PipenvOpts.Env
+---@field install? PipenvOpts.Env.InstallAndDeps
+---@field virtual_env? PipenvOpts.Env.VirtualEnv
+---@field file_location? PipenvOpts.Env.FileLocations
+---@field behavior? PipenvOpts.Env.Behavior
+---@field security? PipenvOpts.Env.Security
+
 ---@class PipenvOpts
 ---@field output? PipenvOpts.Output
----@field install? PipenvOpts.InstallAndDeps
----@field virtual_env? PipenvOpts.VirtualEnv
----@field file_location? PipenvOpts.FileLocations
----@field behavior? PipenvOpts.Behavior
----@field security? PipenvOpts.Security
+---@field env? PipenvOpts.Env
 
 local Util = require('pipenv.util')
 
@@ -135,11 +138,13 @@ M.env = {} ---@type table<string, string|number>
 function M.get_defaults()
   return { ---@type PipenvOpts
     output = { width = 0.85, height = 0.85, zindex = 100 },
-    install = {},
-    virtual_env = {},
-    file_location = {},
-    security = {},
-    behavior = {},
+    env = {
+      install = {},
+      virtual_env = {},
+      file_location = {},
+      security = {},
+      behavior = {},
+    },
   }
 end
 
@@ -193,10 +198,11 @@ function M.gen_env()
   }
 
   for key, T in pairs(types) do
-    if M.opts[key] then
+    if M.opts.env[key] then
       for k, t in pairs(T) do
-        if M.opts[key][k] ~= nil and type(M.opts[key][k]) == t.type then
-          M.env[t.var] = t.type == 'boolean' and (M.opts[key][k] and 1 or 0) or M.opts[key][k]
+        if M.opts.env[key][k] ~= nil and type(M.opts.env[key][k]) == t.type then
+          M.env[t.var] = t.type == 'boolean' and (M.opts.env[key][k] and 1 or 0)
+            or M.opts.env[key][k]
         end
       end
     end
