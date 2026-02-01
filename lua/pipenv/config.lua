@@ -127,8 +127,9 @@
 local Util = require('pipenv.util')
 
 ---@class Pipenv.Config
----@field env table<string, string|number>
 local M = {}
+
+M.env = {} ---@type table<string, string|number>
 
 ---@return PipenvOpts defaults
 function M.get_defaults()

@@ -1,4 +1,5 @@
 local Util = require('pipenv.util')
+local Config = require('pipenv.config')
 
 ---@class Pipenv.Health
 local M = {}
@@ -43,7 +44,29 @@ function M.check()
     end
   end
 
+  if not vim.tbl_isempty(Config.env) then
+    vim.health.start('Custom Env')
+    for var, val in pairs(Config.env) do
+      vim.health.info(('- `%s`: `%s`'):format(var, val))
+    end
+  end
+
   vim.health.start('Requirements')
+
+  local ver = vim.split(
+    vim.split(
+      vim.api.nvim_exec2('version', { output = true }).output,
+      '\n',
+      { trimempty = true, plain = true }
+    )[1],
+    ' ',
+    { plain = true }
+  )[2]
+  if vim.version().minor >= 9 then
+    vim.health.ok(('Neovim >= `v0.9.0` ==> `%s`'):format(ver))
+  else
+    vim.health.warn(('Neovim < `v0.9.0` ==> `%s`'):format(ver))
+  end
   for _, exe in ipairs({ { 'python', 2 }, { 'pipenv', 3 } }) do
     if not Util.executable(exe[1]) then
       vim.health.error(('`%s` not found in `PATH`!'):format(exe[1]))
@@ -56,7 +79,7 @@ function M.check()
   end
 
   vim.health.start('Environment')
-  vim.health.info("If warnings are raised in this section that doesn't mean the plugin won't work.")
+  vim.health.info("Warnings don't mean the plugin won't work.\n")
 
   local env = vim.fn.environ()
   local ret = false
