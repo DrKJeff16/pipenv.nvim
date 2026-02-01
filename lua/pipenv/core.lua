@@ -56,17 +56,19 @@ end
 
 ---@param cmd string[]
 ---@param timeout? integer
+---@param env? table<string, string|number>
 ---@return vim.SystemCompleted sys_obj
-local function run_cmd(cmd, timeout)
+local function run_cmd(cmd, timeout, env)
   Util.validate({
     cmd = { cmd, { 'table' } },
     timeout = { timeout, { 'number', 'nil' }, true },
+    env = { env, { 'table', 'nil' }, true },
   })
   timeout = (timeout and Util.is_int(timeout) and timeout > 0) and timeout or 300000
 
-  local opts = { text = true } ---@type vim.SystemOpts
+  local opts = { text = true, env = env or {} } ---@type vim.SystemOpts
   if Config.env and not vim.tbl_isempty(Config.env) then
-    opts.env = Config.env
+    opts.env = vim.tbl_deep_extend('keep', opts.env, Config.env)
   end
   return vim.system(cmd, opts):wait(timeout)
 end
