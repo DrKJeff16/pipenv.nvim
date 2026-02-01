@@ -59,7 +59,7 @@
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#security
 --- ---
 ---@class PipenvOpts.Security
----If non-nil then `$PIPENV_PYUP_API_KEY` will be set to its value.
+---If non-nil then `$PIPENV_PYUP_Core_KEY` will be set to its value.
 --- ---
 ---@field pyup_api_key? string
 
@@ -187,7 +187,7 @@ function M.gen_env()
       verbose = { type = 'boolean', var = 'PIPENV_VERBOSE' },
     },
     security = {
-      pyup_api_key = { type = 'string', var = 'PIPENV_PYUP_API_KEY' },
+      pyup_api_key = { type = 'string', var = 'PIPENV_PYUP_Core_KEY' },
     },
   }
 

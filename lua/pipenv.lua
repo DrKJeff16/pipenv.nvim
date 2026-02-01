@@ -1,7 +1,7 @@
 local ERROR = vim.log.levels.ERROR
 local Util = require('pipenv.util')
 local Config = require('pipenv.config')
-local Api = require('pipenv.api')
+local Core = require('pipenv.core')
 
 ---@class Pipenv
 local M = {}
@@ -18,16 +18,18 @@ function M.setup(opts)
   require('pipenv.commands').setup()
 end
 
-M.clean = Api.clean
-M.graph = Api.graph
-M.install = Api.install
-M.list_installed = Api.list_installed
-M.lock = Api.lock
-M.requirements = Api.requirements
-M.run = Api.run
-M.sync = Api.sync
-M.uninstall = Api.uninstall
-M.verify = Api.verify
+M.clean = Core.clean
+M.edit = Core.edit
+M.graph = Core.graph
+M.install = Core.install
+M.list_installed = Core.list_installed
+M.list_scripts = Core.list_scripts
+M.lock = Core.lock
+M.requirements = Core.requirements
+M.run = Core.run
+M.sync = Core.sync
+M.uninstall = Core.uninstall
+M.verify = Core.verify
 
 local Pipenv = setmetatable(M, { ---@type Pipenv
   __index = M,

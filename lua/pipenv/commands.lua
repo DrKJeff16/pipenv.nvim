@@ -16,7 +16,7 @@
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
-local Api = require('pipenv.api')
+local Core = require('pipenv.core')
 local Util = require('pipenv.util')
 
 ---@param lead string
@@ -153,7 +153,7 @@ function M.popup(valid, except, verbose, dev, file, python)
       end
       if item == 'run' then
         vim.ui.input({ prompt = 'Type the command to run' }, function(input)
-          Api.run(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+          Core.run(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
         end)
         return
       end
@@ -161,7 +161,7 @@ function M.popup(valid, except, verbose, dev, file, python)
         vim.ui.input(
           { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
           function(input)
-            Api[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+            Core[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
           end
         )
         return
@@ -172,7 +172,7 @@ function M.popup(valid, except, verbose, dev, file, python)
           item
         )
       then
-        Api[item](opts)
+        Core[item](opts)
         return
       end
     end
@@ -240,19 +240,19 @@ function M.setup()
       return
     end
     if subcommand == 'scripts' then
-      Api.list_scripts()
+      Core.list_scripts()
       return
     end
     if subcommand == 'list-installed' then
-      Api.list_installed()
+      Core.list_installed()
       return
     end
     if vim.list_contains({ 'graph', 'edit' }, subcommand) then
-      Api[subcommand]()
+      Core[subcommand]()
       return
     end
     if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
-      Api[subcommand]({ verbose = ctx.bang, python = python })
+      Core[subcommand]({ verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'run' then
@@ -267,22 +267,22 @@ function M.setup()
         end
       end
 
-      Api.run(cmds, { verbose = ctx.bang, python = python })
+      Core.run(cmds, { verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'sync' then
-      Api.sync({ dev = dev, verbose = ctx.bang, python = python })
+      Core.sync({ dev = dev, verbose = ctx.bang, python = python })
       return
     end
     if subcommand == 'install' then
-      Api.install(
+      Core.install(
         vim.tbl_isempty(subsubcmd) and nil or subsubcmd,
         { dev = dev, verbose = ctx.bang, python = python }
       )
       return
     end
     if subcommand == 'requirements' then
-      Api.requirements({ file = file, dev = dev, python = python })
+      Core.requirements({ file = file, dev = dev, python = python })
       return
     end
 

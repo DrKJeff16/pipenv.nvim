@@ -71,7 +71,7 @@ local function run_cmd(cmd, timeout)
   return vim.system(cmd, opts):wait(timeout)
 end
 
----@class Pipenv.API
+---@class Pipenv.Core
 local M = {}
 
 function M.edit()
@@ -750,12 +750,12 @@ function M.requirements(opts)
   end
 end
 
-local Api = setmetatable(M, { ---@type Pipenv.API
+local Core = setmetatable(M, { ---@type Pipenv.Core
   __index = M,
   __newindex = function()
     vim.notify('Pipenv module is read-only!', ERROR)
   end,
 })
 
-return Api
+return Core
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

@@ -231,23 +231,25 @@ Examples:
 ## API
 
 Most of the API is publicly available on the main module
-(see [api.lua](https://github.com/DrKJeff16/pipenv.nvim/blob/main/lua/pipenv/api.lua)).
-It contains all the operations used by the `:Pipenv` user command.
+[`pipenv.lua`](https://github.com/DrKJeff16/pipenv.nvim/blob/main/lua/pipenv.lua), which imports the
+utilities from [`core.lua`](https://github.com/DrKJeff16/pipenv.nvim/blob/main/lua/pipenv/core.lua).
 
-| Function               | Used By                  |
-|------------------------|--------------------------|
-| `Api.clean()`          | `:Pipenv clean`          |
-| `Api.edit()`           | `:Pipenv edit`           |
-| `Api.graph()`          | `:Pipenv graph`          |
-| `Api.install()`        | `:Pipenv install`        |
-| `Api.list_installed()` | `:Pipenv list-installed` |
-| `Api.list_scripts()`   | `:Pipenv scripts`        |
-| `Api.lock()`           | `:Pipenv lock`           |
-| `Api.requirements()`   | `:Pipenv requirements`   |
-| `Api.run()`            | `:Pipenv run`            |
-| `Api.sync()`           | `:Pipenv sync`           |
-| `Api.uninstall()`      | `:Pipenv uninstall`      |
-| `Api.verify()`         | `:Pipenv verify`         |
+The operations used by the `:Pipenv` user command are the following:
+
+| Subcommand               | Core Function Called                      |
+|--------------------------|-------------------------------------------|
+| `:Pipenv clean`          | `require('pipenv.core').clean()`          |
+| `:Pipenv edit`           | `require('pipenv.core').edit()`           |
+| `:Pipenv graph`          | `require('pipenv.core').graph()`          |
+| `:Pipenv install`        | `require('pipenv.core').install()`        |
+| `:Pipenv list-installed` | `require('pipenv.core').list_installed()` |
+| `:Pipenv scripts`        | `require('pipenv.core').list_scripts()`   |
+| `:Pipenv lock`           | `require('pipenv.core').lock()`           |
+| `:Pipenv requirements`   | `require('pipenv.core').requirements()`   |
+| `:Pipenv run`            | `require('pipenv.core').run()`            |
+| `:Pipenv sync`           | `require('pipenv.core').sync()`           |
+| `:Pipenv uninstall`      | `require('pipenv.core').uninstall()`      |
+| `:Pipenv verify`         | `require('pipenv.core').verify()`         |
 
 ---
 
