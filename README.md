@@ -76,11 +76,11 @@ require('pipenv').setup({
     zindex = 100, -- The `zindex` value of the output window
   },
   env = { -- See the `Customizing Pipenv` section
-    install = {},
-    virtual_env = {},
-    file_location = {},
-    security = {},
-    behavior = {},
+    -- install = {},
+    -- virtual_env = {},
+    -- file_location = {},
+    -- security = {},
+    -- behavior = {},
   },
 })
 ```

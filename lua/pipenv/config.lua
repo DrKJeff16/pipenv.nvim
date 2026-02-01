@@ -138,17 +138,16 @@ M.env = {} ---@type table<string, string|number>
 function M.get_defaults()
   return { ---@type PipenvOpts
     output = { width = 0.85, height = 0.85, zindex = 100 },
-    env = {
-      install = {},
-      virtual_env = {},
-      file_location = {},
-      security = {},
-      behavior = {},
-    },
+    env = {},
   }
 end
 
 function M.gen_env()
+  M.opts.env = M.opts.env or {}
+  if vim.tbl_isempty(M.opts.env) then
+    return
+  end
+
   ---@class Pipenv.EnvTypes
   ---@field install { type: 'string'|'boolean'|'number', var: string }
   ---@field virtual_env { type: 'string'|'boolean'|'number', var: string }
@@ -197,15 +196,28 @@ function M.gen_env()
     },
   }
 
+  local err = ''
   for key, T in pairs(types) do
-    if M.opts.env[key] then
+    local category = M.opts.env[key] or {}
+    if not vim.tbl_isempty(category) then
       for k, t in pairs(T) do
-        if M.opts.env[key][k] ~= nil and type(M.opts.env[key][k]) == t.type then
-          M.env[t.var] = t.type == 'boolean' and (M.opts.env[key][k] and 1 or 0)
-            or M.opts.env[key][k]
+        if category[k] ~= nil and type(category[k]) == t.type then
+          M.env[t.var] = t.type == 'boolean' and (category[k] and 1 or 0) or category[k]
+        elseif category[k] ~= nil and type(category[k]) ~= t.type then
+          err = ('%s%s- `env.%s.%s` is of incorrect type (`%s`). Ignoring.'):format(
+            err,
+            err == '' and '' or '\n',
+            key,
+            k,
+            type(category[k])
+          )
         end
       end
     end
+  end
+
+  if err ~= '' then
+    vim.notify(err, vim.log.levels.ERROR)
   end
 end
 
