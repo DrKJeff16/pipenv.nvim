@@ -1,4 +1,4 @@
-*pipenv.txt*           For NVIM >=v0.9.0          Last change: 2026 January 31
+*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 01
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -14,6 +14,8 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 
 - |pipenv-installation|
     - |pipenv-`lazy.nvim`|
+    - |pipenv-`pckr.nvim`|
+    - |pipenv-`paq-nvim`|
     - |pipenv-luarocks|
 - |pipenv-configuration|
     - |pipenv-customizing-pipenv|
@@ -35,6 +37,28 @@ LAZY.NVIM ~
       'DrKJeff16/pipenv.nvim',
       opts = {},
     }
+<
+
+
+PCKR.NVIM ~
+
+>lua
+    require('pckr').add({
+      {
+        'DrKJeff16/pipenv.nvim',
+        config = function()
+          require('pipenv').setup()
+        end,
+      },
+    })
+<
+
+
+PAQ-NVIM ~
+
+>lua
+    local paq = require('paq')
+    paq({ 'DrKJeff16/pipenv.nvim' })
 <
 
 
@@ -179,6 +203,7 @@ The valid subcommands are:
 WITHOUT SUBCOMMANDS ~
 
 
+
 The UI spawned when running without subcommands.You can run `:Pipenv[!]` without any of the subcommands listed above. This will
 open a UI prompting to do any of the valid Pipenv operations.
 
@@ -258,9 +283,11 @@ contains all the operations used by the `:Pipenv` user command.
   Function               Used By
   ---------------------- ------------------------
   Api.clean()            :Pipenv clean
+  Api.edit()             :Pipenv edit
   Api.graph()            :Pipenv graph
   Api.install()          :Pipenv install
   Api.list_installed()   :Pipenv list-installed
+  Api.list_scripts()     :Pipenv scripts
   Api.lock()             :Pipenv lock
   Api.requirements()     :Pipenv requirements
   Api.run()              :Pipenv run
