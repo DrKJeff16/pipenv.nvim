@@ -6,13 +6,16 @@
 ---@field [4]? string
 
 ---@class Pipenv.Util.OpenFloat
----@field title? string
 ---@field border? 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
 ---@field ft? string
 ---@field modifiable? boolean
----@field width? number
+---@field split? 'right'|'left'|'below'|'above'
+---@field title? string
 ---@field height? number
+---@field width? number
 ---@field zindex? integer
+
+local in_list = vim.list_contains
 
 ---@class Pipenv.Util
 local M = {}
@@ -27,7 +30,7 @@ function M.deep_clean(T, keys, reference)
   end
 
   for k, v in pairs(T) do
-    if not vim.list_contains(keys, k) or (type(v) == 'table' and type(reference[k]) ~= 'table') then
+    if not in_list(keys, k) or (type(v) == 'table' and type(reference[k]) ~= 'table') then
       T[k] = nil
     elseif type(v) == 'table' and type(reference[k]) == 'table' then
       T[k] = M.deep_clean(v, vim.tbl_keys(reference[k]), reference[k])
@@ -56,12 +59,12 @@ function M.format_per_type(t, data, sep, constraints)
     if not M.is_type('table', constraints) then
       return res
     end
-    if constraints ~= nil and vim.list_contains(constraints, data) then
+    if constraints ~= nil and in_list(constraints, data) then
       return res
     end
     return res, true
   end
-  if vim.list_contains({ 'number', 'boolean' }, t) then
+  if in_list({ 'number', 'boolean' }, t) then
     return ('%s`%s`'):format(sep, tostring(data))
   end
   if t == 'function' then
@@ -148,14 +151,17 @@ end
 
 ---@param data string
 ---@param opts? Pipenv.Util.OpenFloat
+---@param float? boolean
 ---@return integer bufnr
 ---@return integer win
-function M.open_float(data, opts)
+function M.open_float(data, opts, float)
   M.validate({
     data = { data, { 'string' } },
     opts = { opts, { 'table', 'nil' }, true },
+    float = { float, { 'boolean', 'nil' }, true },
   })
   opts = opts or {}
+  float = float ~= nil and float or true
 
   M.validate({
     border = { opts.border, { 'string', 'nil' }, true },
@@ -163,6 +169,7 @@ function M.open_float(data, opts)
     height = { opts.height, { 'number', 'nil' }, true },
     modifiable = { opts.modifiable, { 'boolean', 'nil' }, true },
     title = { opts.title, { 'string', 'nil' }, true },
+    split = { opts.split, { 'string', 'nil' }, true },
     width = { opts.width, { 'number', 'nil' }, true },
     zindex = { opts.zindex, { 'number', 'nil' }, true },
   })
@@ -174,10 +181,13 @@ function M.open_float(data, opts)
   opts.zindex = (opts.zindex and opts.zindex > 0 and M.is_int(opts.zindex)) and opts.zindex or 100
   opts.border = (
     opts.border
-    and vim.list_contains({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
+    and in_list({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
   )
       and opts.border
     or 'single'
+  opts.split = (opts.split and in_list({ 'above', 'below', 'left', 'right' }, opts.split))
+      and opts.split
+    or 'right'
 
   local bufnr = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_lines(
@@ -202,19 +212,22 @@ function M.open_float(data, opts)
 
   local col = vim.o.columns - width > 0 and math.floor((vim.o.columns - width) / 2) - 1 or 0
   local row = vim.o.lines - height > 0 and math.floor((vim.o.lines - height) / 2) - 1 or 0
-  local win = vim.api.nvim_open_win(bufnr, true, {
-    border = opts.border,
-    height = height,
-    width = width,
-    col = col,
-    row = row,
-    focusable = true,
-    relative = 'editor',
-    style = 'minimal',
-    title = opts.title,
-    title_pos = 'center',
-    zindex = opts.zindex,
-  })
+  ---@type vim.api.keyset.win_config
+  local win_opts = not float and { split = 'right', vertical = true, style = 'minimal' }
+    or {
+      border = opts.border,
+      height = height,
+      width = width,
+      col = col,
+      row = row,
+      focusable = true,
+      relative = 'editor',
+      style = 'minimal',
+      title = opts.title,
+      title_pos = 'center',
+      zindex = opts.zindex,
+    }
+  local win = vim.api.nvim_open_win(bufnr, true, win_opts)
 
   vim.api.nvim_set_option_value('filetype', opts.ft, { buf = bufnr })
   vim.api.nvim_set_option_value('fileencoding', 'utf-8', { buf = bufnr })
@@ -284,7 +297,7 @@ function M.dedup(T)
         return vim.deep_equal(val, v)
       end, { predicate = true })
     else
-      not_dup = not vim.list_contains(NT, v)
+      not_dup = not in_list(NT, v)
     end
     if not_dup then
       table.insert(NT, v)

@@ -1,127 +1,4 @@
----@class PipenvOpts.Output
----Can be a number between `0` and `1` (percentage) or a fixed width.
---- ---
----@field width? number
----Can be a number between `0` and `1` (percentage) or a fixed height.
---- ---
----@field height? number
----The `zindex` value of the output window.
---- ---
----@field zindex? integer
-
----For more info see https://pipenv.pypa.io/en/latest/configuration.html#installation-and-dependencies
---- ---
----@class PipenvOpts.Env.InstallAndDeps
----If `false` then `$PIPENV_INSTALL_DEPENDENCIES` will be set to `0`.
---- ---
----@field install_dependencies? boolean
----If `false` then `$PIPENV_RESOLVE_VCS` will be set to `0`.
---- ---
----@field resolve_vcs? boolean
----If `true` then `$PIPENV_SKIP_LOCK` will be set to `1`.
---- ---
----@field skip_lock? boolean
----If non-nil then `$PIPENV_PYPI_MIRROR` will be set to its value.
---- ---
----@field pypi_mirror? string
----Will set `$PIPENV_MAX_DEPTH` to its value.
---- ---
----@field max_depth? integer
----Will set `$PIPENV_INSTALL_TIMEOUT` to its value.
---- ---
----@field install_timeout? integer
----Will set `$PIPENV_TIMEOUT` to its value.
---- ---
----@field timeout? integer
-
----For more info see https://pipenv.pypa.io/en/latest/configuration.html#virtual-environment
---- ---
----@class PipenvOpts.Env.VirtualEnv
----If `true` then `$PIPENV_IGNORE_VIRTUALENVS` will be set to `1`.
---- ---
----@field ignore_virtual_envs? boolean
----If non-nil then `$PIPENV_PYTHON` will be set to its value.
---- ---
----@field python_path? string
----If non-nil then `$PIPENV_DEFAULT_PYTHON_VERSION` will be set to its value.
---- ---
----@field python_version? string
----If `true` then `$PIPENV_VENV_IN_PROJECT` will be set to `1`.
---- ---
----@field venv_in_project? boolean
----If non-nil then `$PIPENV_CUSTOM_VENV_NAME` will be set to its value.
---- ---
----@field venv_name? string
----If non-nil then `$PIPENV_VIRTUALENV` will be set to its value.
---- ---
----@field venv_path? string
-
----For more info see https://pipenv.pypa.io/en/latest/configuration.html#security
---- ---
----@class PipenvOpts.Env.Security
----If non-nil then `$PIPENV_PYUP_Core_KEY` will be set to its value.
---- ---
----@field pyup_api_key? string
-
----For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
---- ---
----@class PipenvOpts.Env.Behavior
----If `true` then `$PIPENV_DONT_LOAD_ENV` will be set to `1`.
---- ---
----@field no_load_env? boolean
----If `true` then `$PIPENV_DONT_USE_PYENV` will be set to `1`.
---- ---
----@field no_pyenv? boolean
----If `true` then `$PIPENV_DONT_USE_ASDF` will be set to `1`.
---- ---
----@field no_asdf? boolean
----If `true` then `$PIPENV_SHELL_FANCY` will be set to `1`.
---- ---
----@field fancy_shell? boolean
----If `true` then `$PIPENV_NOSPIN` will be set to `1`.
---- ---
----@field no_spin? boolean
----If `true` then `$PIPENV_QUIET` will be set to `1`.
---- ---
----@field quiet? boolean
----If `true` then `$PIPENV_VERBOSE` will be set to `1`.
---- ---
----@field verbose? boolean
----If `true` then `$PIPENV_YES` will be set to `1`.
---- ---
----@field auto_accept? boolean
----If `true` then `$PIPENV_IGNORE_PIPFILE` will be set to `1`.
---- ---
----@field ignore_pipfile? boolean
----Will set `$PIPENV_REQUESTS_TIMEOUT` to its value.
---- ---
----@field timeout? integer
----If `true` then `$PIPENV_CLEAR` will be set to `1`.
---- ---
----@field clear_cache? boolean
----If `true` then `$PIPENV_SITE_PACKAGES` will be set to `1`.
---- ---
----@field site_packages? boolean
-
----For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
---- ---
----@class PipenvOpts.Env.FileLocations
----If non-nil then `$PIPENV_CACHE_DIR` will be set to its value.
---- ---
----@field cache_dir? string
----If non-nil then `$PIPENV_PIPFILE` will be set to its value.
---- ---
----@field pipfile_path? string
----If non-nil then `$PIPENV_DOTENV_LOCATION` will be set to its value.
---- ---
----@field dotenv_location? string
-
----@class PipenvOpts.Env
----@field install? PipenvOpts.Env.InstallAndDeps
----@field virtual_env? PipenvOpts.Env.VirtualEnv
----@field file_location? PipenvOpts.Env.FileLocations
----@field behavior? PipenvOpts.Env.Behavior
----@field security? PipenvOpts.Env.Security
+---@module 'pipenv._meta'
 
 ---@class PipenvOpts
 ---@field output? PipenvOpts.Output
@@ -137,7 +14,14 @@ M.env = {} ---@type table<string, string|number>
 ---@return PipenvOpts defaults
 function M.get_defaults()
   return { ---@type PipenvOpts
-    output = { width = 0.85, height = 0.85, zindex = 100 },
+    output = {
+      float = true,
+      split = 'right',
+      border = 'single',
+      width = 0.85,
+      height = 0.85,
+      zindex = 100,
+    },
     env = {},
   }
 end

@@ -1,31 +1,4 @@
----@class Pipenv.CommandOpts
----@field verbose? boolean
----@field python? string
-
----@class Pipenv.RequirementsOpts
----@field dev? boolean
----@field file? string[]|string|nil
----@field python? string
-
----@class Pipenv.GraphOpts
----@field python? string
-
----@class Pipenv.SyncOpts: Pipenv.CommandOpts
----@field dev? boolean
-
----@class Pipenv.CleanOpts: Pipenv.CommandOpts
----@class Pipenv.InstallOpts: Pipenv.SyncOpts
----@class Pipenv.LockOpts: Pipenv.CommandOpts
----@class Pipenv.RunOpts: Pipenv.CommandOpts
----@class Pipenv.UninstallOpts: Pipenv.SyncOpts
----@class Pipenv.VerifyOpts: Pipenv.CommandOpts
-
----@class PipenvJsonPackage
----@field key string
----@field package_name string
----@field installed_version string
-
----@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
+---@module 'pipenv._meta'
 
 local Util = require('pipenv.util')
 local Config = require('pipenv.config')
@@ -56,20 +29,22 @@ end
 
 ---@param cmd string[]
 ---@param timeout? integer
----@param env? table<string, string|number>
+---@param opts? Pipenv.SystemOpts
 ---@return vim.SystemCompleted sys_obj
-local function run_cmd(cmd, timeout, env)
+local function run_cmd(cmd, timeout, opts)
   Util.validate({
     cmd = { cmd, { 'table' } },
     timeout = { timeout, { 'number', 'nil' }, true },
-    env = { env, { 'table', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
   })
   timeout = (timeout and Util.is_int(timeout) and timeout > 0) and timeout or 300000
+  opts = opts or {}
 
-  local opts = { text = true, env = env or {} } ---@type vim.SystemOpts
+  opts.text = opts.text ~= nil and opts.text or true
   if Config.env and not vim.tbl_isempty(Config.env) then
-    opts.env = vim.tbl_deep_extend('keep', opts.env, Config.env)
+    opts.env = vim.tbl_deep_extend('keep', opts.env or {}, Config.env)
   end
+
   return vim.system(cmd, opts):wait(timeout)
 end
 
@@ -138,13 +113,7 @@ end
 ---@return string[] installed
 function M.retrieve_installed()
   local sys_obj = run_cmd({ 'pipenv', 'graph', '--json' })
-  if sys_obj.code ~= 0 then
-    error(
-      (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr or 'Could not parse JSON graph!',
-      ERROR
-    )
-  end
-  if not sys_obj.stdout or sys_obj.stdout == '' then
+  if sys_obj.code ~= 0 or not sys_obj.stdout or sys_obj.stdout == '' then
     error(
       (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr or 'Could not parse JSON graph!',
       ERROR
@@ -185,6 +154,8 @@ function M.list_installed()
     height = 0.7,
     width = 0.4,
     title = 'Installed Packages',
+    split = Config.opts.output.split,
+    border = Config.opts.output.border,
     zindex = Config.opts.output.zindex,
   })
 end
@@ -212,12 +183,16 @@ function M.list_scripts()
     height = 0.4,
     width = 0.3,
     title = 'Scripts',
+    split = Config.opts.output.split,
+    border = Config.opts.output.border,
     zindex = Config.opts.output.zindex,
-  })
+  }, Config.opts.output.float)
 end
 
 ---@param opts? Pipenv.GraphOpts
-function M.graph(opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.graph(opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -226,8 +201,14 @@ function M.graph(opts)
     return
   end
 
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({ python = { opts.python, { 'string', 'nil' }, true } })
   opts.python = opts.python or nil
@@ -239,7 +220,7 @@ function M.graph(opts)
   end
   table.insert(cmd, 'graph')
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -252,6 +233,8 @@ function M.graph(opts)
     Util.open_float(Util.trim_output(sys_obj.stdout), {
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      split = Config.opts.output.split,
+      border = Config.opts.output.border,
       title = cmd_str,
       zindex = Config.opts.output.zindex,
     })
@@ -261,9 +244,17 @@ function M.graph(opts)
 end
 
 ---@param opts? Pipenv.LockOpts
-function M.lock(opts)
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.lock(opts, timeout, cmd_opts)
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
@@ -279,7 +270,7 @@ function M.lock(opts)
   end
   table.insert(cmd, 'lock')
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -293,6 +284,8 @@ function M.lock(opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -303,7 +296,9 @@ function M.lock(opts)
 end
 
 ---@param opts? Pipenv.CleanOpts
-function M.clean(opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.clean(opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -312,8 +307,14 @@ function M.clean(opts)
     return
   end
 
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
@@ -328,7 +329,8 @@ function M.clean(opts)
     table.insert(cmd, opts.python)
   end
   table.insert(cmd, 'clean')
-  local sys_obj = run_cmd(cmd)
+
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -342,6 +344,8 @@ function M.clean(opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -352,7 +356,9 @@ function M.clean(opts)
 end
 
 ---@param opts? Pipenv.VerifyOpts
-function M.verify(opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.verify(opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -361,8 +367,14 @@ function M.verify(opts)
     return
   end
 
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
@@ -377,7 +389,8 @@ function M.verify(opts)
     table.insert(cmd, opts.python)
   end
   table.insert(cmd, 'verify')
-  local sys_obj = run_cmd(cmd)
+
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -391,6 +404,8 @@ function M.verify(opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -401,7 +416,9 @@ function M.verify(opts)
 end
 
 ---@param opts? Pipenv.SyncOpts
-function M.sync(opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.sync(opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -410,8 +427,14 @@ function M.sync(opts)
     return
   end
 
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
@@ -432,7 +455,7 @@ function M.sync(opts)
     table.insert(cmd, '--dev')
   end
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -446,6 +469,8 @@ function M.sync(opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -457,7 +482,9 @@ end
 
 ---@param packages? string[]|string|nil
 ---@param opts? Pipenv.InstallOpts
-function M.install(packages, opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.install(packages, opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -466,9 +493,13 @@ function M.install(packages, opts)
   Util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   packages = packages or nil
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
@@ -505,7 +536,7 @@ function M.install(packages, opts)
     end
   end
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -519,6 +550,8 @@ function M.install(packages, opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -530,7 +563,9 @@ end
 
 ---@param packages string[]|string
 ---@param opts? Pipenv.UninstallOpts
-function M.uninstall(packages, opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.uninstall(packages, opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -542,8 +577,12 @@ function M.uninstall(packages, opts)
   Util.validate({
     packages = { packages, { 'string', 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
@@ -578,7 +617,7 @@ function M.uninstall(packages, opts)
     return
   end
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -592,6 +631,8 @@ function M.uninstall(packages, opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -603,7 +644,9 @@ end
 
 ---@param command string[]|string
 ---@param opts? Pipenv.RunOpts
-function M.run(command, opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.run(command, opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -615,8 +658,12 @@ function M.run(command, opts)
   Util.validate({
     command = { command, { 'string', 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
@@ -649,7 +696,7 @@ function M.run(command, opts)
     table.insert(cmd, 1, 'pipenv')
   end
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -663,6 +710,8 @@ function M.run(command, opts)
       Util.open_float(Util.trim_output(sys_obj.stdout), {
         height = Config.opts.output.height,
         width = Config.opts.output.width,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
         title = cmd_str,
         zindex = Config.opts.output.zindex,
       })
@@ -673,7 +722,9 @@ function M.run(command, opts)
 end
 
 ---@param opts? Pipenv.RequirementsOpts
-function M.requirements(opts)
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.requirements(opts, timeout, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
     return
@@ -684,8 +735,12 @@ function M.requirements(opts)
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
 
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
@@ -707,7 +762,7 @@ function M.requirements(opts)
     table.insert(cmd, '--dev')
   end
 
-  local sys_obj = run_cmd(cmd)
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
   local cmd_str = table.concat(cmd, ' ')
   local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
     or ('Error when running `%s`'):format(cmd_str)
@@ -729,6 +784,8 @@ function M.requirements(opts)
       ft = 'requirements',
       height = Config.opts.output.height,
       width = Config.opts.output.width,
+      split = Config.opts.output.split,
+      border = Config.opts.output.border,
       title = cmd_str,
       zindex = Config.opts.output.zindex,
     })
