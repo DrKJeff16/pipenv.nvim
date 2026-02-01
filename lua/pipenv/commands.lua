@@ -24,7 +24,12 @@ local Util = require('pipenv.util')
 ---@return string[] completions
 local function complete_fun(_, lead)
   local args = vim.split(lead, '%s+', { trimempty = false })
-  local subs = {
+  if args[1]:sub(args[1]:len()) == '!' and #args == 1 then
+    return {}
+  end
+
+  local subcmd, dev = false, false ---@type boolean, boolean
+  local subs = { ---@type string[]
     'clean',
     'edit',
     'graph',
@@ -39,21 +44,18 @@ local function complete_fun(_, lead)
     'uninstall',
     'verify',
   }
-
-  local subcmd, dev = false, false
   for _, sub in ipairs(args) do
     if in_list(subs, sub) then
       subcmd = true
-    end
-    if in_list({ 'dev=true', 'dev=false' }, sub) then
+    elseif in_list({ 'dev=true', 'dev=false' }, sub) then
       dev = true
     end
   end
-  if dev then
-    if not subcmd then
-      return { 'uninstall', 'install', 'requirements', 'sync' }
-    end
+  if dev and subcmd then
     return {}
+  end
+  if dev and not subcmd then
+    return { 'uninstall', 'install', 'requirements', 'sync' }
   end
   if not subcmd and not dev then
     return {
