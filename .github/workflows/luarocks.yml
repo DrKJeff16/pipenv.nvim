@@ -12,7 +12,7 @@ jobs:
       - name: LuaRocks Upload
         uses: nvim-neorocks/luarocks-tag-release@v7.2.0
         with:
-          version: "0.1.0"
+          version: "0.1.1"
           license: "MIT"
           detailed_description: |
             Manage Pipenv from within Neovim.
