@@ -79,9 +79,12 @@ These are the default options:
     require('pipenv').setup({
       -- Output window options (`:Pipenv!`)
       output = {
-        width = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed width
-        height = 0.85, -- Can be a number between `0` and `1` (percentage) or a fixed height
-        zindex = 100, -- The `zindex` value of the output window
+        float = true, -- Set to `false` if you don't want a floating window
+        split = 'right', -- right|left|above|below (only matters if `float` is `false`)
+        border = 'single', -- none|single|double|rounded|solid|shadow (only matters if `float` is `true`)
+        height = 0.85, -- A number between `0` and `1` (percentage) or a fixed height (only matters if `float` is `true`)
+        width = 0.85, -- A number between `0` and `1` (percentage) or a fixed width (only matters if `float` is `true`)
+        zindex = 100, -- The `zindex` value of the output window (only matters if `float` is `true`)
       },
       env = { -- See the `Customizing Pipenv` section
         -- install = {},
