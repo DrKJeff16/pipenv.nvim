@@ -1,4 +1,4 @@
-*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 01
+*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 02
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -18,10 +18,10 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
     - |pipenv-`paq-nvim`|
     - |pipenv-luarocks|
 - |pipenv-configuration|
-    - |pipenv-customizing-pipenv|
+    - |pipenv-pipenv-environment-variables|
 - |pipenv-usage|
-    - |pipenv-without-subcommands|
-    - |pipenv-with-subcommands|
+    - |pipenv-no-subcommands|
+    - |pipenv-subcommands|
 - |pipenv-api|
 - |pipenv-license|
 
@@ -97,15 +97,14 @@ These are the default options:
 <
 
 
-CUSTOMIZING PIPENV ~
+PIPENV ENVIRONMENT VARIABLES ~
 
 You can customize the environment variables used when executing Pipenv
 operations. By default no option is set as to not interfere with your
-environment variables.
+environment variables, but you may modify any listed in the table below.
 
-See the Pipenv Documentation
-<https://pipenv.pypa.io/en/latest/configuration.html#available-environment-variables>
-for more info.
+For more information consult the Pipenv Documentation
+<https://pipenv.pypa.io/en/latest/configuration.html#available-environment-variables>.
 
   -------------------------------------------------------------------------------
   Setup Option                          Type      Environment Variable
@@ -168,6 +167,34 @@ for more info.
 
   env.virtual_env.venv_path             string    PIPENV_VIRTUALENV
   -------------------------------------------------------------------------------
+Example:
+
+>lua
+    -- ARBITRARY EXAMPLE. DO NOT COPY AS-IS!
+    require('pipenv').setup({
+      env = {
+        behavior = {
+          auto_accept = true,
+          ignore_pipfile = true,
+        },
+        file_location = {
+          cache_dir = vim.fn.expand('~/.local/state/pipenv/cache'),
+        },
+        install = {
+          install_dependencies = false,
+          resolve_vcs = true,
+        },
+        security = {
+          pyup_api_key = '<API_KEY>',
+        },
+        virtual_env = {
+          venv_name = 'my_venv',
+          venv_path = vim.fn.expand('~/.cache/my-virtualenv'),
+        },
+      },
+    })
+<
+
 ------------------------------------------------------------------------------
 
 USAGE                                                           *pipenv-usage*
@@ -205,11 +232,10 @@ The valid subcommands are:
 - `verify`
 
 
-WITHOUT SUBCOMMANDS ~
+NO SUBCOMMANDS ~
 
 
-
-The UI spawned when running without subcommands.You can run `:Pipenv[!]` without any of the subcommands listed above. This will
+You can run `:Pipenv[!]` without any of the subcommands listed above. This will
 open a UI prompting to do any of the valid Pipenv operations.
 
 Keep in mind flags can still be passed to achieve the same effect for any
@@ -225,9 +251,10 @@ Examples:
 <
 
 
-WITH SUBCOMMANDS ~
+SUBCOMMANDS ~
 
-Below is a table specifying what flags are parsed.
+Below is a table specifying each subcommand, how many arguments does it take,
+what flags are valid for parsing and its description.
 
   -------------------------------------------------------------------------------------------------------------------
   Subcommand       Nargs    Verbose   Dev   File   Python   Description
@@ -251,8 +278,7 @@ Below is a table specifying what flags are parsed.
 
   requirements     *        [X]       [X]   [X]    [X]      Runs pipenv [--python <VERSION>] requirements [--dev]
 
-  run              1 or     [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] run ...
-                   more                                     
+  run              +        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] run ...
 
   sync             *        [X]       [X]   [ ]    [X]      Runs pipenv [--python <VERSION>] sync [--dev]
 

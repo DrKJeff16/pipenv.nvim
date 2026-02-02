@@ -14,10 +14,10 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
   - [`paq-nvim`](#paq-nvim)
   - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
-  - [Customizing Pipenv](#customizing-pipenv)
+  - [Pipenv Environment Variables](#pipenv-environment-variables)
 - [Usage](#usage)
-  - [Without Subcommands](#without-subcommands)
-  - [With Subcommands](#with-subcommands)
+  - [No Subcommands](#no-subcommands)
+  - [Subcommands](#subcommands)
 - [API](#api)
 - [License](#license)
 
@@ -88,12 +88,13 @@ require('pipenv').setup({
 })
 ```
 
-### Customizing Pipenv
+### Pipenv Environment Variables
 
 You can customize the environment variables used when executing Pipenv operations.
-By default no option is set as to not interfere with your environment variables.
+By default no option is set as to not interfere with your environment variables, but you may
+modify any listed in the table below.
 
-See the [Pipenv Documentation](https://pipenv.pypa.io/en/latest/configuration.html#available-environment-variables) for more info.
+For more information consult the [Pipenv Documentation](https://pipenv.pypa.io/en/latest/configuration.html#available-environment-variables).
 
 
 | Setup Option                          | Type      | Environment Variable            |
@@ -127,6 +128,34 @@ See the [Pipenv Documentation](https://pipenv.pypa.io/en/latest/configuration.ht
 | `env.virtual_env.venv_in_project`     | `boolean` | `PIPENV_VENV_IN_PROJECT`        |
 | `env.virtual_env.venv_name`           | `string`  | `PIPENV_CUSTOM_VENV_NAME`       |
 | `env.virtual_env.venv_path`           | `string`  | `PIPENV_VIRTUALENV`             |
+
+Example:
+
+```lua
+-- ARBITRARY EXAMPLE. DO NOT COPY AS-IS!
+require('pipenv').setup({
+  env = {
+    behavior = {
+      auto_accept = true,
+      ignore_pipfile = true,
+    },
+    file_location = {
+      cache_dir = vim.fn.expand('~/.local/state/pipenv/cache'),
+    },
+    install = {
+      install_dependencies = false,
+      resolve_vcs = true,
+    },
+    security = {
+      pyup_api_key = '<API_KEY>',
+    },
+    virtual_env = {
+      venv_name = 'my_venv',
+      venv_path = vim.fn.expand('~/.cache/my-virtualenv'),
+    },
+  },
+})
+```
 
 ---
 
@@ -162,22 +191,26 @@ The valid subcommands are:
 - `uninstall`
 - `verify`
 
-### Without Subcommands
+### No Subcommands
 
-<table>
-  <tr>
-    <td>
-      <p align="center">
-        <img
-        alt="Showcase"
-        src="https://github.com/user-attachments/assets/ff2d08f6-f70d-4dd4-9ea4-df18a78a9a56"
-        />
-        <br />
-        <em>The UI spawned when running without subcommands.</em>
-      </p>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <table>
+    <tr>
+      <td>
+        <p align="center">
+          <a href="#no-subcommands">
+            <img
+            alt="Showcase"
+            src="https://github.com/user-attachments/assets/ff2d08f6-f70d-4dd4-9ea4-df18a78a9a56"
+            />
+          </a>
+          <br />
+          <em>The UI spawned when running without subcommands.</em>
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 You can run `:Pipenv[!]` without any of the subcommands listed above. This will open a UI
 prompting to do any of the valid Pipenv operations.
@@ -194,9 +227,10 @@ Examples:
 :Pipenv! dev=true file=/path/to/file  " verbose=true, dev=true, file=/path/to/file, python=nil
 ```
 
-### With Subcommands
+### Subcommands
 
-Below is a table specifying what flags are parsed.
+Below is a table specifying each subcommand, how many arguments does it take,
+what flags are valid for parsing and its description.
 
 | Subcommand       | Nargs         | Verbose | Dev | File | Python | Description                                                    |
 |------------------|---------------|---------|-----|------|--------|----------------------------------------------------------------|
@@ -209,7 +243,7 @@ Below is a table specifying what flags are parsed.
 | `install`        | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...]`   |
 | `lock`           | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] lock`                        |
 | `requirements`   | `*`           | [X]     | [X] | [X]  | [X]    | Runs `pipenv [--python <VERSION>] requirements [--dev]`        |
-| `run`            | `1` or more   | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] run ...`                     |
+| `run`            | `+`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] run ...`                     |
 | `sync`           | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] sync [--dev]`                |
 | `uninstall`      | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] uninstall [--dev] [ARGS...]` |
 | `verify`         | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] verify`                      |
