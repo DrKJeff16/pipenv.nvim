@@ -34,11 +34,13 @@ function M.check()
   vim.health.ok('`pipenv.nvim` has been setup!')
 
   vim.health.start('Config')
-  for name, opt in pairs(require('pipenv.config').opts) do
+  for name, opt in pairs(Config.opts) do
+    ---@cast name string
+    ---@cast opt PipenvOpts.Env|PipenvOpts.Output
     if name ~= 'env' then
       local str, warning = Util.format_per_type(type(opt), opt)
       str = ('`%s`: %s'):format(name, str)
-      if Util.is_type('boolean', warning) and warning then
+      if warning ~= nil and warning then
         vim.health.warn(str)
       else
         vim.health.ok(str)
@@ -67,7 +69,7 @@ function M.check()
   if vim.version().minor >= 9 then
     vim.health.ok(('Neovim >= `v0.9.0` ==> `%s`'):format(ver))
   else
-    vim.health.warn(('Neovim < `v0.9.0` ==> `%s`'):format(ver))
+    vim.health.warn(('Neovim < `v0.9.0` ==> `%s`\nThe plugin will not be stable!'):format(ver))
   end
   for _, exe in ipairs({ { 'python', 2 }, { 'pipenv', 3 } }) do
     if not Util.executable(exe[1]) then
@@ -81,17 +83,20 @@ function M.check()
   end
 
   vim.health.start('Environment')
-  vim.health.info("Warnings don't mean the plugin won't work.\n")
 
   local env = vim.fn.environ()
+  local pipenv_active = vim.fn.has_key(env, 'PIPENV_ACTIVE') and env.PIPENV_ACTIVE == '1'
+  local virtual_env = vim.fn.has_key(env, 'VIRTUAL_ENV') and env.VIRTUAL_ENV ~= ''
   local ret = false
-  if not vim.fn.has_key(env, 'PIPENV_ACTIVE') or env.PIPENV_ACTIVE ~= '1' then
-    vim.health.warn('`$PIPENV_ACTIVE` not set!')
+  if not (pipenv_active and virtual_env) then
+    vim.health.info("Warnings don't mean the plugin won't work.\n")
     ret = true
   end
-  if not vim.fn.has_key(env, 'VIRTUAL_ENV') or env.VIRTUAL_ENV ~= '1' then
+  if not pipenv_active then
+    vim.health.warn('`$PIPENV_ACTIVE` not set!')
+  end
+  if not virtual_env then
     vim.health.warn('`$VIRTUAL_ENV` not set!')
-    ret = true
   end
   if ret then
     return
