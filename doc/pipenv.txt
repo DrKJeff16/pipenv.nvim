@@ -1,4 +1,4 @@
-*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 02
+*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 04
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -223,6 +223,7 @@ The valid subcommands are:
 - `help`
 - `install`
 - `list-installed`
+- `list-scripts`
 - `lock`
 - `requirements`
 - `run`
@@ -265,16 +266,18 @@ what flags are valid for parsing and its description.
 
   list-installed   0        [ ]       [ ]   [ ]    [ ]      Lists the installed packages in a window
 
-  scripts          0        [ ]       [ ]   [ ]    [ ]      Lists the defined scripts in the Pipfile
+  list-scripts     0        [ ]       [ ]   [ ]    [ ]      Lists the defined scripts in the Pipfile
 
-  graph            0        [ ]       [ ]   [ ]    [X]      Returns the output of pipenv [--python <VERSION>] graph
+  scripts          *        [ ]       [ ]   [ ]    [X]      Returns the output of pipenv [--python <VERSION>] scripts
 
-  clean            0        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] clean
+  graph            *        [ ]       [ ]   [ ]    [X]      Returns the output of pipenv [--python <VERSION>] graph
+
+  clean            *        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] clean
 
   install          *        [X]       [X]   [ ]    [X]      Runs
                                                             pipenv [--python <VERSION>] install [--dev] [ARGS...]
 
-  lock             0        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] lock
+  lock             *        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] lock
 
   requirements     *        [X]       [X]   [X]    [X]      Runs pipenv [--python <VERSION>] requirements [--dev]
 
@@ -285,7 +288,7 @@ what flags are valid for parsing and its description.
   uninstall        *        [X]       [X]   [ ]    [X]      Runs
                                                             pipenv [--python <VERSION>] uninstall [--dev] [ARGS...]
 
-  verify           0        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] verify
+  verify           *        [X]       [ ]   [ ]    [X]      Runs pipenv [--python <VERSION>] verify
   -------------------------------------------------------------------------------------------------------------------
 Examples:
 
