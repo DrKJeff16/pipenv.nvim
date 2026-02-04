@@ -112,21 +112,22 @@ function M.cmd_usage(level)
   vim.notify(msg, level)
 end
 
+---@class Pipenv.Util.PopupOpts
+---@field verbose? boolean
+---@field dev? boolean
+---@field file? string
+---@field python? string
+
 ---@param valid string[]
 ---@param except string[]
----@param verbose boolean
----@param dev boolean
----@param file nil|string
----@param python nil|string
-function M.popup(valid, except, verbose, dev, file, python)
+---@param opts? Pipenv.Util.PopupOpts
+function M.popup(valid, except, opts)
   Util.validate({
     valid = { valid, { 'table' } },
     except = { except, { 'table' } },
-    verbose = { verbose, { 'boolean' } },
-    dev = { dev, { 'boolean' } },
-    file = { file, { 'string', 'nil' }, true },
-    python = { python, { 'string', 'nil' }, true },
+    opts = { opts, { 'table', 'nil' }, true },
   })
+  opts = opts or {}
 
   local new_valid = {}
   for _, v in ipairs(valid) do
@@ -135,7 +136,6 @@ function M.popup(valid, except, verbose, dev, file, python)
     end
   end
 
-  local opts = { verbose = verbose, dev = dev, file = file, python = python }
   vim.ui.select(
     new_valid,
     { prompt = 'Select your operation:' },
@@ -215,7 +215,7 @@ function M.setup()
             python = subsubcommand[2]
           end
         end
-      elseif in_list(valid, arg) and not subcommand then
+      elseif not subcommand then
         subcommand = arg ---@type Pipenv.ValidOps
       else
         table.insert(subsubcmd, arg)
@@ -223,7 +223,12 @@ function M.setup()
     end
 
     if not subcommand then
-      M.popup(valid, { 'help', 'list-installed' }, ctx.bang, dev, file, python)
+      M.popup(valid, { 'help', 'list-installed' }, {
+        verbose = ctx.bang,
+        dev = dev,
+        file = file,
+        python = python,
+      })
       return
     end
 
