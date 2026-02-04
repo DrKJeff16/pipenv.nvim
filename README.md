@@ -183,6 +183,7 @@ The valid subcommands are:
 - `help`
 - `install`
 - `list-installed`
+- `list-scripts`
 - `lock`
 - `requirements`
 - `run`
@@ -237,16 +238,17 @@ what flags are valid for parsing and its description.
 | `help`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Prints the usage message                                       |
 | `edit`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Edit the `Pipfile` or create a blank one if none exists        |
 | `list-installed` | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the installed packages in a window                       |
-| `scripts`        | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the defined scripts in the Pipfile                       |
-| `graph`          | `0`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv [--python <VERSION>] graph`      |
-| `clean`          | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] clean`                       |
+| `list-scripts`   | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the defined scripts in the Pipfile                       |
+| `scripts`        | `*`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv [--python <VERSION>] scripts`    |
+| `graph`          | `*`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv [--python <VERSION>] graph`      |
+| `clean`          | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] clean`                       |
 | `install`        | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...]`   |
-| `lock`           | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] lock`                        |
+| `lock`           | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] lock`                        |
 | `requirements`   | `*`           | [X]     | [X] | [X]  | [X]    | Runs `pipenv [--python <VERSION>] requirements [--dev]`        |
 | `run`            | `+`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] run ...`                     |
 | `sync`           | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] sync [--dev]`                |
 | `uninstall`      | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] uninstall [--dev] [ARGS...]` |
-| `verify`         | `0`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] verify`                      |
+| `verify`         | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] verify`                      |
 
 
 Examples:
