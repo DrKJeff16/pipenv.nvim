@@ -462,7 +462,7 @@ function M.lstrip(char, str)
     str = { str, { 'string' } },
   })
 
-  if str == '' or not vim.startswith(str, char) then
+  if str == '' then
     return str
   end
 
@@ -477,10 +477,14 @@ function M.lstrip(char, str)
   end
 
   ---@cast char string
+  if not vim.startswith(str, char) or char:len() > str:len() then
+    return str
+  end
+
   local i, len, new_str = 1, str:len(), ''
   local other = false
-  while i <= len + 1 do
-    if str:sub(i, i) ~= char and not other then
+  while i <= len and i + char:len() - 1 <= len do
+    if str:sub(i, i + char:len() - 1) ~= char and not other then
       other = true
     end
     if other then
@@ -517,12 +521,11 @@ function M.rstrip(char, str)
   end
 
   ---@cast char string
-  str = str:reverse()
-
-  if not vim.startswith(str, char) then
-    return str:reverse()
+  if not vim.startswith(str:reverse(), char) or char:len() > str:len() then
+    return str
   end
-  return M.lstrip(char, str):reverse()
+
+  return M.lstrip(char, str:reverse()):reverse()
 end
 
 ---Strip given a leading string (or list of strings) within a string, if any, bidirectionally.
@@ -551,6 +554,10 @@ function M.strip(char, str)
   end
 
   ---@cast char string
+  if char:len() > str:len() then
+    return str
+  end
+
   return M.rstrip(char, M.lstrip(char, str))
 end
 
