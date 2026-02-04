@@ -155,6 +155,7 @@
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
 ---@class Pipenv.LockOpts: Pipenv.CommandOpts
 ---@class Pipenv.RunOpts: Pipenv.CommandOpts
+---@class Pipenv.ScriptsOpts: Pipenv.GraphOpts
 ---@class Pipenv.UninstallOpts: Pipenv.SyncOpts
 ---@class Pipenv.VerifyOpts: Pipenv.CommandOpts
 

@@ -28,6 +28,7 @@ M.lock = Core.lock
 M.requirements = Core.requirements
 M.run = Core.run
 M.sync = Core.sync
+M.scripts = Core.scripts
 M.uninstall = Core.uninstall
 M.verify = Core.verify
 

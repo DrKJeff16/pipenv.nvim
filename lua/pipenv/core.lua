@@ -487,6 +487,61 @@ function M.sync(opts, timeout, cmd_opts)
   end
 end
 
+---@param opts? Pipenv.ScriptsOpts
+---@param timeout? integer
+---@param cmd_opts? Pipenv.SystemOpts
+function M.scripts(opts, timeout, cmd_opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+  if not has_pipfile() then
+    return
+  end
+
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    timeout = { timeout, { 'number', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
+  opts = opts or {}
+  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  cmd_opts = cmd_opts or {}
+
+  Util.validate({ python = { opts.python, { 'string', 'nil' }, true } })
+  opts.python = opts.python or nil
+
+  local cmd = { 'pipenv' }
+  if opts.python and opts.python ~= '' then
+    table.insert(cmd, '--python')
+    table.insert(cmd, opts.python)
+  end
+  table.insert(cmd, 'scripts')
+
+  local sys_obj = run_cmd(cmd, timeout, cmd_opts)
+  local cmd_str = table.concat(cmd, ' ')
+  local err = (sys_obj.stderr and sys_obj.stderr ~= '') and sys_obj.stderr
+    or ('Error when running `%s`'):format(cmd_str)
+
+  if sys_obj.code ~= 0 then
+    vim.notify(err, ERROR)
+    return
+  end
+  if sys_obj.stdout and sys_obj.stdout ~= '' then
+    Util.open_win(Util.trim_output(sys_obj.stdout), {
+      height = Config.opts.output.height,
+      width = Config.opts.output.width,
+      title = cmd_str,
+      split = Config.opts.output.split,
+      border = Config.opts.output.border,
+      float = Config.opts.output.float,
+      zindex = Config.opts.output.zindex,
+    })
+    return
+  end
+  vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
+end
+
 ---@param packages? string[]|string|nil
 ---@param opts? Pipenv.InstallOpts
 ---@param timeout? integer

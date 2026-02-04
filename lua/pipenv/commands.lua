@@ -5,6 +5,7 @@
 ---|'help'
 ---|'install'
 ---|'list-installed'
+---|'list-scripts'
 ---|'lock'
 ---|'requirements'
 ---|'run'
@@ -36,6 +37,7 @@ local function complete_fun(_, lead)
     'help',
     'install',
     'list-installed',
+    'list-scripts',
     'lock',
     'requirements',
     'run',
@@ -67,6 +69,7 @@ local function complete_fun(_, lead)
       'help',
       'install',
       'list-installed',
+      'list-scripts',
       'lock',
       'requirements',
       'run',
@@ -98,16 +101,18 @@ function M.cmd_usage(level)
 
       :Pipenv help
       :Pipenv list-installed
-      :Pipenv scripts
+      :Pipenv list-scripts
 
-      :Pipenv graph
-      :Pipenv[!] clean
-      :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false]
-      :Pipenv[!] lock
-      :Pipenv requirements [dev=true|false] [file=/path/to/file]
-      :Pipenv[!] run <command> [<args> [...]\]
-      :Pipenv[!] sync [dev=true|false]
-      :Pipenv[!] verify]]
+      :Pipenv graph [python=PYTHON_VERSION]
+      :Pipenv scripts [python=PYTHON_VERSION]
+      :Pipenv[!] clean [python=PYTHON_VERSION]
+      :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false] [python=PYTHON_VERSION]
+      :Pipenv[!] lock [python=PYTHON_VERSION]
+      :Pipenv requirements [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION]
+      :Pipenv[!] run <command> [<args> [...]\] [python=PYTHON_VERSION]
+      :Pipenv[!] sync [dev=true|false] [python=PYTHON_VERSION]
+      :Pipenv[!] verify [python=PYTHON_VERSION]
+      ]]
 
   vim.notify(msg, level)
 end
@@ -185,6 +190,7 @@ function M.setup()
       'install',
       'list',
       'list-installed',
+      'list-scripts',
       'lock',
       'requirements',
       'run',
@@ -213,6 +219,8 @@ function M.setup()
             file = subsubcommand[2]
           elseif subsubcommand[1] == 'python' then
             python = subsubcommand[2]
+          else
+            M.cmd_usage(WARN)
           end
         end
       elseif not subcommand then
@@ -233,42 +241,11 @@ function M.setup()
     end
 
     if subcommand == 'help' then
-      M.cmd_usage(INFO)
-      return
-    end
-    if subcommand == 'scripts' then
-      Core.list_scripts()
-      return
-    end
-    if subcommand == 'list-installed' then
-      Core.list_installed()
-      return
-    end
-    if in_list({ 'graph', 'edit' }, subcommand) then
-      Core[subcommand]()
-      return
-    end
-    if in_list({ 'verify', 'clean', 'lock' }, subcommand) then
-      Core[subcommand]({ verbose = ctx.bang, python = python })
-      return
-    end
-    if subcommand == 'run' then
-      if #ctx.fargs == 1 then
+      if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
       end
-      local cmds = {}
-      for i, cmd in ipairs(ctx.fargs) do
-        if i > 1 then
-          table.insert(cmds, cmd)
-        end
-      end
-
-      Core.run(cmds, { verbose = ctx.bang, python = python })
-      return
-    end
-    if subcommand == 'sync' then
-      Core.sync({ dev = dev, verbose = ctx.bang, python = python })
+      M.cmd_usage(INFO)
       return
     end
     if subcommand == 'install' then
@@ -278,7 +255,66 @@ function M.setup()
       )
       return
     end
+    if subcommand == 'list-scripts' then
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core.list_scripts()
+      return
+    end
+    if subcommand == 'list-installed' then
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core.list_installed()
+      return
+    end
+    if subcommand == 'edit' then
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core.edit()
+      return
+    end
+    if in_list({ 'graph', 'scripts' }, subcommand) then
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core[subcommand]({ python = python })
+      return
+    end
+    if in_list({ 'verify', 'clean', 'lock' }, subcommand) then
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core[subcommand]({ verbose = ctx.bang, python = python })
+      return
+    end
+    if subcommand == 'run' then
+      if vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+
+      Core.run(subsubcmd, { verbose = ctx.bang, python = python })
+      return
+    end
+    if subcommand == 'sync' then
+      if vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+      end
+      Core.sync({ dev = dev, verbose = ctx.bang, python = python })
+      return
+    end
     if subcommand == 'requirements' then
+      if vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+      end
       Core.requirements({ file = file, dev = dev, python = python })
       return
     end
