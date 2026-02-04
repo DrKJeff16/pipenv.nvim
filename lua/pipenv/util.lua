@@ -209,14 +209,14 @@ function M.open_win(data, opts)
 
   local col = vim.o.columns - width > 0 and math.floor((vim.o.columns - width) / 2) - 1 or 0
   local row = vim.o.lines - height > 0 and math.floor((vim.o.lines - height) / 2) - 1 or 0
-  ---@type vim.api.keyset.win_config
-  local win_opts = not opts.float and { split = opts.split, style = 'minimal' }
-    or {
-      border = opts.border,
+  local win_opts = { split = opts.split, style = 'minimal' } ---@type vim.api.keyset.win_config
+  if opts.float then
+    win_opts = {
       height = height,
       width = width,
       col = col,
       row = row,
+      border = opts.border,
       focusable = true,
       relative = 'editor',
       style = 'minimal',
@@ -224,6 +224,7 @@ function M.open_win(data, opts)
       title_pos = 'center',
       zindex = opts.zindex,
     }
+  end
   local win = vim.api.nvim_open_win(bufnr, true, win_opts)
 
   vim.api.nvim_set_option_value('filetype', opts.ft, { buf = bufnr })
