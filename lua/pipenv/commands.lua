@@ -266,6 +266,7 @@ function M.setup()
             python = subsubcommand[2]
           else
             M.cmd_usage(WARN)
+            return
           end
         end
       elseif not subcommand then
@@ -356,16 +357,18 @@ function M.setup()
     end
     if vim.list_contains({ 'sync', 'upgrade' }, subcommand) then
       ---@cast subcommand 'sync'|'upgrade'
-      if vim.tbl_isempty(subsubcmd) then
+      if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
+        return
       end
       Core[subcommand]({ dev = dev, verbose = ctx.bang, python = python, pre = pre })
       return
     end
     if subcommand == 'requirements' then
       ---@cast subcommand 'requirements'
-      if vim.tbl_isempty(subsubcmd) then
+      if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
+        return
       end
       Core.requirements({ file = file, dev = dev, python = python })
       return
