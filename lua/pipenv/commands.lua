@@ -12,6 +12,7 @@
 ---|'scripts'
 ---|'sync'
 ---|'uninstall'
+---|'upgrade'
 ---|'verify'
 
 local in_list = vim.list_contains
@@ -29,7 +30,7 @@ local function complete_fun(_, lead)
     return {}
   end
 
-  local subcmd, dev = false, false ---@type boolean, boolean
+  local subcmd, dev, pre = false, false, false ---@type boolean, boolean, boolean
   local subs = { ---@type string[]
     'clean',
     'edit',
@@ -44,6 +45,7 @@ local function complete_fun(_, lead)
     'scripts',
     'sync',
     'uninstall',
+    'upgrade',
     'verify',
   }
   for _, sub in ipairs(args) do
@@ -51,18 +53,28 @@ local function complete_fun(_, lead)
       subcmd = true
     elseif in_list({ 'dev=true', 'dev=false' }, sub) then
       dev = true
+    elseif in_list({ 'pre=true', 'pre=false' }, sub) then
+      pre = true
     end
   end
-  if dev and subcmd then
+  if dev and subcmd and pre then
     return {}
   end
-  if dev and not subcmd then
-    return { 'uninstall', 'install', 'requirements', 'sync' }
+  if dev and not subcmd and pre then
+    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
   end
-  if not subcmd and not dev then
+  if dev and not (subcmd or pre) then
+    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
+  end
+  if pre and not (subcmd or dev) then
+    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
+  end
+  if not (subcmd or dev or pre) then
     return {
       'dev=true',
       'dev=false',
+      'pre=true',
+      'pre=false',
       'clean',
       'edit',
       'graph',
@@ -79,10 +91,38 @@ local function complete_fun(_, lead)
       'verify',
     }
   end
+  if not (subcmd or pre) and dev then
+    return {
+      'pre=true',
+      'pre=false',
+      'install',
+      'lock',
+      'sync',
+      'upgrade',
+      'uninstall',
+    }
+  end
+  if not (subcmd or dev) and pre then
+    return {
+      'dev=true',
+      'dev=false',
+      'install',
+      'lock',
+      'sync',
+      'upgrade',
+      'uninstall',
+    }
+  end
   for _, sub in ipairs(args) do
     if subcmd and in_list({ 'uninstall', 'install', 'requirements', 'sync' }, sub) then
-      if not dev then
+      if not (dev or pre) then
+        return { 'dev=true', 'dev=false', 'pre=true', 'pre=false' }
+      end
+      if not dev and pre then
         return { 'dev=true', 'dev=false' }
+      end
+      if not pre and dev then
+        return { 'pre=true', 'pre=false' }
       end
     end
   end
@@ -118,8 +158,9 @@ function M.cmd_usage(level)
 end
 
 ---@class Pipenv.Util.PopupOpts
----@field verbose? boolean
 ---@field dev? boolean
+---@field pre? boolean
+---@field verbose? boolean
 ---@field file? string
 ---@field python? string
 
@@ -200,7 +241,9 @@ function M.setup()
       'verify',
     }
 
-    local dev, file, python, subcommand, subsubcmd = false, nil, nil, nil, {} ---@type boolean, nil|string, nil|string, string|Pipenv.ValidOps|nil, string[]
+    local dev, pre = false, false ---@type boolean, boolean
+    local file, python, subcommand = nil, nil, nil ---@type nil|string, nil|string, string|Pipenv.ValidOps|nil
+    local subsubcmd = {} ---@type string[]
     for _, arg in ipairs(ctx.fargs) do
       if arg:find('=') then
         local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = false })
@@ -210,11 +253,13 @@ function M.setup()
               M.cmd_usage(WARN)
               return
             end
-            if subsubcommand[2] == 'true' then
-              dev = true
-            else
-              dev = false
+            dev = subsubcommand[2] == 'true' and true or false
+          elseif subsubcommand[1] == 'pre' then
+            if not in_list({ 'true', 'false' }, subsubcommand[2]) then
+              M.cmd_usage(WARN)
+              return
             end
+            pre = subsubcommand[2] == 'true' and true or false
           elseif subsubcommand[1] == 'file' then
             file = subsubcommand[2]
           elseif subsubcommand[1] == 'python' then
@@ -234,6 +279,7 @@ function M.setup()
       M.popup(valid, { 'help', 'list-installed' }, {
         verbose = ctx.bang,
         dev = dev,
+        pre = pre,
         file = file,
         python = python,
       })
@@ -241,21 +287,20 @@ function M.setup()
     end
 
     if subcommand == 'help' then
-      if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
-        return
-      end
+      ---@cast subcommand 'help'
       M.cmd_usage(INFO)
       return
     end
     if subcommand == 'install' then
+      ---@cast subcommand 'install'
       Core.install(
         vim.tbl_isempty(subsubcmd) and nil or subsubcmd,
-        { dev = dev, verbose = ctx.bang, python = python }
+        { dev = dev, verbose = ctx.bang, python = python, pre = pre }
       )
       return
     end
     if subcommand == 'list-scripts' then
+      ---@cast subcommand 'list-scripts'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -264,6 +309,7 @@ function M.setup()
       return
     end
     if subcommand == 'list-installed' then
+      ---@cast subcommand 'list-installed'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -272,6 +318,7 @@ function M.setup()
       return
     end
     if subcommand == 'edit' then
+      ---@cast subcommand 'edit'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -280,6 +327,7 @@ function M.setup()
       return
     end
     if in_list({ 'graph', 'scripts' }, subcommand) then
+      ---@cast subcommand 'graph'|'scripts'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -288,6 +336,7 @@ function M.setup()
       return
     end
     if in_list({ 'verify', 'clean', 'lock' }, subcommand) then
+      ---@cast subcommand 'verify'|'clean'|'lock'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -296,6 +345,7 @@ function M.setup()
       return
     end
     if subcommand == 'run' then
+      ---@cast subcommand 'run'
       if vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return
@@ -304,14 +354,16 @@ function M.setup()
       Core.run(subsubcmd, { verbose = ctx.bang, python = python })
       return
     end
-    if subcommand == 'sync' then
+    if vim.list_contains({ 'sync', 'upgrade' }, subcommand) then
+      ---@cast subcommand 'sync'|'upgrade'
       if vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
       end
-      Core.sync({ dev = dev, verbose = ctx.bang, python = python })
+      Core[subcommand]({ dev = dev, verbose = ctx.bang, python = python, pre = pre })
       return
     end
     if subcommand == 'requirements' then
+      ---@cast subcommand 'requirements'
       if vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
       end

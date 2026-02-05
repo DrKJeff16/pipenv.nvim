@@ -150,10 +150,13 @@
 
 ---@class Pipenv.SyncOpts: Pipenv.CommandOpts
 ---@field dev? boolean
+---@field pre? boolean
+
+---@class Pipenv.UpgradeOpts: Pipenv.SyncOpts
 
 ---@class Pipenv.CleanOpts: Pipenv.CommandOpts
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
----@class Pipenv.LockOpts: Pipenv.CommandOpts
+---@class Pipenv.LockOpts: Pipenv.SyncOpts
 ---@class Pipenv.RunOpts: Pipenv.CommandOpts
 ---@class Pipenv.ScriptsOpts: Pipenv.GraphOpts
 ---@class Pipenv.UninstallOpts: Pipenv.SyncOpts

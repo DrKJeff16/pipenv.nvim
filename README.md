@@ -56,6 +56,9 @@ paq({ 'DrKJeff16/pipenv.nvim' })
 
 ### LuaRocks
 
+You can also install this plugin through LuaRocks
+from [the `pipenv.nvim` module](https://luarocks.org/modules/drkjeff16/pipenv.nvim).
+
 ```bash
 luarocks install pipenv.nvim         # Global Install
 luarocks install --local pipenv.nvim # Local Install
@@ -168,9 +171,10 @@ To enable verbose mode in any operation simply add a `!` to the command (`:Pipen
 You can also pass these flags:
 
 - `dev=true|false` - The command is called with a `--dev` flag.
-- `file=</path/to/file>` - The command output will be written to the target `file`.
-- `python=<PYTHON_VERSION>` - The python version for Pipenv to use. Must be formatted correctly
-  (e.g. `python=3.10`, `python=3.13`, ...)
+- `pre=true|false` - The command is called with a `--pre` flag.
+- `file=/path/to/file` - The command output will be written to the target `file`.
+- `python=PYTHON_VERSION` - The python version for Pipenv to use. Must be formatted correctly
+  (e.g. `python=3.10`, `python=3.13`, ...).
 
 Keep in mind that any flag that doesn't get parsed by a subcommand can still be passed,
 only it won't make a difference!
@@ -190,6 +194,7 @@ The valid subcommands are:
 - `scripts`
 - `sync`
 - `uninstall`
+- `upgrade`
 - `verify`
 
 ### No Subcommands
@@ -222,10 +227,11 @@ for any operation that requires it.
 Examples:
 
 ```vim
-:Pipenv                               " verbose=false, dev=false, file=nil, python=nil
-:Pipenv python=3.10                   " verbose=false, dev=false, file=nil, python=3.10
-:Pipenv!                              " verbose=true, dev=false, file=nil, python=nil
-:Pipenv! dev=true file=/path/to/file  " verbose=true, dev=true, file=/path/to/file, python=nil
+:Pipenv                              " verbose=false, dev=false, pre=false, file=nil, python=nil
+:Pipenv python=3.10                  " verbose=false, dev=false, pre=false, file=nil, python=3.10
+:Pipenv!                             " verbose=true, dev=false, pre=false, file=nil, python=nil
+:Pipenv! dev=true file=/path/to/file " verbose=true, dev=true, pre=false, file=/path/to/file, python=nil
+:Pipenv dev=true pre=false           " verbose=false, dev=true, pre=true, file=nil, python=nil
 ```
 
 ### Subcommands
@@ -233,22 +239,23 @@ Examples:
 Below is a table specifying each subcommand, how many arguments does it take,
 what flags are valid for parsing and its description.
 
-| Subcommand       | Nargs         | Verbose | Dev | File | Python | Description                                                    |
-|------------------|---------------|---------|-----|------|--------|----------------------------------------------------------------|
-| `help`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Prints the usage message                                       |
-| `edit`           | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Edit the `Pipfile` or create a blank one if none exists        |
-| `list-installed` | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the installed packages in a window                       |
-| `list-scripts`   | `0`           | [ ]     | [ ] | [ ]  | [ ]    | Lists the defined scripts in the Pipfile                       |
-| `scripts`        | `*`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv [--python <VERSION>] scripts`    |
-| `graph`          | `*`           | [ ]     | [ ] | [ ]  | [X]    | Returns the output of `pipenv [--python <VERSION>] graph`      |
-| `clean`          | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] clean`                       |
-| `install`        | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...]`   |
-| `lock`           | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] lock`                        |
-| `requirements`   | `*`           | [X]     | [X] | [X]  | [X]    | Runs `pipenv [--python <VERSION>] requirements [--dev]`        |
-| `run`            | `+`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] run ...`                     |
-| `sync`           | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] sync [--dev]`                |
-| `uninstall`      | `*`           | [X]     | [X] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] uninstall [--dev] [ARGS...]` |
-| `verify`         | `*`           | [X]     | [ ] | [ ]  | [X]    | Runs `pipenv [--python <VERSION>] verify`                      |
+| Subcommand       | Nargs | Verbose | Dev | Pre | File | Python | Description                                                            |
+|------------------|-------|---------|-----|-----|------|--------|------------------------------------------------------------------------|
+| `help`           | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prints the usage message                                               |
+| `edit`           | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Edit the `Pipfile` or create a blank one if none exists                |
+| `list-installed` | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the installed packages in a window                               |
+| `list-scripts`   | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the defined scripts in the Pipfile                               |
+| `scripts`        | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] scripts`            |
+| `graph`          | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] graph`              |
+| `clean`          | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] clean`                               |
+| `install`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...] [--pre]`   |
+| `lock`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] lock [--dev] [--pre]`                |
+| `requirements`   | `*`   | 󰄬       | 󰄬   | 󰅖   | 󰄬    | 󰄬      | Runs `pipenv [--python <VERSION>] requirements [--dev]`                |
+| `run`            | `+`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] run ...`                             |
+| `sync`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] sync [--dev] [--pre]`                |
+| `uninstall`      | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] uninstall [--dev] [--pre] [ARGS...]` |
+| `upgrade`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] upgrade [--dev] [--pre]`             |
+| `verify`         | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] verify`                              |
 
 
 Examples:
@@ -262,7 +269,9 @@ Examples:
 :Pipenv! sync dev=true                            " verbose=true, dev=false
 :Pipenv! dev=true sync                            " Same as above
 
-:Pipenv! python=3.13 install <PACKAGES>            " verbose=true, python=3.13
+:Pipenv pre=true install ...                      " Installs prerelease packages
+
+:Pipenv! python=3.13 install <PACKAGES>           " verbose=true, python=3.13
 
 :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
 ```
@@ -284,12 +293,14 @@ The operations used by the `:Pipenv` user command are the following:
 | `:Pipenv graph`          | `require('pipenv.core').graph()`          |
 | `:Pipenv install`        | `require('pipenv.core').install()`        |
 | `:Pipenv list-installed` | `require('pipenv.core').list_installed()` |
-| `:Pipenv scripts`        | `require('pipenv.core').list_scripts()`   |
+| `:Pipenv list-scripts`   | `require('pipenv.core').list_scripts()`   |
 | `:Pipenv lock`           | `require('pipenv.core').lock()`           |
 | `:Pipenv requirements`   | `require('pipenv.core').requirements()`   |
 | `:Pipenv run`            | `require('pipenv.core').run()`            |
+| `:Pipenv scripts`        | `require('pipenv.core').scripts()`        |
 | `:Pipenv sync`           | `require('pipenv.core').sync()`           |
 | `:Pipenv uninstall`      | `require('pipenv.core').uninstall()`      |
+| `:Pipenv upgrade`        | `require('pipenv.core').upgrade()`        |
 | `:Pipenv verify`         | `require('pipenv.core').verify()`         |
 
 ---
