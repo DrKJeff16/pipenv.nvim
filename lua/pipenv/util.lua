@@ -172,6 +172,7 @@ function M.open_win(data, opts)
     zindex = { opts.zindex, { 'number', 'nil' }, true },
   })
   opts.ft = opts.ft or 'log'
+  opts.modifiable = opts.modifiable ~= nil and opts.modifiable or false
   opts.height = (opts.height and opts.height > 0) and opts.height or 0.85
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
