@@ -18,6 +18,7 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 - [Usage](#usage)
   - [No Subcommands](#no-subcommands)
   - [Subcommands](#subcommands)
+  - [`picker.nvim` Integration](#pickernvim-integration)
 - [API](#api)
 - [License](#license)
 
@@ -30,6 +31,7 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 ```lua
 {
   'DrKJeff16/pipenv.nvim',
+  dependencies = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
   opts = {},
 }
 ```
@@ -40,6 +42,7 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 require('pckr').add({
   {
     'DrKJeff16/pipenv.nvim',
+    requires = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
     config = function()
       require('pipenv').setup()
     end,
@@ -51,7 +54,11 @@ require('pckr').add({
 
 ```lua
 local paq = require('paq')
-paq({ 'DrKJeff16/pipenv.nvim' })
+paq({
+  'DrKJeff16/pipenv.nvim',
+
+  'wsdjeg/picker.nvim', -- OPTIONAL
+})
 ```
 
 ### LuaRocks
@@ -275,6 +282,14 @@ Examples:
 
 :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
 ```
+
+### `picker.nvim` Integration
+
+![picker.nvim showcase](./assets/picker_nvim.png)
+
+This plugin has a (rather rough) integration with
+[`wsdjeg/picker.nvim`](https://github.com/wsdjeg/picker.nvim). If you have it installed you can
+run `:Picker pipenv` to use it.
 
 ---
 
