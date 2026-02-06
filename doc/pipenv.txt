@@ -96,7 +96,7 @@ These are the default options:
         width = 0.85, -- A number between `0` and `1` (percentage) or a fixed width (only matters if `float` is `true`)
         zindex = 100, -- The `zindex` value of the output window (only matters if `float` is `true`)
       },
-      env = { -- See the `Customizing Pipenv` section
+      env = { -- See the `Pipenv Environment Variables` section
         -- install = {},
         -- virtual_env = {},
         -- file_location = {},
