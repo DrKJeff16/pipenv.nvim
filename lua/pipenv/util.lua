@@ -315,35 +315,23 @@ end
 --- ---
 ---@param T table<string, vim.validate.Spec|ValidateSpec>
 function M.validate(T)
-  if not M.vim_has('nvim-0.11') then
-    ---Filter table to fit legacy standard
-    ---@cast T table<string, vim.validate.Spec>
-    for name, spec in pairs(T) do
-      while #spec > 3 do
-        table.remove(spec, #spec)
-      end
-
-      T[name] = spec
-    end
-
-    vim.validate(T)
-    return
-  end
-
-  ---Filter table to fit non-legacy standard
-  ---@cast T table<string, ValidateSpec>
+  local max = M.vim_has('nvim-0.11') and 3 or 4
   for name, spec in pairs(T) do
-    while #spec > 4 do
+    while #spec > max do
       table.remove(spec, #spec)
     end
-
     T[name] = spec
   end
 
-  for name, spec in pairs(T) do
-    table.insert(spec, 1, name)
-    vim.validate(unpack(spec))
+  if M.vim_has('nvim-0.11') then
+    for name, spec in pairs(T) do
+      table.insert(spec, 1, name)
+      vim.validate(unpack(spec))
+    end
+    return
   end
+
+  vim.validate(T)
 end
 
 ---@param T table<string|integer, any>
