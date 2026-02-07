@@ -191,6 +191,10 @@ function M.popup(valid, except, opts)
       end
       if item == 'run' then
         vim.ui.input({ prompt = 'Type the command to run' }, function(input)
+          if not input or input == '' then
+            return
+          end
+
           Core.run(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
         end)
         return
@@ -203,6 +207,10 @@ function M.popup(valid, except, opts)
         vim.ui.input(
           { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
           function(input)
+            if not input or input == '' then
+              return
+            end
+
             Core[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
           end
         )
