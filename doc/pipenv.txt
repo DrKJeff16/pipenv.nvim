@@ -1,4 +1,4 @@
-*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 06
+*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 08
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -241,6 +241,7 @@ The valid subcommands are:
 - `scripts`
 - `sync`
 - `uninstall`
+- `update`
 - `upgrade`
 - `verify`
 
@@ -300,6 +301,8 @@ what flags are valid for parsing and its description.
 
   uninstall        *       󰄬         󰄬     󰄬     󰅖      󰄬        Runs
                                                                  pipenv [--python <VERSION>] uninstall [--dev] [--pre] [ARGS...]
+
+  update           *       󰄬         󰄬     󰄬     󰅖      󰄬        Runs pipenv [--python <VERSION>] update [--dev] [--pre]
 
   upgrade          *       󰄬         󰄬     󰄬     󰅖      󰄬        Runs pipenv [--python <VERSION>] upgrade [--dev] [--pre]
 
