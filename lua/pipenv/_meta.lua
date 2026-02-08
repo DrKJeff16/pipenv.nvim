@@ -141,6 +141,7 @@
 ---@field python? string
 
 ---@class Pipenv.RequirementsOpts
+---@field verbose? boolean
 ---@field dev? boolean
 ---@field file? string[]|string|nil
 ---@field python? string

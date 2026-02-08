@@ -904,6 +904,7 @@ function M.requirements(opts, timeout, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     file = { opts.file, { 'string', 'table', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
@@ -968,6 +969,10 @@ function M.requirements(opts, timeout, cmd_opts)
     ) == -1
   then
     vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
+  end
+
+  if opts.verbose then
+    vim.notify(('(%s): Wrote requirements to `%s`!'):format(cmd_str, opts.file), INFO)
   end
 end
 

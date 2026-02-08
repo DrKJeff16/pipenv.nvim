@@ -582,7 +582,7 @@ function M.setup()
         M.cmd_usage(WARN)
         return
       end
-      Core.requirements({ file = file, dev = dev, python = python })
+      Core.requirements({ file = file, dev = dev, python = python, verbose = ctx.bang })
       return
     end
 
