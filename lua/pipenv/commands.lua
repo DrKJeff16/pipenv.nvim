@@ -22,15 +22,60 @@ local ERROR = vim.log.levels.ERROR
 local Core = require('pipenv.core')
 local Util = require('pipenv.util')
 
+---@param opt 'dev'|'pre'|'both'
+---@param ... string
+---@return string[] candidates
+local function gen_bool_candidates(opt, ...)
+  local candidates = { 'pre=true', 'pre=false' } ---@type string[]
+  if opt == 'both' then
+    candidates = { 'dev=true', 'dev=false', 'pre=true', 'pre=false' }
+  end
+  if opt == 'dev' then
+    candidates = { 'dev=true', 'dev=false' }
+  end
+
+  for i = 1, select('#', ...), 1 do
+    local comp = select(i, ...) ---@type string
+    if not vim.list_contains(candidates, comp) then
+      table.insert(candidates, comp)
+    end
+  end
+
+  return candidates
+end
+
+---@param lead string
+---@param choices string[]
+---@param hide_opt? boolean
+---@return string[] candidates
+local function narrow_candidates(lead, choices, hide_opt)
+  hide_opt = hide_opt ~= nil and hide_opt or false
+
+  local candidates = {}
+  for _, comp in ipairs(choices) do
+    if vim.startswith(comp, lead) then
+      if
+        not hide_opt
+        or (hide_opt and not vim.list_contains(gen_bool_candidates('both', 'python=', 'file=')))
+      then
+        table.insert(candidates, comp)
+      end
+    end
+  end
+  return candidates
+end
+
 ---@param lead string
 ---@return string[] completions
 local function complete_fun(_, lead)
   local args = vim.split(lead, '%s+', { trimempty = false })
-  if args[1]:sub(args[1]:len()) == '!' and #args == 1 then
+  if args[1]:sub(-1) == '!' and #args == 1 then
     return {}
   end
 
-  local subcmd, dev, pre = false, false, false ---@type boolean, boolean, boolean
+  ---@type boolean, boolean, boolean, boolean, boolean
+  local subcmd, dev, pre, python, file = false, false, false, false, false
+  local subcmd_val = ''
   local subs = { ---@type string[]
     'clean',
     'edit',
@@ -51,79 +96,235 @@ local function complete_fun(_, lead)
   for _, sub in ipairs(args) do
     if in_list(subs, sub) then
       subcmd = true
-    elseif in_list({ 'dev=true', 'dev=false' }, sub) then
+      subcmd_val = sub
+    elseif in_list(gen_bool_candidates('dev'), sub) then
       dev = true
-    elseif in_list({ 'pre=true', 'pre=false' }, sub) then
+    elseif in_list(gen_bool_candidates('pre'), sub) then
       pre = true
+    elseif vim.startswith(sub, 'python=') then
+      python = true
+    elseif vim.startswith(sub, 'file=') then
+      file = true
     end
   end
-  if dev and subcmd and pre then
+  if dev and subcmd and pre and python and file then
     return {}
   end
-  if dev and not subcmd and pre then
-    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
+  if not (subcmd or dev or pre or python or file) then
+    return narrow_candidates(
+      args[#args],
+      gen_bool_candidates(
+        'both',
+        'file=',
+        'python=',
+        'clean',
+        'edit',
+        'graph',
+        'help',
+        'install',
+        'list-installed',
+        'list-scripts',
+        'lock',
+        'requirements',
+        'run',
+        'scripts',
+        'sync',
+        'uninstall',
+        'upgrade',
+        'verify'
+      ),
+      true
+    )
   end
-  if dev and not (subcmd or pre) then
-    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
-  end
-  if pre and not (subcmd or dev) then
-    return { 'uninstall', 'install', 'requirements', 'lock', 'sync', 'upgrade' }
-  end
-  if not (subcmd or dev or pre) then
-    return {
-      'dev=true',
-      'dev=false',
-      'pre=true',
-      'pre=false',
-      'clean',
-      'edit',
-      'graph',
-      'help',
-      'install',
-      'list-installed',
-      'list-scripts',
-      'lock',
-      'requirements',
-      'run',
-      'scripts',
-      'sync',
-      'uninstall',
-      'verify',
-    }
-  end
-  if not (subcmd or pre) and dev then
-    return {
-      'pre=true',
-      'pre=false',
-      'install',
-      'lock',
-      'sync',
-      'upgrade',
-      'uninstall',
-    }
-  end
-  if not (subcmd or dev) and pre then
-    return {
-      'dev=true',
-      'dev=false',
-      'install',
-      'lock',
-      'sync',
-      'upgrade',
-      'uninstall',
-    }
-  end
-  for _, sub in ipairs(args) do
-    if subcmd and in_list({ 'uninstall', 'install', 'requirements', 'sync' }, sub) then
-      if not (dev or pre) then
-        return { 'dev=true', 'dev=false', 'pre=true', 'pre=false' }
+  if file then
+    if not (subcmd or dev or python) then
+      return narrow_candidates(
+        args[#args],
+        gen_bool_candidates('dev', 'python=', 'requirements'),
+        subcmd
+      )
+    end
+    if dev then
+      if not (subcmd or python) then
+        return narrow_candidates(args[#args], { 'python=', 'requirements' }, subcmd)
       end
-      if not dev and pre then
-        return { 'dev=true', 'dev=false' }
+      if subcmd and not python then
+        return narrow_candidates(args[#args], { 'python=' }, subcmd)
       end
-      if not pre and dev then
-        return { 'pre=true', 'pre=false' }
+    end
+    if subcmd then
+      if subcmd_val ~= 'requirements' then
+        return {}
       end
+      if not (dev or python) then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+      end
+      if python and not dev then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+      end
+      if dev and not python then
+        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+      end
+    end
+    return {}
+  end
+  if python then
+    if not (subcmd or dev or pre) then
+      return narrow_candidates(
+        args[#args],
+        gen_bool_candidates(
+          'both',
+          'clean',
+          'graph',
+          'install',
+          'lock',
+          'requirements',
+          'run',
+          'scripts',
+          'sync',
+          'uninstall',
+          'upgrade',
+          'verify'
+        ),
+        subcmd
+      )
+    end
+    if dev and pre and not subcmd then
+      return narrow_candidates(
+        args[#args],
+        { 'uninstall', 'install', 'lock', 'sync', 'upgrade' },
+        subcmd
+      )
+    end
+    if dev and not (subcmd or pre) then
+      return narrow_candidates(
+        args[#args],
+        gen_bool_candidates(
+          'pre',
+          'install',
+          'lock',
+          'requirements',
+          'sync',
+          'uninstall',
+          'upgrade'
+        ),
+        subcmd
+      )
+    end
+    if pre and not (subcmd or dev) then
+      return narrow_candidates(
+        args[#args],
+        gen_bool_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'upgrade'),
+        subcmd
+      )
+    end
+  end
+  if dev then
+    if pre and not (subcmd or python) then
+      return narrow_candidates(
+        args[#args],
+        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'upgrade' },
+        subcmd
+      )
+    end
+    if not (subcmd or pre or python) then
+      return narrow_candidates(
+        args[#args],
+        gen_bool_candidates(
+          'pre',
+          'install',
+          'lock',
+          'python=',
+          'requirements',
+          'sync',
+          'uninstall',
+          'upgrade'
+        ),
+        subcmd
+      )
+    end
+  end
+  if pre and not (subcmd or dev or python) then
+    return narrow_candidates(
+      args[#args],
+      gen_bool_candidates('dev', 'install', 'lock', 'python=', 'sync', 'uninstall', 'upgrade'),
+      subcmd
+    )
+  end
+  if dev and not (subcmd or pre or python) then
+    return narrow_candidates(
+      args[#args],
+      gen_bool_candidates(
+        'pre',
+        'install',
+        'lock',
+        'python=',
+        'requirements',
+        'sync',
+        'uninstall',
+        'upgrade'
+      ),
+      subcmd
+    )
+  end
+  if subcmd then
+    if in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts' }, subcmd_val) then
+      return {}
+    end
+    if in_list({ 'run', 'graph', 'verify' }, subcmd_val) then
+      if not python then
+        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+      end
+      return {}
+    end
+    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'upgrade' }, subcmd_val) then
+      if not (python or pre or dev) then
+        return narrow_candidates(args[#args], gen_bool_candidates('both', 'python='), subcmd)
+      end
+      if dev and not (python or pre) then
+        return narrow_candidates(args[#args], gen_bool_candidates('pre', 'python='), subcmd)
+      end
+      if pre and not (python or dev) then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+      end
+      if pre and dev and not python then
+        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+      end
+      if python and pre and not dev then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+      end
+      if python and dev and not pre then
+        return narrow_candidates(args[#args], gen_bool_candidates('pre'), subcmd)
+      end
+      return {}
+    end
+    if subcmd_val == 'requirements' then
+      if not (file or python or dev) then
+        return narrow_candidates(
+          args[#args],
+          gen_bool_candidates('dev', 'python=', 'file='),
+          subcmd
+        )
+      end
+      if dev and not (file or python) then
+        return narrow_candidates(args[#args], { 'python=', 'file=' }, subcmd)
+      end
+      if python and not (file or dev) then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'file='), subcmd)
+      end
+      if file and not (file or dev) then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+      end
+      if file and dev and not python then
+        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+      end
+      if python and dev and not file then
+        return narrow_candidates(args[#args], { 'file=' }, subcmd)
+      end
+      if python and file and not dev then
+        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+      end
+      return {}
     end
   end
   return {}
@@ -137,22 +338,25 @@ function M.cmd_usage(level)
   Util.validate({ level = { level, { 'number', 'nil' }, true } })
   level = (level and Util.is_int(level)) and level or INFO
 
-  local msg = [[Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [<OPERATION>]
+  local msg =
+    [[Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION] [pre=true|false] [<OPERATION>]
 
-      :Pipenv help
-      :Pipenv list-installed
-      :Pipenv list-scripts
+  :Pipenv help
+  :Pipenv edit
+  :Pipenv list-installed
+  :Pipenv list-scripts
 
-      :Pipenv graph [python=PYTHON_VERSION]
-      :Pipenv scripts [python=PYTHON_VERSION]
-      :Pipenv[!] clean [python=PYTHON_VERSION]
-      :Pipenv[!] install [<pkg1> [<pkg2> [...]\]\] [dev=true|false] [python=PYTHON_VERSION]
-      :Pipenv[!] lock [python=PYTHON_VERSION]
-      :Pipenv requirements [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION]
-      :Pipenv[!] run <command> [<args> [...]\] [python=PYTHON_VERSION]
-      :Pipenv[!] sync [dev=true|false] [python=PYTHON_VERSION]
-      :Pipenv[!] verify [python=PYTHON_VERSION]
-      ]]
+  :Pipenv graph [python=PYTHON_VERSION]
+  :Pipenv scripts [python=PYTHON_VERSION]
+  :Pipenv[!] requirements [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION]
+  :Pipenv[!] clean [python=PYTHON_VERSION]
+  :Pipenv[!] install [dev=true|false] [pre=true|false] [python=PYTHON_VERSION] [<pkg1> [<pkg2> [...]\]\]
+  :Pipenv[!] lock [pre=true|false] [python=PYTHON_VERSION]
+  :Pipenv[!] run [python=PYTHON_VERSION] <command> [<args> [...]\]
+  :Pipenv[!] sync [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
+  :Pipenv[!] uninstall [dev=true|false] [pre=true|false] [python=PYTHON_VERSION] <pkg1> [...]
+  :Pipenv[!] upgrade [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
+  :Pipenv[!] verify [python=PYTHON_VERSION]\]]
 
   vim.notify(msg, level)
 end

@@ -21,6 +21,26 @@ local in_list = vim.list_contains
 ---@class Pipenv.Util
 local M = {}
 
+---@param allow_dups boolean
+---@param ... any[]
+---@return any[] merged
+function M.merge_lists(allow_dups, ...)
+  vim.validate({ allow_dups = { allow_dups, { 'boolean' } } })
+
+  local merged = {} ---@type any[]
+  for i = 1, select('#', ...), 1 do
+    local list_n = select(i, ...) ---@type any[]
+    vim.validate({ ['list_' .. tostring(i)] = { list_n, { 'table' } } })
+    if not vim.islist(list_n) then
+      error(('list_%d is not a list!'):format(i), vim.log.levels.ERROR)
+    end
+
+    merged = { unpack(merged), unpack(list_n) }
+  end
+
+  return allow_dups and merged or M.dedup(merged)
+end
+
 ---@param T table
 ---@param keys (string|integer)[]
 ---@param reference table
@@ -283,7 +303,6 @@ end
 ---@return any[] NT
 function M.dedup(T)
   M.validate({ T = { T, { 'table' } } })
-
   if vim.tbl_isempty(T) then
     return T
   end
