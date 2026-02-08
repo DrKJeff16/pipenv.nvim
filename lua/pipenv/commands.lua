@@ -334,7 +334,7 @@ end
 ---@param level? vim.log.levels
 function M.cmd_usage(level)
   Util.validate({ level = { level, { 'number', 'nil' }, true } })
-  level = (level and Util.is_int(level)) and level or INFO
+  level = (level and Util.is_int(level, level <= 5 and level >= 0)) and level or INFO
 
   local msg =
     [[Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION] [pre=true|false] [<OPERATION>]

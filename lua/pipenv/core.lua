@@ -37,7 +37,7 @@ local function run_cmd(cmd, timeout, opts)
     timeout = { timeout, { 'number', 'nil' }, true },
     opts = { opts, { 'table', 'nil' }, true },
   })
-  timeout = (timeout and Util.is_int(timeout) and timeout > 0) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   opts = opts or {}
 
   opts.text = opts.text ~= nil and opts.text or true
@@ -209,7 +209,7 @@ function M.graph(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({ python = { opts.python, { 'string', 'nil' }, true } })
@@ -256,7 +256,7 @@ function M.lock(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -327,7 +327,7 @@ function M.clean(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -388,7 +388,7 @@ function M.verify(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -449,7 +449,7 @@ function M.sync(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -520,7 +520,7 @@ function M.update(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -591,7 +591,7 @@ function M.upgrade(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -662,7 +662,7 @@ function M.scripts(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({ python = { opts.python, { 'string', 'nil' }, true } })
@@ -717,7 +717,7 @@ function M.install(packages, opts, timeout, cmd_opts)
   })
   packages = packages or nil
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -806,7 +806,7 @@ function M.uninstall(packages, opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -893,7 +893,7 @@ function M.run(command, opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({
@@ -971,7 +971,7 @@ function M.requirements(opts, timeout, cmd_opts)
     cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
   })
   opts = opts or {}
-  timeout = (timeout and timeout > 0 and Util.is_int(timeout)) and timeout or 300000
+  timeout = (timeout and Util.is_int(timeout, timeout > 0)) and timeout or 300000
   cmd_opts = cmd_opts or {}
 
   Util.validate({

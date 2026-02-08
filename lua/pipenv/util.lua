@@ -196,7 +196,7 @@ function M.open_win(data, opts)
   opts.height = (opts.height and opts.height > 0) and opts.height or 0.85
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
-  opts.zindex = (opts.zindex and opts.zindex > 0 and M.is_int(opts.zindex)) and opts.zindex or 100
+  opts.zindex = (opts.zindex and M.is_int(opts.zindex, opts.zindex > 0)) and opts.zindex or 50
   opts.border = (
     opts.border
     and in_list({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
@@ -420,11 +420,17 @@ end
 ---Checks if a given number is type integer.
 --- ---
 ---@param num number
+---@param greater_than? boolean
 ---@return boolean int
-function M.is_int(num)
-  M.validate({ num = { num, { 'number' } } })
+function M.is_int(num, greater_than)
+  M.validate({
+    num = { num, { 'number' } },
+    greater_than = { greater_than, { 'boolean', 'nil' }, true },
+  })
+  greater_than = greater_than ~= nil and greater_than or true
 
-  return math.floor(num) == num and math.ceil(num) == num
+  local is_int = math.floor(num) == num and math.ceil(num) == num
+  return is_int and greater_than
 end
 
 ---Checks whether `data` is of type `t` or not.
