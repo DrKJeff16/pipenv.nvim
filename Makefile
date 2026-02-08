@@ -12,8 +12,9 @@ all:
 	@echo
 
 helptags: ## Generate Neovim helptags
-	@echo -e "Generating helptags...\n"
+	@echo "Generating helptags..."
 	@$(TAGS_CMD) > /dev/null 2>&1
+	@echo "Done!"
 
 lint: ## Lint with selene
 	@echo "Linting with selene..."
