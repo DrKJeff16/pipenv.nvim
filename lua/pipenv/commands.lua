@@ -23,46 +23,21 @@ local ERROR = vim.log.levels.ERROR
 local Core = require('pipenv.core')
 local Util = require('pipenv.util')
 
----@param opt 'dev'|'pre'|'both'
----@param ... string
----@return string[] candidates
-local function gen_bool_candidates(opt, ...)
-  local candidates = { 'pre=true', 'pre=false' } ---@type string[]
-  if opt == 'both' then
-    candidates = { 'dev=true', 'dev=false', 'pre=true', 'pre=false' }
-  end
-  if opt == 'dev' then
-    candidates = { 'dev=true', 'dev=false' }
-  end
-
-  for i = 1, select('#', ...), 1 do
-    local comp = select(i, ...) ---@type string
-    if not vim.list_contains(candidates, comp) then
-      table.insert(candidates, comp)
-    end
-  end
-
-  return candidates
-end
+---@class Pipenv.Commands
+local M = {}
 
 ---@param lead string
 ---@param choices string[]
----@param hide_opt? boolean
 ---@return string[] candidates
-local function narrow_candidates(lead, choices, hide_opt)
+function M.narrow_candidates(lead, choices)
   Util.validate({
     lead = { lead, { 'string' } },
     choices = { choices, { 'table' } },
-    hide_opt = { hide_opt, { 'boolean', 'nil' }, true },
   })
-  hide_opt = hide_opt ~= nil and hide_opt or false
 
   local candidates = {}
   for _, comp in ipairs(choices) do
-    if
-      vim.startswith(comp, lead) and not hide_opt
-      or (hide_opt and not vim.list_contains(gen_bool_candidates('both', 'python=', 'file=')))
-    then
+    if vim.startswith(comp, lead) then
       table.insert(candidates, comp)
     end
   end
@@ -71,7 +46,7 @@ end
 
 ---@param lead string
 ---@return string[] completions
-local function complete_fun(_, lead)
+function M.complete_fun(_, lead)
   local args = vim.split(lead, '%s+', { trimempty = false })
   if args[1]:sub(-1) == '!' and #args == 1 then
     return {}
@@ -102,10 +77,12 @@ local function complete_fun(_, lead)
     if in_list(subs, sub) then
       subcmd = true
       subcmd_val = sub
-    elseif in_list(gen_bool_candidates('dev'), sub) then
+    elseif in_list(M.gen_candidates('dev'), sub) then
       dev = true
-    elseif in_list(gen_bool_candidates('pre'), sub) then
+      vim.print('dev=true')
+    elseif in_list(M.gen_candidates('pre'), sub) then
       pre = true
+      vim.print('pre=true')
     elseif vim.startswith(sub, 'python=') then
       python = true
     elseif vim.startswith(sub, 'file=') then
@@ -116,12 +93,12 @@ local function complete_fun(_, lead)
     return {}
   end
   if not (subcmd or dev or pre or python or file) then
-    return narrow_candidates(
+    return M.narrow_candidates(
       args[#args],
-      gen_bool_candidates(
+      M.gen_candidates(
         'both',
-        'file=',
         'python=',
+        'file=',
         'clean',
         'edit',
         'graph',
@@ -138,24 +115,19 @@ local function complete_fun(_, lead)
         'update',
         'upgrade',
         'verify'
-      ),
-      true
+      )
     )
   end
   if file then
     if not (subcmd or dev or python) then
-      return narrow_candidates(
-        args[#args],
-        gen_bool_candidates('dev', 'python=', 'requirements'),
-        subcmd
-      )
+      return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'python=', 'requirements'))
     end
     if dev then
       if not (subcmd or python) then
-        return narrow_candidates(args[#args], { 'python=', 'requirements' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=', 'requirements' })
       end
       if subcmd and not python then
-        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=' })
       end
     end
     if subcmd then
@@ -163,22 +135,22 @@ local function complete_fun(_, lead)
         return {}
       end
       if not (dev or python) then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'python='))
       end
       if python and not dev then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev'))
       end
       if dev and not python then
-        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=' })
       end
     end
     return {}
   end
   if python then
     if not (subcmd or dev or pre) then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        gen_bool_candidates(
+        M.gen_candidates(
           'both',
           'clean',
           'graph',
@@ -192,21 +164,19 @@ local function complete_fun(_, lead)
           'update',
           'upgrade',
           'verify'
-        ),
-        subcmd
+        )
       )
     end
     if dev and pre and not subcmd then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        { 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' },
-        subcmd
+        { 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' }
       )
     end
     if dev and not (subcmd or pre) then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        gen_bool_candidates(
+        M.gen_candidates(
           'pre',
           'install',
           'lock',
@@ -215,30 +185,27 @@ local function complete_fun(_, lead)
           'uninstall',
           'update',
           'upgrade'
-        ),
-        subcmd
+        )
       )
     end
     if pre and not (subcmd or dev) then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        gen_bool_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'update', 'upgrade'),
-        subcmd
+        M.gen_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'update', 'upgrade')
       )
     end
   end
   if dev then
     if pre and not (subcmd or python) then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' },
-        subcmd
+        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' }
       )
     end
     if not (subcmd or pre or python) then
-      return narrow_candidates(
+      return M.narrow_candidates(
         args[#args],
-        gen_bool_candidates(
+        M.gen_candidates(
           'pre',
           'install',
           'lock',
@@ -248,15 +215,14 @@ local function complete_fun(_, lead)
           'uninstall',
           'update',
           'upgrade'
-        ),
-        subcmd
+        )
       )
     end
   end
   if pre and not (subcmd or dev or python) then
-    return narrow_candidates(
+    return M.narrow_candidates(
       args[#args],
-      gen_bool_candidates(
+      M.gen_candidates(
         'dev',
         'install',
         'lock',
@@ -265,14 +231,13 @@ local function complete_fun(_, lead)
         'uninstall',
         'update',
         'upgrade'
-      ),
-      subcmd
+      )
     )
   end
   if dev and not (subcmd or pre or python) then
-    return narrow_candidates(
+    return M.narrow_candidates(
       args[#args],
-      gen_bool_candidates(
+      M.gen_candidates(
         'pre',
         'install',
         'lock',
@@ -282,8 +247,7 @@ local function complete_fun(_, lead)
         'uninstall',
         'update',
         'upgrade'
-      ),
-      subcmd
+      )
     )
   end
   if subcmd then
@@ -292,56 +256,52 @@ local function complete_fun(_, lead)
     end
     if in_list({ 'run', 'graph', 'verify' }, subcmd_val) then
       if not python then
-        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=' })
       end
       return {}
     end
     if in_list({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
       if not (python or pre or dev) then
-        return narrow_candidates(args[#args], gen_bool_candidates('both', 'python='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('both', 'python='))
       end
       if dev and not (python or pre) then
-        return narrow_candidates(args[#args], gen_bool_candidates('pre', 'python='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('pre', 'python='))
       end
       if pre and not (python or dev) then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'python='))
       end
       if pre and dev and not python then
-        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=' })
       end
       if python and pre and not dev then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev'))
       end
       if python and dev and not pre then
-        return narrow_candidates(args[#args], gen_bool_candidates('pre'), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('pre'))
       end
       return {}
     end
     if subcmd_val == 'requirements' then
       if not (file or python or dev) then
-        return narrow_candidates(
-          args[#args],
-          gen_bool_candidates('dev', 'python=', 'file='),
-          subcmd
-        )
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'python=', 'file='))
       end
       if dev and not (file or python) then
-        return narrow_candidates(args[#args], { 'python=', 'file=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=', 'file=' })
       end
       if python and not (file or dev) then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'file='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'file='))
       end
       if file and not (file or dev) then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev', 'python='), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev', 'python='))
       end
       if file and dev and not python then
-        return narrow_candidates(args[#args], { 'python=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'python=' })
       end
       if python and dev and not file then
-        return narrow_candidates(args[#args], { 'file=' }, subcmd)
+        return M.narrow_candidates(args[#args], { 'file=' })
       end
       if python and file and not dev then
-        return narrow_candidates(args[#args], gen_bool_candidates('dev'), subcmd)
+        return M.narrow_candidates(args[#args], M.gen_candidates('dev'))
       end
       return {}
     end
@@ -349,8 +309,33 @@ local function complete_fun(_, lead)
   return {}
 end
 
----@class Pipenv.Commands
-local M = {}
+---@param opt 'dev'|'pre'|'both'|'none'
+---@param ... string
+---@return string[] candidates
+function M.gen_candidates(opt, ...)
+  local candidates ---@type string[]
+  if opt == 'both' then
+    candidates = { 'dev=true', 'dev=false', 'pre=true', 'pre=false' }
+  end
+  if opt == 'dev' then
+    candidates = { 'dev=true', 'dev=false' }
+  end
+  if opt == 'pre' then
+    candidates = { 'pre=true', 'pre=false' }
+  end
+  if opt == 'none' then
+    candidates = {}
+  end
+
+  for i = 1, select('#', ...), 1 do
+    local comp = select(i, ...) ---@type string
+    if not vim.list_contains(candidates, comp) then
+      table.insert(candidates, comp)
+    end
+  end
+
+  return candidates
+end
 
 ---@param level? vim.log.levels
 function M.cmd_usage(level)
@@ -626,7 +611,7 @@ function M.setup()
     nargs = '*',
     bang = true,
     desc = 'Pipenv user command',
-    complete = complete_fun,
+    complete = M.complete_fun,
   })
 end
 
