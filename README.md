@@ -201,6 +201,7 @@ The valid subcommands are:
 - `scripts`
 - `sync`
 - `uninstall`
+- `update`
 - `upgrade`
 - `verify`
 
@@ -261,6 +262,7 @@ what flags are valid for parsing and its description.
 | `run`            | `+`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] run ...`                             |
 | `sync`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] sync [--dev] [--pre]`                |
 | `uninstall`      | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] uninstall [--dev] [--pre] [ARGS...]` |
+| `update`         | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] update [--dev] [--pre]`              |
 | `upgrade`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] upgrade [--dev] [--pre]`             |
 | `verify`         | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] verify`                              |
 

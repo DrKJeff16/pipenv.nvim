@@ -154,6 +154,7 @@
 ---@field pre? boolean
 
 ---@class Pipenv.UpgradeOpts: Pipenv.SyncOpts
+---@class Pipenv.UpdateOpts: Pipenv.SyncOpts
 
 ---@class Pipenv.CleanOpts: Pipenv.CommandOpts
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts

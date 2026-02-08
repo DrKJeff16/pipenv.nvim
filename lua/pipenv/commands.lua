@@ -12,6 +12,7 @@
 ---|'scripts'
 ---|'sync'
 ---|'uninstall'
+---|'update'
 ---|'upgrade'
 ---|'verify'
 
@@ -49,17 +50,20 @@ end
 ---@param hide_opt? boolean
 ---@return string[] candidates
 local function narrow_candidates(lead, choices, hide_opt)
+  Util.validate({
+    lead = { lead, { 'string' } },
+    choices = { choices, { 'table' } },
+    hide_opt = { hide_opt, { 'boolean', 'nil' }, true },
+  })
   hide_opt = hide_opt ~= nil and hide_opt or false
 
   local candidates = {}
   for _, comp in ipairs(choices) do
-    if vim.startswith(comp, lead) then
-      if
-        not hide_opt
-        or (hide_opt and not vim.list_contains(gen_bool_candidates('both', 'python=', 'file=')))
-      then
-        table.insert(candidates, comp)
-      end
+    if
+      vim.startswith(comp, lead) and not hide_opt
+      or (hide_opt and not vim.list_contains(gen_bool_candidates('both', 'python=', 'file=')))
+    then
+      table.insert(candidates, comp)
     end
   end
   return candidates
@@ -90,6 +94,7 @@ local function complete_fun(_, lead)
     'scripts',
     'sync',
     'uninstall',
+    'update',
     'upgrade',
     'verify',
   }
@@ -130,6 +135,7 @@ local function complete_fun(_, lead)
         'scripts',
         'sync',
         'uninstall',
+        'update',
         'upgrade',
         'verify'
       ),
@@ -183,6 +189,7 @@ local function complete_fun(_, lead)
           'scripts',
           'sync',
           'uninstall',
+          'update',
           'upgrade',
           'verify'
         ),
@@ -192,7 +199,7 @@ local function complete_fun(_, lead)
     if dev and pre and not subcmd then
       return narrow_candidates(
         args[#args],
-        { 'uninstall', 'install', 'lock', 'sync', 'upgrade' },
+        { 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' },
         subcmd
       )
     end
@@ -206,6 +213,7 @@ local function complete_fun(_, lead)
           'requirements',
           'sync',
           'uninstall',
+          'update',
           'upgrade'
         ),
         subcmd
@@ -214,7 +222,7 @@ local function complete_fun(_, lead)
     if pre and not (subcmd or dev) then
       return narrow_candidates(
         args[#args],
-        gen_bool_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'upgrade'),
+        gen_bool_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'update', 'upgrade'),
         subcmd
       )
     end
@@ -223,7 +231,7 @@ local function complete_fun(_, lead)
     if pre and not (subcmd or python) then
       return narrow_candidates(
         args[#args],
-        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'upgrade' },
+        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' },
         subcmd
       )
     end
@@ -238,6 +246,7 @@ local function complete_fun(_, lead)
           'requirements',
           'sync',
           'uninstall',
+          'update',
           'upgrade'
         ),
         subcmd
@@ -247,7 +256,16 @@ local function complete_fun(_, lead)
   if pre and not (subcmd or dev or python) then
     return narrow_candidates(
       args[#args],
-      gen_bool_candidates('dev', 'install', 'lock', 'python=', 'sync', 'uninstall', 'upgrade'),
+      gen_bool_candidates(
+        'dev',
+        'install',
+        'lock',
+        'python=',
+        'sync',
+        'uninstall',
+        'update',
+        'upgrade'
+      ),
       subcmd
     )
   end
@@ -262,6 +280,7 @@ local function complete_fun(_, lead)
         'requirements',
         'sync',
         'uninstall',
+        'update',
         'upgrade'
       ),
       subcmd
@@ -277,7 +296,7 @@ local function complete_fun(_, lead)
       end
       return {}
     end
-    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'upgrade' }, subcmd_val) then
+    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
       if not (python or pre or dev) then
         return narrow_candidates(args[#args], gen_bool_candidates('both', 'python='), subcmd)
       end
@@ -355,6 +374,7 @@ function M.cmd_usage(level)
   :Pipenv[!] run [python=PYTHON_VERSION] <command> [<args> [...]\]
   :Pipenv[!] sync [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
   :Pipenv[!] uninstall [dev=true|false] [pre=true|false] [python=PYTHON_VERSION] <pkg1> [...]
+  :Pipenv[!] update [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
   :Pipenv[!] upgrade [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
   :Pipenv[!] verify [python=PYTHON_VERSION]\]]
 
@@ -420,10 +440,23 @@ function M.popup(valid, except, opts)
         )
         return
       end
-      if in_list({ 'clean', 'edit', 'verify', 'requirements', 'lock', 'sync', 'graph' }, item) then
-        Core[item](opts)
+      if
+        not in_list({
+          'clean',
+          'edit',
+          'graph',
+          'lock',
+          'requirements',
+          'sync',
+          'update',
+          'upgrade',
+          'verify',
+        }, item)
+      then
         return
       end
+
+      Core[item](opts)
     end
   )
 end
@@ -450,6 +483,8 @@ function M.setup()
       'scripts',
       'sync',
       'uninstall',
+      'update',
+      'upgrade',
       'verify',
     }
 
@@ -489,7 +524,7 @@ function M.setup()
     end
 
     if not subcommand then
-      M.popup(valid, { 'help', 'list-installed' }, {
+      M.popup(valid, { 'help', 'list-installed', 'list-scripts' }, {
         verbose = ctx.bang,
         dev = dev,
         pre = pre,
@@ -567,8 +602,8 @@ function M.setup()
       Core.run(subsubcmd, { verbose = ctx.bang, python = python })
       return
     end
-    if vim.list_contains({ 'sync', 'upgrade' }, subcommand) then
-      ---@cast subcommand 'sync'|'upgrade'
+    if vim.list_contains({ 'sync', 'update', 'upgrade' }, subcommand) then
+      ---@cast subcommand 'sync'|'upgrade'|'update'
       if not vim.tbl_isempty(subsubcmd) then
         M.cmd_usage(WARN)
         return

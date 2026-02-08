@@ -27,9 +27,11 @@ M.list_scripts = Core.list_scripts
 M.lock = Core.lock
 M.requirements = Core.requirements
 M.run = Core.run
-M.sync = Core.sync
 M.scripts = Core.scripts
+M.sync = Core.sync
 M.uninstall = Core.uninstall
+M.update = Core.update
+M.upgrade = Core.upgrade
 M.verify = Core.verify
 
 local Pipenv = setmetatable(M, { ---@type Pipenv
