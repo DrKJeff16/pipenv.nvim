@@ -254,7 +254,7 @@ function M.complete_fun(_, lead)
     if in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts' }, subcmd_val) then
       return {}
     end
-    if in_list({ 'run', 'graph', 'verify' }, subcmd_val) then
+    if in_list({ 'run', 'graph', 'verify', 'clean' }, subcmd_val) then
       if not python then
         return M.narrow_candidates(args[#args], { 'python=' })
       end
