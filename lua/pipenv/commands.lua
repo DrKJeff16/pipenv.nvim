@@ -107,10 +107,8 @@ local function complete_fun(_, lead)
       subcmd_val = sub
     elseif in_list(gen_candidates('dev'), sub) then
       dev = true
-      vim.print('dev=true')
     elseif in_list(gen_candidates('pre'), sub) then
       pre = true
-      vim.print('pre=true')
     elseif vim.startswith(sub, 'python=') then
       python = true
     elseif vim.startswith(sub, 'file=') then
@@ -146,33 +144,74 @@ local function complete_fun(_, lead)
       )
     )
   end
+  if subcmd then
+    if
+      in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts' }, subcmd_val)
+      and not (dev or python or file or dev)
+    then
+      return {}
+    end
+    if in_list({ 'graph', 'verify', 'clean', 'run' }, subcmd_val) and not python then
+      return narrow_candidates(args[#args], gen_candidates('none', 'python='))
+    end
+    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
+      if not (python or pre or dev) then
+        return narrow_candidates(args[#args], gen_candidates('both', 'python='))
+      end
+      if dev and not (python or pre) then
+        return narrow_candidates(args[#args], gen_candidates('pre', 'python='))
+      end
+      if pre and not (python or dev) then
+        return narrow_candidates(args[#args], gen_candidates('dev', 'python='))
+      end
+      if pre and dev and not python then
+        return narrow_candidates(args[#args], gen_candidates('none', 'python='))
+      end
+      if python and not (dev or pre) then
+        return narrow_candidates(args[#args], gen_candidates('both'))
+      end
+      if python and pre and not dev then
+        return narrow_candidates(args[#args], gen_candidates('dev'))
+      end
+      if python and dev and not pre then
+        return narrow_candidates(args[#args], gen_candidates('pre'))
+      end
+    end
+    if subcmd_val == 'requirements' then
+      if not (file or python or dev) then
+        return narrow_candidates(args[#args], gen_candidates('dev', 'python=', 'file='))
+      end
+      if dev and not (file or python) then
+        return narrow_candidates(args[#args], gen_candidates('none', 'python=', 'file='))
+      end
+      if python and not (file or dev) then
+        return narrow_candidates(args[#args], gen_candidates('dev', 'file='))
+      end
+      if file and not (python or dev) then
+        return narrow_candidates(args[#args], gen_candidates('dev', 'python='))
+      end
+      if file and dev and not python then
+        return narrow_candidates(args[#args], gen_candidates('none', 'python='))
+      end
+      if python and dev and not file then
+        return narrow_candidates(args[#args], gen_candidates('none', 'file='))
+      end
+      if python and file and not dev then
+        return narrow_candidates(args[#args], gen_candidates('dev'))
+      end
+    end
+    return {}
+  end
   if file then
     if not (subcmd or dev or python) then
       return narrow_candidates(args[#args], gen_candidates('dev', 'python=', 'requirements'))
     end
-    if dev then
-      if not (subcmd or python) then
-        return narrow_candidates(args[#args], { 'python=', 'requirements' })
-      end
-      if subcmd and not python then
-        return narrow_candidates(args[#args], { 'python=' })
-      end
+    if dev and not (subcmd or python) then
+      return narrow_candidates(args[#args], gen_candidates('none', 'python=', 'requirements'))
     end
-    if subcmd then
-      if subcmd_val ~= 'requirements' then
-        return {}
-      end
-      if not (dev or python) then
-        return narrow_candidates(args[#args], gen_candidates('dev', 'python='))
-      end
-      if python and not dev then
-        return narrow_candidates(args[#args], gen_candidates('dev'))
-      end
-      if dev and not python then
-        return narrow_candidates(args[#args], { 'python=' })
-      end
+    if dev and subcmd and not python then
+      return narrow_candidates(args[#args], gen_candidates('none', 'python='))
     end
-    return {}
   end
   if python then
     if not (subcmd or dev or pre) then
@@ -198,7 +237,7 @@ local function complete_fun(_, lead)
     if dev and pre and not subcmd then
       return narrow_candidates(
         args[#args],
-        { 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' }
+        gen_candidates('none', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade')
       )
     end
     if dev and not (subcmd or pre) then
@@ -222,13 +261,37 @@ local function complete_fun(_, lead)
         gen_candidates('dev', 'install', 'lock', 'sync', 'uninstall', 'update', 'upgrade')
       )
     end
+    if pre and subcmd and not dev then
+      return narrow_candidates(args[#args], gen_candidates('dev'))
+    end
+    if dev and subcmd and not pre then
+      return narrow_candidates(args[#args], gen_candidates('pre'))
+    end
   end
   if dev then
     if pre and not (subcmd or python) then
       return narrow_candidates(
         args[#args],
-        { 'python=', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade' }
+        gen_candidates(
+          'none',
+          'python=',
+          'uninstall',
+          'install',
+          'lock',
+          'sync',
+          'update',
+          'upgrade'
+        )
       )
+    end
+    if python and not (subcmd or pre) then
+      return narrow_candidates(
+        args[#args],
+        gen_candidates('pre', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade')
+      )
+    end
+    if python and subcmd and not pre then
+      return narrow_candidates(args[#args], gen_candidates('pre'))
     end
     if not (subcmd or pre or python) then
       return narrow_candidates(
@@ -245,87 +308,6 @@ local function complete_fun(_, lead)
           'upgrade'
         )
       )
-    end
-  end
-  if pre and not (subcmd or dev or python) then
-    return narrow_candidates(
-      args[#args],
-      gen_candidates('dev', 'install', 'lock', 'python=', 'sync', 'uninstall', 'update', 'upgrade')
-    )
-  end
-  if dev and not (subcmd or pre or python) then
-    return narrow_candidates(
-      args[#args],
-      gen_candidates(
-        'pre',
-        'install',
-        'lock',
-        'python=',
-        'requirements',
-        'sync',
-        'uninstall',
-        'update',
-        'upgrade'
-      )
-    )
-  end
-  if subcmd then
-    if in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts' }, subcmd_val) then
-      return {}
-    end
-    if subcmd_val == 'run' then
-      return {}
-    end
-    if in_list({ 'graph', 'verify', 'clean' }, subcmd_val) then
-      if not python then
-        return narrow_candidates(args[#args], { 'python=' })
-      end
-      return {}
-    end
-    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
-      if not (python or pre or dev) then
-        return narrow_candidates(args[#args], gen_candidates('both', 'python='))
-      end
-      if dev and not (python or pre) then
-        return narrow_candidates(args[#args], gen_candidates('pre', 'python='))
-      end
-      if pre and not (python or dev) then
-        return narrow_candidates(args[#args], gen_candidates('dev', 'python='))
-      end
-      if pre and dev and not python then
-        return narrow_candidates(args[#args], { 'python=' })
-      end
-      if python and pre and not dev then
-        return narrow_candidates(args[#args], gen_candidates('dev'))
-      end
-      if python and dev and not pre then
-        return narrow_candidates(args[#args], gen_candidates('pre'))
-      end
-      return {}
-    end
-    if subcmd_val == 'requirements' then
-      if not (file or python or dev) then
-        return narrow_candidates(args[#args], gen_candidates('dev', 'python=', 'file='))
-      end
-      if dev and not (file or python) then
-        return narrow_candidates(args[#args], { 'python=', 'file=' })
-      end
-      if python and not (file or dev) then
-        return narrow_candidates(args[#args], gen_candidates('dev', 'file='))
-      end
-      if file and not (file or dev) then
-        return narrow_candidates(args[#args], gen_candidates('dev', 'python='))
-      end
-      if file and dev and not python then
-        return narrow_candidates(args[#args], { 'python=' })
-      end
-      if python and dev and not file then
-        return narrow_candidates(args[#args], { 'file=' })
-      end
-      if python and file and not dev then
-        return narrow_candidates(args[#args], gen_candidates('dev'))
-      end
-      return {}
     end
   end
   return {}
