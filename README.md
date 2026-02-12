@@ -1,6 +1,6 @@
 # pipenv.nvim
 
-Manage your Pipenv environment from within Neovim.
+Asynchronous management for your Pipenv environment from within Neovim.
 
 https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 
