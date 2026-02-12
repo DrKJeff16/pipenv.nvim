@@ -1,4 +1,4 @@
-*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 08
+*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 12
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -30,13 +30,25 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 
 INSTALLATION                                             *pipenv-installation*
 
+**Requirements**
+
+- Neovim `>=v0.9.0`
+- Pipenv
+- `wsdjeg/job.nvim` <https://github.com/wsdjeg/job.nvim>
+- `xieyonn/spinner.nvim` <https://github.com/xieyonn/spinner.nvim> - **(OPTIONAL, RECOMMENDED)**
+- `wsdjeg/picker.nvim` <https://github.com/wsdjeg/picker.nvim> - **(OPTIONAL)**
+
 
 LAZY.NVIM ~
 
 >lua
     {
       'DrKJeff16/pipenv.nvim',
-      dependencies = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+      dependencies = {
+        'wsdjeg/job.nvim', -- REQUIRED!
+        'xieyonn/spinner.nvim', -- RECOMMENDED
+        'wsdjeg/picker.nvim', -- OPTIONAL
+      },
       opts = {},
     }
 <
@@ -48,7 +60,11 @@ PCKR.NVIM ~
     require('pckr').add({
       {
         'DrKJeff16/pipenv.nvim',
-        requires = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+        requires = {
+          'wsdjeg/job.nvim', -- REQUIRED!
+          'xieyonn/spinner.nvim', -- RECOMMENDED
+          'wsdjeg/picker.nvim', -- OPTIONAL
+        },
         config = function()
           require('pipenv').setup()
         end,
@@ -63,7 +79,8 @@ PAQ-NVIM ~
     local paq = require('paq')
     paq({
       'DrKJeff16/pipenv.nvim',
-    
+      'wsdjeg/job.nvim', -- REQUIRED!
+      'xieyonn/spinner.nvim', -- RECOMMENDED
       'wsdjeg/picker.nvim', -- OPTIONAL
     })
 <
