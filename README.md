@@ -26,12 +26,24 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 
 ## Installation
 
+**Requirements**
+
+- Neovim `>=v0.9.0`
+- Pipenv
+- [`wsdjeg/job.nvim`](https://github.com/wsdjeg/job.nvim)
+- [`xieyonn/spinner.nvim`](https://github.com/xieyonn/spinner.nvim) - **(OPTIONAL, RECOMMENDED)**
+- [`wsdjeg/picker.nvim`](https://github.com/wsdjeg/picker.nvim) - **(OPTIONAL)**
+
 ### `lazy.nvim`
 
 ```lua
 {
   'DrKJeff16/pipenv.nvim',
-  dependencies = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+  dependencies = {
+    'wsdjeg/job.nvim', -- REQUIRED!
+    'xieyonn/spinner.nvim', -- RECOMMENDED
+    'wsdjeg/picker.nvim', -- OPTIONAL
+  },
   opts = {},
 }
 ```
@@ -42,7 +54,11 @@ https://github.com/user-attachments/assets/e5697041-c01f-4eae-887b-d9277022186e
 require('pckr').add({
   {
     'DrKJeff16/pipenv.nvim',
-    requires = { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+    requires = {
+      'wsdjeg/job.nvim', -- REQUIRED!
+      'xieyonn/spinner.nvim', -- RECOMMENDED
+      'wsdjeg/picker.nvim', -- OPTIONAL
+    },
     config = function()
       require('pipenv').setup()
     end,
@@ -56,7 +72,8 @@ require('pckr').add({
 local paq = require('paq')
 paq({
   'DrKJeff16/pipenv.nvim',
-
+  'wsdjeg/job.nvim', -- REQUIRED!
+  'xieyonn/spinner.nvim', -- RECOMMENDED
   'wsdjeg/picker.nvim', -- OPTIONAL
 })
 ```

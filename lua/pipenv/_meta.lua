@@ -1,5 +1,12 @@
 ---@meta
 
+---@class PipenvSpinner
+---@field id string
+---@field text string
+---@field start fun(self: PipenvSpinner)
+---@field stop fun(self: PipenvSpinner, force?: boolean)
+---@field pause fun(self: PipenvSpinner, force?: boolean)
+
 ---@class Pipenv.SystemOpts: vim.SystemOpts
 
 ---@class PipenvOpts.Output
