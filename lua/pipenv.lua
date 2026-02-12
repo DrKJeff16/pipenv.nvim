@@ -14,6 +14,9 @@ function M.setup(opts)
   end
 
   Config.setup(opts or {})
+  if vim.g.pipenv_setup ~= 1 then
+    return
+  end
 
   require('pipenv.commands').setup()
 end

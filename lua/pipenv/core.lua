@@ -13,14 +13,15 @@ local ec = -1 ---@type integer
 
 ---@return boolean spinner
 local function has_spinner()
-  return Util.mod_exists('spinner')
+  return Util.mod_exists('spinner') and Config.opts.spinner and Config.opts.spinner.enabled
 end
 
 ---@param id string
----@param opts spinner.Opts
+---@param opts spinner.Opts|PipenvSpinner.Opts
 local function new_spinner(id, opts)
   local Spinner = require('spinner')
-  Spinner.config(id, opts)
+  Spinner.config(id, vim.tbl_deep_extend('keep', opts, Config.opts.spinner.opts or {}))
+
   spinner = { ---@type PipenvSpinner
     id = id,
     text = Spinner.render(id),
@@ -38,7 +39,7 @@ end
 
 ---@param cmd string[]
 ---@param on_exit fun(code: integer, out: string, err: string)
----@param opts? Pipenv.SystemOpts
+---@param opts? Pipenv.CommandOpts
 local function run_cmd(cmd, on_exit, opts)
   Util.validate({
     cmd = { cmd, { 'table' } },
@@ -46,7 +47,6 @@ local function run_cmd(cmd, on_exit, opts)
   })
   opts = opts or {}
 
-  opts.text = opts.text ~= nil and opts.text or true
   if Config.env and not vim.tbl_isempty(Config.env) then
     opts.env = vim.tbl_deep_extend('keep', opts.env or {}, Config.env)
   end
@@ -250,7 +250,7 @@ function M.list_scripts()
 end
 
 ---@param opts? Pipenv.GraphOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.graph(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -302,7 +302,7 @@ function M.graph(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.LockOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.lock(opts, cmd_opts)
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -363,7 +363,7 @@ function M.lock(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.CleanOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.clean(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -422,7 +422,7 @@ function M.clean(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.VerifyOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.verify(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -481,7 +481,7 @@ function M.verify(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.SyncOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.sync(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -550,7 +550,7 @@ function M.sync(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.UpgradeOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.update(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -619,7 +619,7 @@ function M.update(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.UpgradeOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.upgrade(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -688,7 +688,7 @@ function M.upgrade(opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.ScriptsOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.scripts(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -741,7 +741,7 @@ end
 
 ---@param packages? string[]|string|nil
 ---@param opts? Pipenv.InstallOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.install(packages, opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -826,7 +826,7 @@ end
 
 ---@param packages string[]|string
 ---@param opts? Pipenv.UninstallOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.uninstall(packages, opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -911,7 +911,7 @@ end
 
 ---@param command string[]|string
 ---@param opts? Pipenv.RunOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.run(command, opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)
@@ -988,7 +988,7 @@ function M.run(command, opts, cmd_opts)
 end
 
 ---@param opts? Pipenv.RequirementsOpts
----@param cmd_opts? Pipenv.SystemOpts
+---@param cmd_opts? Pipenv.CommandOpts
 function M.requirements(opts, cmd_opts)
   if vim.g.pipenv_setup ~= 1 then
     vim.notify('pipenv.nvim is not configured!', ERROR)

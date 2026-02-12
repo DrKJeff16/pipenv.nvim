@@ -1,4 +1,8 @@
 ---@meta
+---@diagnostic disable:unused-local
+
+---@module 'spinner'
+---@module 'job'
 
 ---@class PipenvSpinner
 ---@field id string
@@ -7,7 +11,44 @@
 ---@field stop fun(self: PipenvSpinner, force?: boolean)
 ---@field pause fun(self: PipenvSpinner, force?: boolean)
 
----@class Pipenv.SystemOpts: vim.SystemOpts
+---@class Pipenv.CommandOpts: JobOpts
+
+---Options for customizing your spinner.
+---
+---See https://github.com/xieyonn/spinner.nvim for more info about these options
+--- ---
+---@class PipenvSpinner.Opts
+---@field attach? { text: string, status: PipenvOpts.SpinnerEventStatus }
+---@field border? string|PipenvWinBorders
+---@field bufnr? integer
+---@field col? integer
+---@field fmt? fun(event: { text: string, status: PipenvOpts.SpinnerEventStatus }): string
+---@field hl_group? string
+---@field initial_delay_ms? integer
+---@field kind? PipenvOpts.SpinnerKind
+---@field ns? integer
+---@field on_update_ui? fun(event: { text: string, status: PipenvOpts.SpinnerEventStatus })
+---@field pattern? PipenvOpts.SpinnerPattern
+---@field placeholder? boolean|string
+---@field row? integer
+---@field ttl_ms? integer
+---@field ui_scope? string
+---@field winblend? integer
+---@field zindex? integer
+
+---Options for customizing the `spinner.nvim` integration.
+--- ---
+---@class PipenvOpts.Spinner
+---If `true` it will add a spinner while an operation is running.
+---
+---If `spinner.nvim` is not installed this will raise a warning and be ignored.
+--- ---
+---@field enabled? boolean
+---Options for customizing your spinner.
+---
+---See https://github.com/xieyonn/spinner.nvim for more info about these options
+--- ---
+---@field opts? PipenvSpinner.Opts|spinner.Opts
 
 ---@class PipenvOpts.Output
 ---Can be a number between `0` and `1` (percentage) or a fixed width (only matters if `float` is `true`).
@@ -177,5 +218,111 @@
 ---@field installed_version string
 
 ---@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
+
+---@enum (key) PipenvOpts.SpinnerPattern
+local patterns = {
+  aesthetic = 1,
+  arc = 1,
+  arrow = 1,
+  arrow3 = 1,
+  balloon = 1,
+  balloon2 = 1,
+  betaWave = 1,
+  binary = 1,
+  bounce = 1,
+  bouncingBall = 1,
+  bouncingBar = 1,
+  boxBounce = 1,
+  boxBounce2 = 1,
+  circle = 1,
+  circleHalves = 1,
+  circleQuarters = 1,
+  dots = 1,
+  dots10 = 1,
+  dots11 = 1,
+  dots12 = 1,
+  dots13 = 1,
+  dots14 = 1,
+  dots2 = 1,
+  dots3 = 1,
+  dots4 = 1,
+  dots5 = 1,
+  dots6 = 1,
+  dots7 = 1,
+  dots8 = 1,
+  dots8Bit = 1,
+  dots9 = 1,
+  dotsCircle = 1,
+  dqpb = 1,
+  dwarfFortress = 1,
+  fish = 1,
+  flip = 1,
+  grenade = 1,
+  growHorizontal = 1,
+  growVertical = 1,
+  hamburger = 1,
+  layer = 1,
+  line = 1,
+  line2 = 1,
+  material = 1,
+  noise = 1,
+  pipe = 1,
+  point = 1,
+  pong = 1,
+  rollingLine = 1,
+  sand = 1,
+  shark = 1,
+  simpleDots = 1,
+  simpleDotsScrolling = 1,
+  squareCorners = 1,
+  squish = 1,
+  star = 1,
+  star2 = 1,
+  toggle = 1,
+  toggle10 = 1,
+  toggle11 = 1,
+  toggle12 = 1,
+  toggle13 = 1,
+  toggle2 = 1,
+  toggle3 = 1,
+  toggle4 = 1,
+  toggle5 = 1,
+  toggle6 = 1,
+  toggle7 = 1,
+  toggle8 = 1,
+  toggle9 = 1,
+  triangle = 1,
+}
+
+---@enum (key) PipenvOpts.SpinnerEventStatus
+local spinner_status = {
+  delayed = 1,
+  paused = 1,
+  running = 1,
+  stopped = 1,
+}
+
+---@enum (key) PipenvOpts.SpinnerKind
+local kinds = {
+  ['window-footer'] = 1,
+  ['window-title'] = 1,
+  cmdline = 1,
+  cursor = 1,
+  extmark = 1,
+  statusline = 1,
+  tabline = 1,
+  winbar = 1,
+}
+
+---@enum (key) PipenvWinBorders
+local borders = {
+  bold = 1,
+  double = 1,
+  none = 1,
+  rounded = 1,
+  shadow = 1,
+  single = 1,
+  solid = 1,
+}
 
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

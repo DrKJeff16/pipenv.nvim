@@ -3,6 +3,9 @@
 ---@class PipenvOpts
 ---@field output? PipenvOpts.Output
 ---@field env? PipenvOpts.Env
+---Options for customizing the `spinner.nvim` integration.
+--- ---
+---@field spinner? PipenvOpts.Spinner
 
 local Util = require('pipenv.util')
 
@@ -21,6 +24,27 @@ function M.get_defaults()
       width = 0.85,
       height = 0.85,
       zindex = 100,
+    },
+    spinner = {
+      enabled = false,
+      opts = {
+        border = 'none',
+        hl_group = 'Special',
+        kind = 'cursor',
+        pattern = 'dots13',
+        zindex = 100,
+        -- attach = {},
+        -- col = 0,
+        -- fmt = function(event) return '' end,
+        -- initial_delay_ms = 10,
+        -- ns = 0,
+        -- on_update_ui = function(event) end,
+        -- placeholder = false,
+        -- row = 0,
+        -- ttl_ms = 100,
+        -- ui_scope = 'Foo',
+        -- winblend = 10,
+      },
     },
     env = {},
   }
@@ -108,9 +132,18 @@ end
 ---@param opts? PipenvOpts
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  if not Util.mod_exists('job') then
+    error('`job.nvim` is not installed!', vim.log.levels.ERROR)
+    vim.g.pipenv_setup = 0
+  end
 
   M.opts = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
   M.gen_env()
+
+  if M.opts.spinner.enabled and not Util.mod_exists('spinner') then
+    vim.notify("`spinner.nvim` integration enabled, but it's not installed!", vim.log.levels.WARN)
+    M.opts.spinner.enabled = false
+  end
 
   vim.g.pipenv_setup = 1
 end

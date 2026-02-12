@@ -112,6 +112,28 @@ require('pipenv').setup({
     -- security = {},
     -- behavior = {},
   },
+  spinner = {
+    enabled = false,
+    -- See https://github.com/xieyonn/spinner.nvim for more info about these options
+    opts = {
+      border = 'none',
+      hl_group = 'Special',
+      kind = 'cursor',
+      pattern = 'dots13',
+      zindex = 100,
+      -- attach = {},
+      -- col = 0,
+      -- fmt = function(event) return '' end,
+      -- initial_delay_ms = 10,
+      -- ns = 0,
+      -- on_update_ui = function(event) end,
+      -- placeholder = false,
+      -- row = 0,
+      -- ttl_ms = 100,
+      -- ui_scope = 'Foo',
+      -- winblend = 10,
+    },
+  },
 })
 ```
 
