@@ -7,26 +7,6 @@ local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
----@param create? boolean
----@return boolean pipfile
-local function has_pipfile(create)
-  Util.validate({ create = { create, { 'boolean', 'nil' }, true } })
-  create = create ~= nil and create or false
-
-  if not vim.fn.filereadable('./Pipfile') then
-    if not create or vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
-      vim.notify('No Pipfile found!', ERROR)
-      return false
-    end
-    if not vim.fn.writefile({}, './Pipfile') ~= 0 then
-      vim.notify('Could not create Pipfile!', WARN)
-      return false
-    end
-  end
-
-  return true
-end
-
 ---@param cmd string[]
 ---@param timeout? integer
 ---@param opts? Pipenv.SystemOpts
@@ -46,6 +26,23 @@ local function run_cmd(cmd, timeout, opts)
   end
 
   return vim.system(cmd, opts):wait(timeout)
+end
+
+---@param create? boolean
+---@return boolean pipfile
+local function has_pipfile(create)
+  Util.validate({ create = { create, { 'boolean', 'nil' }, true } })
+  create = create ~= nil and create or false
+
+  if not vim.fn.filereadable('./Pipfile') then
+    if not create or vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
+      vim.notify('No Pipfile found!', ERROR)
+      return false
+    end
+    return run_cmd({ 'pipenv', 'install' }).code == 0
+  end
+
+  return true
 end
 
 ---@class Pipenv.Core
