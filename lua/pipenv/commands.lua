@@ -7,6 +7,7 @@
 ---|'list-installed'
 ---|'list-scripts'
 ---|'lock'
+---|'remove'
 ---|'requirements'
 ---|'run'
 ---|'scripts'
@@ -92,6 +93,7 @@ local function complete_fun(_, lead)
     'list-installed',
     'list-scripts',
     'lock',
+    'remove',
     'requirements',
     'run',
     'scripts',
@@ -133,6 +135,7 @@ local function complete_fun(_, lead)
         'list-installed',
         'list-scripts',
         'lock',
+        'remove',
         'requirements',
         'run',
         'scripts',
@@ -146,7 +149,7 @@ local function complete_fun(_, lead)
   end
   if subcmd then
     if
-      in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts' }, subcmd_val)
+      in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts', 'remove' }, subcmd_val)
       and not (dev or python or file or dev)
     then
       return {}
@@ -323,6 +326,7 @@ function M.cmd_usage(level)
 
   :Pipenv help
   :Pipenv edit
+  :Pipenv remove
   :Pipenv list-installed
   :Pipenv list-scripts
 
@@ -407,6 +411,7 @@ function M.popup(valid, except, opts)
           'edit',
           'graph',
           'lock',
+          'remove',
           'requirements',
           'sync',
           'update',
@@ -439,6 +444,7 @@ function M.setup()
       'list-installed',
       'list-scripts',
       'lock',
+      'remove',
       'requirements',
       'run',
       'scripts',
@@ -533,6 +539,15 @@ function M.setup()
         return
       end
       Core.edit()
+      return
+    end
+    if subcommand == 'remove' then
+      ---@cast subcommand 'remove'
+      if not vim.tbl_isempty(subsubcmd) then
+        M.cmd_usage(WARN)
+        return
+      end
+      Core.remove()
       return
     end
     if in_list({ 'graph', 'scripts' }, subcommand) then

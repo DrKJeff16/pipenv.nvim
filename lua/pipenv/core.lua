@@ -92,7 +92,7 @@ local function has_pipfile(create)
   create = create ~= nil and create or false
 
   if not vim.fn.filereadable('./Pipfile') then
-    if not create or vim.fn.confirm('No Pipfile found. Create?', '&Yes\n&No', 2) ~= 1 then
+    if not (create and Util.yes_no('No Pipfile found. Create?')) then
       vim.notify('No Pipfile found!', ERROR)
       return false
     end
@@ -191,6 +191,62 @@ function M.retrieve_installed()
     end
   end)
   return installed
+end
+
+---@param opts? Pipenv.RemoveOpts
+---@param cmd_opts? Pipenv.CommandOpts
+function M.remove(opts, cmd_opts)
+  if vim.g.pipenv_setup ~= 1 then
+    vim.notify('pipenv.nvim is not configured!', ERROR)
+    return
+  end
+
+  Util.validate({
+    opts = { opts, { 'table', 'nil' }, true },
+    cmd_opts = { cmd_opts, { 'table', 'nil' }, true },
+  })
+  opts = opts or {}
+  cmd_opts = cmd_opts or {}
+
+  Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
+  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+
+  -- Treat as `force` for compatibility with other commands
+  if not opts.verbose then
+    if not Util.yes_no('Remove current Pipenv environment?') then
+      return
+    end
+  end
+
+  local cmd1 = { 'pipenv', '--rm' }
+  run_cmd(cmd1, function(code, out, err)
+    local cmd_str = table.concat(cmd1, ' ')
+    local txt = code ~= 1 and out or err
+    if txt ~= '' then
+      Util.open_win(txt, {
+        height = Config.opts.output.height,
+        width = Config.opts.output.width,
+        title = cmd_str,
+        split = Config.opts.output.split,
+        border = Config.opts.output.border,
+        float = Config.opts.output.float,
+        zindex = Config.opts.output.zindex,
+      })
+      return
+    end
+    vim.notify(('%s - No output'):format(cmd_str), INFO)
+  end, cmd_opts)
+
+  if not has_pipfile(false) then
+    return
+  end
+  if not opts.verbose then
+    if not Util.yes_no('Remove Pipfile and Pipfile.lock?') then
+      return
+    end
+  end
+
+  run_cmd({ 'rm', '-f', 'Pipenv', 'Pipenv.lock' }, function() end, cmd_opts)
 end
 
 function M.list_installed()
@@ -1055,7 +1111,7 @@ function M.requirements(opts, cmd_opts)
 
     local stat = uv.fs_stat(opts.file)
     if stat and stat.size ~= 0 then
-      if vim.fn.confirm(("Overwrite '%s'?"):format(opts.file), '&Yes\n&No', 2) ~= 1 then
+      if Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
         return
       end
     end

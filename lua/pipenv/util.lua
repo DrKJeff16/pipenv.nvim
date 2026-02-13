@@ -21,6 +21,12 @@ local in_list = vim.list_contains
 ---@class Pipenv.Util
 local M = {}
 
+---@param prompt string
+---@return boolean response
+function M.yes_no(prompt)
+  return vim.fn.confirm(prompt, '&Yes\n&No', 2) == 1
+end
+
 ---@param allow_dups boolean
 ---@param ... any[]
 ---@return any[] merged

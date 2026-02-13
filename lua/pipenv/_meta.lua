@@ -194,6 +194,9 @@
 ---@field file? string[]|string|nil
 ---@field python? string
 
+---@class Pipenv.RemoveOpts
+---@field verbose? boolean
+
 ---@class Pipenv.GraphOpts
 ---@field python? string
 

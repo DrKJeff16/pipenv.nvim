@@ -235,6 +235,7 @@ The valid subcommands are:
 - `list-installed`
 - `list-scripts`
 - `lock`
+- `remove` (calling `:Pipenv! remove` will force its execution instead of enabling verbose mode)
 - `requirements`
 - `run`
 - `scripts`
@@ -305,7 +306,6 @@ what flags are valid for parsing and its description.
 | `upgrade`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] upgrade [--dev] [--pre]`             |
 | `verify`         | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] verify`                              |
 
-
 Examples:
 
 ```vim
@@ -322,6 +322,20 @@ Examples:
 :Pipenv! python=3.13 install <PACKAGES>           " verbose=true, python=3.13
 
 :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
+```
+
+Note that the `remove` subcommand only supports a bang (`!`) and treats it as "force" instead of
+"verbose":
+
+| Subcommand | Nargs | Force | Dev | Pre | File | Python | Description                                                                                                            |
+|------------|-------|-------|-----|-----|------|--------|------------------------------------------------------------------------------------------------------------------------|
+| `remove`   | `0`   | 󰄬     | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prompts to run `pipenv --rm` and optionally removes your `Pipfile`. **If called with a bang you will not be prompted** |
+
+Examples:
+
+```vim
+:Pipenv remove     " force=false, you will be prompted
+:Pipenv! remove    " force=true, you will NOT be prompted
 ```
 
 ### `picker.nvim` Integration
