@@ -791,9 +791,6 @@ function M.install(packages, opts, cmd_opts)
           table.insert(cmd, pkg)
         end
       end
-    else
-      vim.notify('(pipenv install): Empty packages table!', ERROR)
-      return
     end
   end
 
