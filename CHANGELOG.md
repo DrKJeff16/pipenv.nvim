@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.2-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.4.2-1) (2026-02-13)
+
+[Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.4.1-1...0.4.2-1)
+
+## [0.4.1-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.4.1-1) (2026-02-12)
+
+[Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.4.0-1...0.4.1-1)
+
+## [0.4.0-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.4.0-1) (2026-02-12)
+
+[Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.3.0-1...0.4.0-1)
+
 ## [0.3.0-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.3.0-1) (2026-02-08)
 
 [Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.2.0-1...0.3.0-1)
