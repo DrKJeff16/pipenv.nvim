@@ -19,7 +19,6 @@
 --- ---
 ---@class PipenvSpinner.Opts
 ---@field attach? { text: string, status: PipenvOpts.SpinnerEventStatus }
----@field border? string|PipenvWinBorders
 ---@field bufnr? integer
 ---@field col? integer
 ---@field fmt? fun(event: { text: string, status: PipenvOpts.SpinnerEventStatus }): string

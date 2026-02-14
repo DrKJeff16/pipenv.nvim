@@ -54,7 +54,13 @@ local function run_cmd(cmd, on_exit, opts)
   stdout, stderr = {}, {}
   local job = require('job')
   if has_spinner() then
-    new_spinner(table.concat(cmd, ' '), { kind = 'cursor' })
+    local default_opts = { ---@type PipenvSpinner.Opts
+      kind = 'cursor',
+    }
+    new_spinner(
+      table.concat(cmd, ' '),
+      vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts)
+    )
     if spinner then
       spinner:start()
     end
