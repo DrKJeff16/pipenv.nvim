@@ -11,6 +11,7 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
 - [Installation](#installation)
   - [`lazy.nvim`](#lazynvim)
   - [`pckr.nvim`](#pckrnvim)
+  - [`nvim-plug`](#nvim-plug)
   - [`paq-nvim`](#paq-nvim)
   - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
@@ -46,6 +47,24 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
   },
   opts = {},
 }
+```
+
+### `nvim-plug`
+
+```lua
+require('plug').add({
+  {
+    'DrKJeff16/pipenv.nvim',
+    depends = {
+      { 'wsdjeg/job.nvim' }, -- REQUIRED!
+      { 'xieyonn/spinner.nvim' }, -- RECOMMENDED
+      { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+    },
+    config = function()
+      require('pipenv').setup()
+    end,
+  }
+})
 ```
 
 ### `pckr.nvim`
