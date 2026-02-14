@@ -116,7 +116,6 @@ require('pipenv').setup({
     enabled = false,
     -- See https://github.com/xieyonn/spinner.nvim for more info about these options
     opts = {
-      border = 'none',
       hl_group = 'Special',
       kind = 'cursor',
       pattern = 'dots13',

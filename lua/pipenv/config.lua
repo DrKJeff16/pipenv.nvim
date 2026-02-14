@@ -28,7 +28,6 @@ function M.get_defaults()
     spinner = {
       enabled = false,
       opts = {
-        border = 'none',
         hl_group = 'Special',
         kind = 'cursor',
         pattern = 'dots13',
