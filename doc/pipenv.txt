@@ -15,6 +15,7 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 - |pipenv-installation|
     - |pipenv-`lazy.nvim`|
     - |pipenv-`pckr.nvim`|
+    - |pipenv-`nvim-plug`|
     - |pipenv-`paq-nvim`|
     - |pipenv-luarocks|
 - |pipenv-configuration|
@@ -51,6 +52,25 @@ LAZY.NVIM ~
       },
       opts = {},
     }
+<
+
+
+NVIM-PLUG ~
+
+>lua
+    require('plug').add({
+      {
+        'DrKJeff16/pipenv.nvim',
+        depends = {
+          { 'wsdjeg/job.nvim' }, -- REQUIRED!
+          { 'xieyonn/spinner.nvim' }, -- RECOMMENDED
+          { 'wsdjeg/picker.nvim' }, -- OPTIONAL
+        },
+        config = function()
+          require('pipenv').setup()
+        end,
+      }
+    })
 <
 
 
