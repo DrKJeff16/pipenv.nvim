@@ -23,9 +23,9 @@ jobs:
           zip -r -9 pipenv.nvim.zip pipenv.nvim
           tar cvJf pipenv.nvim.tar.xz pipenv.nvim
           tar cvzf pipenv.nvim.tar.gz pipenv.nvim
-          sha512sum pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| sha512sums.txt
-          md5sum pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| md5sums.txt
-          rm -rfv pipenv.nvim
+          7z a -mx9 -mmt -sdel pipenv.nvim.7z pipenv.nvim
+          sha512sum pipenv.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| sha512sums.txt
+          md5sum pipenv.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| md5sums.txt
       - name: Get Release
         uses: joutvhu/get-release@v1.0.3
         with:
@@ -46,10 +46,11 @@ jobs:
         with:
           files: |
             Release.txt
+            md5sums.txt
+            sha512sums.txt
+            pipenv.nvim.7z
             pipenv.nvim.tar.gz
             pipenv.nvim.tar.xz
             pipenv.nvim.zip
-            md5sums.txt
-            sha512sums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
 # vim: set ts=2 sts=2 sw=2 et ai si sta:
