@@ -24,8 +24,8 @@ jobs:
           tar cvJf pipenv.nvim.tar.xz pipenv.nvim
           tar cvzf pipenv.nvim.tar.gz pipenv.nvim
           7z a -mx9 -mmt -sdel pipenv.nvim.7z pipenv.nvim
-          sha512sum pipenv.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| sha512sums.txt
-          md5sum pipenv.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| md5sums.txt
+          sha512sum pipenv.nvim.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| sha512sums.txt
+          md5sum pipenv.nvim.7z pipenv.nvim.zip pipenv.nvim.tar.xz pipenv.nvim.tar.gz >| md5sums.txt
       - name: Get Release
         uses: joutvhu/get-release@v1.0.3
         with:
