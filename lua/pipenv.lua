@@ -1,6 +1,5 @@
 local ERROR = vim.log.levels.ERROR
 local Util = require('pipenv.util')
-local Config = require('pipenv.config')
 local Core = require('pipenv.core')
 
 ---@class Pipenv
@@ -13,7 +12,7 @@ function M.setup(opts)
     error('Pipenv not found in your PATH!', ERROR)
   end
 
-  Config.setup(opts or {})
+  require('pipenv.config').setup(opts or {})
   if vim.g.pipenv_setup ~= 1 then
     return
   end
