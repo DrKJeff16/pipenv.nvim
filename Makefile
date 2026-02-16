@@ -1,12 +1,12 @@
 TAGS_CMD = nvim --clean --headless -c 'helptags doc/' -c 'qa!'
 
-.POSIX:
-
-.PHONY: all lint format helptags
+.PHONY: all format help helptags lint
 
 .SUFFIXES:
 
-all:
+all: help
+
+help: ## Show usage
 	@echo -e "Usage: make [target]\n\nAvailable targets:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo
