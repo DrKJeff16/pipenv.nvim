@@ -484,20 +484,29 @@ function M.setup()
           end
         end
       elseif not subcommand then
-        subcommand = arg ---@type Pipenv.ValidOps
+        if vim.list_contains(valid, arg) then
+          subcommand = arg ---@type Pipenv.ValidOps
+        else
+          M.cmd_usage(ERROR)
+          return
+        end
       else
         table.insert(subsubcmd, arg)
       end
     end
 
     if not subcommand then
-      M.popup(valid, { 'help', 'list-installed', 'list-scripts' }, {
-        verbose = ctx.bang,
-        dev = dev,
-        pre = pre,
-        file = file,
-        python = python,
-      })
+      if vim.tbl_isempty(subsubcmd) then
+        M.popup(valid, { 'help', 'list-installed', 'list-scripts' }, {
+          verbose = ctx.bang,
+          dev = dev,
+          pre = pre,
+          file = file,
+          python = python,
+        })
+        return
+      end
+      M.cmd_usage(ERROR)
       return
     end
 
