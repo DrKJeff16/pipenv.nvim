@@ -345,4 +345,25 @@ local borders = {
   solid = 1,
 }
 
+---@enum (key) Pipenv.ValidOps
+local valid_ops = {
+  clean = 1,
+  edit = 1,
+  graph = 1,
+  help = 1,
+  install = 1,
+  ['list-installed'] = 1,
+  ['list-scripts'] = 1,
+  lock = 1,
+  remove = 1,
+  requirements = 1,
+  run = 1,
+  scripts = 1,
+  sync = 1,
+  uninstall = 1,
+  update = 1,
+  upgrade = 1,
+  verify = 1,
+}
+
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

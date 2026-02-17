@@ -1,21 +1,4 @@
----@alias Pipenv.ValidOps
----|'clean'
----|'edit'
----|'graph'
----|'help'
----|'install'
----|'list-installed'
----|'list-scripts'
----|'lock'
----|'remove'
----|'requirements'
----|'run'
----|'scripts'
----|'sync'
----|'uninstall'
----|'update'
----|'upgrade'
----|'verify'
+---@module 'pipenv._meta'
 
 local in_list = vim.list_contains
 local INFO = vim.log.levels.INFO
