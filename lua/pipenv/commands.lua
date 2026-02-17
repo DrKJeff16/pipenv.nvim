@@ -460,8 +460,8 @@ function M.setup()
     local subsubcmd = {} ---@type string[]
     for _, arg in ipairs(ctx.fargs) do
       if arg:find('=') then
-        local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = false })
-        if #subsubcommand > 1 then
+        local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = true })
+        if #subsubcommand == 2 then
           if subsubcommand[1] == 'dev' then
             if not in_list({ 'true', 'false' }, subsubcommand[2]) then
               M.cmd_usage(WARN)
@@ -479,9 +479,12 @@ function M.setup()
           elseif subsubcommand[1] == 'python' then
             python = subsubcommand[2]
           else
-            M.cmd_usage(WARN)
+            M.cmd_usage(ERROR)
             return
           end
+        else
+          M.cmd_usage(ERROR)
+          return
         end
       elseif not subcommand then
         if vim.list_contains(valid, arg) then
