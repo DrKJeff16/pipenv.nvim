@@ -11,7 +11,7 @@
 ---@field stop fun(self: PipenvSpinner, force?: boolean)
 ---@field pause fun(self: PipenvSpinner, force?: boolean)
 
----@class Pipenv.CommandOpts: JobOpts
+---@class Pipenv.CmdOpts: JobOpts
 
 ---Options for customizing your spinner.
 ---
@@ -220,6 +220,24 @@
 ---@field installed_version string
 
 ---@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
+
+---@class PipenvOpts
+---@field output? PipenvOpts.Output
+---@field env? PipenvOpts.Env
+---Options for customizing the `spinner.nvim` integration.
+--- ---
+---@field spinner? PipenvOpts.Spinner
+
+---@class PipenvEnvType
+---@field type 'string'|'boolean'|'number'
+---@field var string
+
+---@class PipenvEnvTypes
+---@field behavior table<string, PipenvEnvType>
+---@field file_location table<string, PipenvEnvType>
+---@field install table<string, PipenvEnvType>
+---@field security table<string, PipenvEnvType>
+---@field virtual_env table<string, PipenvEnvType>
 
 ---@enum (key) PipenvOpts.SpinnerPattern
 local patterns = {

@@ -1,12 +1,7 @@
 ---@module 'pipenv._meta'
 
----@class PipenvOpts
----@field output? PipenvOpts.Output
----@field env? PipenvOpts.Env
----Options for customizing the `spinner.nvim` integration.
---- ---
----@field spinner? PipenvOpts.Spinner
-
+local ERROR = vim.log.levels.ERROR
+local WARN = vim.log.levels.WARN
 local Util = require('pipenv.util')
 
 ---@class Pipenv.Config
@@ -55,13 +50,7 @@ function M.gen_env()
     return
   end
 
-  ---@class Pipenv.EnvTypes
-  ---@field install { type: 'string'|'boolean'|'number', var: string }
-  ---@field virtual_env { type: 'string'|'boolean'|'number', var: string }
-  ---@field file_location { type: 'string'|'boolean'|'number', var: string }
-  ---@field behavior { type: 'string'|'boolean'|'number', var: string }
-  ---@field security { type: 'string'|'boolean'|'number', var: string }
-  local types = {
+  local types = { ---@type PipenvEnvTypes
     install = {
       install_dependencies = { type = 'boolean', var = 'PIPENV_INSTALL_DEPENDENCIES' },
       install_timeout = { type = 'number', var = 'PIPENV_INSTALL_TIMEOUT' },
@@ -98,9 +87,7 @@ function M.gen_env()
       site_packages = { type = 'boolean', var = 'PIPENV_SITE_PACKAGES' },
       verbose = { type = 'boolean', var = 'PIPENV_VERBOSE' },
     },
-    security = {
-      pyup_api_key = { type = 'string', var = 'PIPENV_PYUP_Core_KEY' },
-    },
+    security = { pyup_api_key = { type = 'string', var = 'PIPENV_PYUP_Core_KEY' } },
   }
 
   local err = ''
@@ -124,7 +111,7 @@ function M.gen_env()
   end
 
   if err ~= '' then
-    vim.notify(err, vim.log.levels.ERROR)
+    vim.notify(err, ERROR)
   end
 end
 
@@ -132,7 +119,7 @@ end
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   if not Util.mod_exists('job') then
-    error('`job.nvim` is not installed!', vim.log.levels.ERROR)
+    error('`job.nvim` is not installed!', ERROR)
     vim.g.pipenv_setup = 0
   end
 
@@ -140,7 +127,7 @@ function M.setup(opts)
   M.gen_env()
 
   if M.opts.spinner.enabled and not Util.mod_exists('spinner') then
-    vim.notify("`spinner.nvim` integration enabled, but it's not installed!", vim.log.levels.WARN)
+    vim.notify("`spinner.nvim` integration enabled, but it's not installed!", WARN)
     M.opts.spinner.enabled = false
   end
 

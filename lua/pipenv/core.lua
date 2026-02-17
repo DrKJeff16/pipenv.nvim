@@ -1,4 +1,5 @@
 ---@module 'pipenv._meta'
+---@module 'spinner'
 
 local Util = require('pipenv.util')
 local Config = require('pipenv.config')
@@ -39,7 +40,7 @@ end
 
 ---@param cmd string[]
 ---@param on_exit fun(code: integer, out: string, err: string)
----@param opts? Pipenv.CommandOpts
+---@param opts? Pipenv.CmdOpts
 local function run_cmd(cmd, on_exit, opts)
   Util.validate({
     cmd = { cmd, { 'table' } },
@@ -47,6 +48,11 @@ local function run_cmd(cmd, on_exit, opts)
   })
   opts = opts or {}
 
+  Util.validate({
+    ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
+    ['opts.cwd'] = { opts.cwd, { 'string', 'nil' }, true },
+  })
+  opts.cwd = opts.cwd or uv.cwd()
   if Config.env and not vim.tbl_isempty(Config.env) then
     opts.env = vim.tbl_deep_extend('keep', opts.env or {}, Config.env)
   end
@@ -67,7 +73,7 @@ local function run_cmd(cmd, on_exit, opts)
   end
   local jobid = job.start(cmd, {
     env = opts.env,
-    cwd = uv.cwd(),
+    cwd = opts.cwd,
     on_stdout = function(_, data)
       table.insert(stdout, table.concat(data, '\n'))
     end,
@@ -1116,16 +1122,13 @@ function M.requirements(opts, cmd_opts)
     end
 
     local stat = uv.fs_stat(opts.file)
-    if stat and stat.size ~= 0 then
-      if Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
-        return
-      end
+    if stat and stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
+      return
     end
 
-    if
-      vim.fn.writefile(vim.split(out, '\n', { plain = true, trimempty = false }), opts.file) == -1
-    then
+    if vim.fn.writefile(vim.split(out, '\n', { trimempty = false }), opts.file) == -1 then
       vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
+      return
     end
 
     if opts.verbose then

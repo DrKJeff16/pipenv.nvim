@@ -47,8 +47,9 @@ function M.merge_lists(allow_dups, ...)
   return allow_dups and merged or M.dedup(merged)
 end
 
+---@generic T
 ---@param T table
----@param keys (string|integer)[]
+---@param keys T[]
 ---@param reference table
 ---@return table T
 function M.deep_clean(T, keys, reference)
@@ -66,8 +67,9 @@ function M.deep_clean(T, keys, reference)
   return T
 end
 
+---@generic T
 ---@param t type
----@param data nil|number|string|boolean|table|function
+---@param data T
 ---@param sep? string
 ---@param constraints? string[]
 ---@return string
@@ -122,16 +124,17 @@ function M.format_per_type(t, data, sep, constraints)
   return msg
 end
 
----@param T any[]
+---@generic T
+---@param T T[]
 ---@param elem any
----@return any[] new_tbl
+---@return T[] new_tbl
 function M.remove_elem(T, elem)
   M.validate({ T = { T, { 'table' } } })
   if vim.tbl_isempty(T) or not vim.islist(T) then
     return T
   end
 
-  local new_tbl = {} ---@type any[]
+  local new_tbl = {}
   for _, v in ipairs(T) do
     if not vim.deep_equal(v, elem) then
       table.insert(new_tbl, v)
@@ -305,8 +308,9 @@ end
 ---If the data passed to the function is not a table,
 ---an error will be raised.
 --- ---
----@param T any[]
----@return any[] NT
+---@generic T
+---@param T T[]
+---@return T[] NT
 function M.dedup(T)
   M.validate({ T = { T, { 'table' } } })
   if vim.tbl_isempty(T) then
@@ -359,7 +363,8 @@ function M.validate(T)
   vim.validate(T)
 end
 
----@param T table<string|integer, any>
+---@generic T
+---@param T table<string|integer, T>
 ---@return integer len
 function M.get_dict_size(T)
   M.validate({ T = { T, { 'table' } } })
@@ -369,7 +374,7 @@ function M.get_dict_size(T)
   end
 
   local len = 0
-  for _, _ in pairs(T) do
+  for _ in pairs(T) do
     len = len + 1
   end
   return len
@@ -382,11 +387,11 @@ end
 ---If the data passed to the function is not a table,
 ---an error will be raised.
 --- ---
----@param T any[]
----@return any[] T
+---@generic T
+---@param T T[]
+---@return T[] T
 function M.reverse(T)
   M.validate({ T = { T, { 'table' } } })
-
   if vim.tbl_isempty(T) then
     return T
   end
@@ -401,9 +406,10 @@ end
 ---Checks if module `mod` exists to be imported.
 --- ---
 ---@param mod string The `require()` argument to be checked
----@param ret? boolean Whether to return the called module
+---@param ret true Whether to return the called module
 ---@return boolean exists A boolean indicating whether the module exists or not
 ---@return unknown? module
+---@overload fun(mod: string): exists: boolean
 function M.mod_exists(mod, ret)
   M.validate({
     mod = { mod, { 'string' } },
@@ -443,8 +449,9 @@ end
 ---
 ---If `data` is `nil`, the function will always return `false`.
 --- ---
+---@generic T
 ---@param t type Any return value the `type()` function would return
----@param data any The data to be type-checked
+---@param data T The data to be type-checked
 ---@return boolean correct_type
 function M.is_type(t, data)
   return data ~= nil and type(data) == t
