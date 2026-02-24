@@ -255,22 +255,27 @@ function M.open_win(data, opts)
       zindex = opts.zindex,
     }
   end
+
+  if vim.fn.mode() ~= 'n' then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'i', false)
+  end
   local win = vim.api.nvim_open_win(bufnr, true, win_opts)
 
-  vim.api.nvim_set_option_value('filetype', opts.ft, { buf = bufnr })
-  vim.api.nvim_set_option_value('fileencoding', 'utf-8', { buf = bufnr })
+  local buf_option, win_option = { buf = bufnr }, { win = win } ---@type vim.api.keyset.option, vim.api.keyset.option
+  vim.api.nvim_set_option_value('filetype', opts.ft, buf_option)
+  vim.api.nvim_set_option_value('fileencoding', 'utf-8', buf_option)
 
-  vim.api.nvim_set_option_value('foldenable', false, { win = win })
-  vim.api.nvim_set_option_value('list', false, { win = win })
-  vim.api.nvim_set_option_value('number', false, { win = win })
-  vim.api.nvim_set_option_value('signcolumn', 'no', { win = win })
-  vim.api.nvim_set_option_value('spell', false, { win = win })
-  vim.api.nvim_set_option_value('wrap', false, { win = win })
+  vim.api.nvim_set_option_value('foldenable', false, win_option)
+  vim.api.nvim_set_option_value('list', false, win_option)
+  vim.api.nvim_set_option_value('number', false, win_option)
+  vim.api.nvim_set_option_value('signcolumn', 'no', win_option)
+  vim.api.nvim_set_option_value('spell', false, win_option)
+  vim.api.nvim_set_option_value('wrap', false, win_option)
 
-  vim.api.nvim_set_option_value('modifiable', opts.modifiable, { buf = bufnr })
-  vim.api.nvim_set_option_value('buftype', opts.modifiable and '' or 'nowrite', { buf = bufnr })
+  vim.api.nvim_set_option_value('modifiable', opts.modifiable, buf_option)
+  vim.api.nvim_set_option_value('buftype', opts.modifiable and '' or 'nowrite', buf_option)
   if opts.modifiable then
-    vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
+    vim.api.nvim_set_option_value('modified', false, buf_option)
   end
 
   vim.keymap.set('n', 'q', function()
