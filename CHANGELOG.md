@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.5.0-1) (2026-02-25)
+
+[Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.4.3-1...0.5.0-1)
+
+## [0.4.3-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.4.3-1) (2026-02-15)
+
+[Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.4.2-1...0.4.3-1)
+
+**Merged pull requests:**
+
+- docs\(readme\): remove border options for cursor spinner [\#2](https://github.com/DrKJeff16/pipenv.nvim/pull/2) ([xieyonn](https://github.com/xieyonn))
+
 ## [0.4.2-1](https://github.com/DrKJeff16/pipenv.nvim/tree/0.4.2-1) (2026-02-13)
 
 [Full Changelog](https://github.com/DrKJeff16/pipenv.nvim/compare/0.4.1-1...0.4.2-1)
