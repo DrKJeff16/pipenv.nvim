@@ -311,13 +311,13 @@ what flags are valid for parsing and its description.
 | `edit`           | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Edit the `Pipfile` or create a blank one if none exists                |
 | `list-installed` | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the installed packages in a window                               |
 | `list-scripts`   | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the defined scripts in the Pipfile                               |
-| `scripts`        | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] scripts`            |
 | `graph`          | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] graph`              |
 | `clean`          | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] clean`                               |
 | `install`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...] [--pre]`   |
 | `lock`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] lock [--dev] [--pre]`                |
 | `requirements`   | `*`   | 󰄬       | 󰄬   | 󰅖   | 󰄬    | 󰄬      | Runs `pipenv [--python <VERSION>] requirements [--dev]`                |
 | `run`            | `+`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] run ...`                             |
+| `scripts`        | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] scripts`            |
 | `sync`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] sync [--dev] [--pre]`                |
 | `uninstall`      | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] uninstall [--dev] [--pre] [ARGS...]` |
 | `update`         | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] update [--dev] [--pre]`              |
@@ -384,10 +384,12 @@ The operations used by the `:Pipenv` user command are the following:
 | `:Pipenv list-scripts`   | `require('pipenv.core').list_scripts()`   |
 | `:Pipenv lock`           | `require('pipenv.core').lock()`           |
 | `:Pipenv requirements`   | `require('pipenv.core').requirements()`   |
+| `:Pipenv remove`         | `require('pipenv.core').remove()`         |
 | `:Pipenv run`            | `require('pipenv.core').run()`            |
 | `:Pipenv scripts`        | `require('pipenv.core').scripts()`        |
 | `:Pipenv sync`           | `require('pipenv.core').sync()`           |
 | `:Pipenv uninstall`      | `require('pipenv.core').uninstall()`      |
+| `:Pipenv update`         | `require('pipenv.core').update()`         |
 | `:Pipenv upgrade`        | `require('pipenv.core').upgrade()`        |
 | `:Pipenv verify`         | `require('pipenv.core').verify()`         |
 
