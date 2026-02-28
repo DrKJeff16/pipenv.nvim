@@ -49,8 +49,8 @@ local function run_cmd(cmd, on_exit, opts)
   opts = opts or {}
 
   Util.validate({
-    ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
     ['opts.cwd'] = { opts.cwd, { 'string', 'nil' }, true },
+    ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
   })
   opts.cwd = opts.cwd or uv.cwd()
   if Config.env and not vim.tbl_isempty(Config.env) then
@@ -236,12 +236,12 @@ function M.remove(opts, cmd_opts)
     local txt = code ~= 1 and out or err
     if txt ~= '' then
       Util.open_win(txt, {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -280,9 +280,9 @@ function M.list_installed()
     height = 0.7,
     width = 0.4,
     title = 'Installed Packages',
-    split = Config.opts.output.split,
     border = Config.opts.output.border,
     float = Config.opts.output.float,
+    split = Config.opts.output.split,
     zindex = Config.opts.output.zindex,
   })
 end
@@ -310,9 +310,9 @@ function M.list_scripts()
     height = 0.4,
     width = 0.3,
     title = 'Scripts',
-    split = Config.opts.output.split,
     border = Config.opts.output.border,
     float = Config.opts.output.float,
+    split = Config.opts.output.split,
     zindex = Config.opts.output.zindex,
   })
 end
@@ -355,12 +355,12 @@ function M.graph(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -382,8 +382,8 @@ function M.lock(opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -416,12 +416,12 @@ function M.lock(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -449,8 +449,8 @@ function M.clean(opts, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
   opts.python = opts.python or nil
@@ -475,12 +475,12 @@ function M.clean(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -508,8 +508,8 @@ function M.verify(opts, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
   opts.python = opts.python or nil
@@ -534,12 +534,12 @@ function M.verify(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -569,8 +569,8 @@ function M.sync(opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -603,12 +603,12 @@ function M.sync(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -638,8 +638,8 @@ function M.update(opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -672,12 +672,12 @@ function M.update(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -707,8 +707,8 @@ function M.upgrade(opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -741,12 +741,12 @@ function M.upgrade(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -793,12 +793,12 @@ function M.scripts(opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -828,8 +828,8 @@ function M.install(packages, opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -875,12 +875,12 @@ function M.install(packages, opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -912,8 +912,8 @@ function M.uninstall(packages, opts, cmd_opts)
   Util.validate({
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     pre = { opts.pre, { 'boolean', 'nil' }, true },
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.pre = opts.pre ~= nil and opts.pre or false
@@ -960,12 +960,12 @@ function M.uninstall(packages, opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -995,8 +995,8 @@ function M.run(command, opts, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.verbose = opts.verbose ~= nil and opts.verbose or false
   opts.python = opts.python or nil
@@ -1038,12 +1038,12 @@ function M.run(command, opts, cmd_opts)
     end
     if out and out ~= '' then
       Util.open_win(Util.trim_output(out), {
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
@@ -1071,10 +1071,10 @@ function M.requirements(opts, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({
-    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
     dev = { opts.dev, { 'boolean', 'nil' }, true },
     file = { opts.file, { 'string', 'table', 'nil' }, true },
     python = { opts.python, { 'string', 'nil' }, true },
+    verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
   opts.dev = opts.dev ~= nil and opts.dev or false
   opts.file = opts.file or nil
@@ -1105,36 +1105,72 @@ function M.requirements(opts, cmd_opts)
       return
     end
 
-    out = Util.trim_output(out)
-
     if not opts.file or opts.file == '' then
-      Util.open_win(out, {
+      Util.open_win(Util.trim_output(out), {
         ft = 'requirements',
-        height = Config.opts.output.height,
-        width = Config.opts.output.width,
         title = cmd_str,
-        split = Config.opts.output.split,
         border = Config.opts.output.border,
         float = Config.opts.output.float,
+        height = Config.opts.output.height,
+        split = Config.opts.output.split,
+        width = Config.opts.output.width,
         zindex = Config.opts.output.zindex,
       })
       return
     end
 
     local stat = uv.fs_stat(opts.file)
-    if stat and stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
-      return
+    if stat then
+      if stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
+        return
+      end
     end
 
-    if vim.fn.writefile(vim.split(out, '\n', { trimempty = false }), opts.file) == -1 then
+    local fd = uv.fs_open(opts.file, 'w', tonumber('644', 8))
+    if not fd then
       vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
       return
     end
+
+    uv.fs_write(fd, vim.split(out, '\n', { trimempty = false }))
+    uv.fs_close(fd)
 
     if opts.verbose then
       vim.notify(('(%s): Wrote requirements to `%s`!'):format(cmd_str, opts.file), INFO)
     end
   end, cmd_opts)
+end
+
+---@param level? vim.log.levels
+function M.help(level)
+  Util.validate({ level = { level, { 'number', 'nil' }, true } })
+  level = (level and Util.is_int(level, level <= 5 and level >= 0)) and level or INFO
+
+  vim.notify(
+    [[Usage:
+  :Pipenv[!] [dev=true|false] [file=/path/to/file] [python=<VERSION>] [pre=true|false] [<OPERATION>]
+
+Subcommands:
+  :Pipenv edit
+  :Pipenv graph [python=<VERSION>]
+  :Pipenv help
+  :Pipenv list-installed
+  :Pipenv list-scripts
+  :Pipenv scripts [python=<VERSION>]
+  :Pipenv[!] clean [python=<VERSION>]
+  :Pipenv[!] install [dev=true|false] [pre=true|false] [python=<VERSION>] [<pkg1> [<pkg2> [...]\]\]
+  :Pipenv[!] lock [pre=true|false] [python=<VERSION>]
+  :Pipenv[!] remove
+  :Pipenv[!] requirements [dev=true|false] [file=/path/to/file] [python=<VERSION>]
+  :Pipenv[!] run [python=<VERSION>] <command> [<args> [...]\]
+  :Pipenv[!] sync [dev=true|false] [pre=true|false] [python=<VERSION>]
+  :Pipenv[!] uninstall [dev=true|false] [pre=true|false] [python=<VERSION>] <pkg1> [...]
+  :Pipenv[!] update [dev=true|false] [pre=true|false] [python=<VERSION>]
+  :Pipenv[!] upgrade [dev=true|false] [pre=true|false] [python=<VERSION>]
+  :Pipenv[!] verify [python=<VERSION>]
+]],
+    level
+  )
 end
 
 local Core = setmetatable(M, { ---@type Pipenv.Core

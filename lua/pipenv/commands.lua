@@ -299,36 +299,6 @@ local function complete_fun(_, lead)
   return {}
 end
 
----@param level? vim.log.levels
-function M.cmd_usage(level)
-  Util.validate({ level = { level, { 'number', 'nil' }, true } })
-  level = (level and Util.is_int(level, level <= 5 and level >= 0)) and level or INFO
-
-  local msg =
-    [[Usage - :Pipenv[!] [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION] [pre=true|false] [<OPERATION>]
-
-  :Pipenv help
-  :Pipenv edit
-  :Pipenv remove
-  :Pipenv list-installed
-  :Pipenv list-scripts
-
-  :Pipenv graph [python=PYTHON_VERSION]
-  :Pipenv scripts [python=PYTHON_VERSION]
-  :Pipenv[!] requirements [dev=true|false] [file=/path/to/file] [python=PYTHON_VERSION]
-  :Pipenv[!] clean [python=PYTHON_VERSION]
-  :Pipenv[!] install [dev=true|false] [pre=true|false] [python=PYTHON_VERSION] [<pkg1> [<pkg2> [...]\]\]
-  :Pipenv[!] lock [pre=true|false] [python=PYTHON_VERSION]
-  :Pipenv[!] run [python=PYTHON_VERSION] <command> [<args> [...]\]
-  :Pipenv[!] sync [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
-  :Pipenv[!] uninstall [dev=true|false] [pre=true|false] [python=PYTHON_VERSION] <pkg1> [...]
-  :Pipenv[!] update [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
-  :Pipenv[!] upgrade [dev=true|false] [pre=true|false] [python=PYTHON_VERSION]
-  :Pipenv[!] verify [python=PYTHON_VERSION]\]]
-
-  vim.notify(msg, level)
-end
-
 ---@class Pipenv.Util.PopupOpts
 ---@field dev? boolean
 ---@field pre? boolean
@@ -447,13 +417,13 @@ function M.setup()
         if #subsubcommand == 2 then
           if subsubcommand[1] == 'dev' then
             if not in_list({ 'true', 'false' }, subsubcommand[2]) then
-              M.cmd_usage(WARN)
+              Core.help(WARN)
               return
             end
             dev = subsubcommand[2] == 'true' and true or false
           elseif subsubcommand[1] == 'pre' then
             if not in_list({ 'true', 'false' }, subsubcommand[2]) then
-              M.cmd_usage(WARN)
+              Core.help(WARN)
               return
             end
             pre = subsubcommand[2] == 'true' and true or false
@@ -462,18 +432,18 @@ function M.setup()
           elseif subsubcommand[1] == 'python' then
             python = subsubcommand[2]
           else
-            M.cmd_usage(ERROR)
+            Core.help(ERROR)
             return
           end
         else
-          M.cmd_usage(ERROR)
+          Core.help(ERROR)
           return
         end
       elseif not subcommand then
         if vim.list_contains(valid, arg) then
           subcommand = arg ---@type Pipenv.ValidOps
         else
-          M.cmd_usage(ERROR)
+          Core.help(ERROR)
           return
         end
       else
@@ -492,13 +462,13 @@ function M.setup()
         })
         return
       end
-      M.cmd_usage(ERROR)
+      Core.help(ERROR)
       return
     end
 
     if subcommand == 'help' then
       ---@cast subcommand 'help'
-      M.cmd_usage(INFO)
+      Core.help(INFO)
       return
     end
     if subcommand == 'install' then
@@ -512,7 +482,7 @@ function M.setup()
     if subcommand == 'list-scripts' then
       ---@cast subcommand 'list-scripts'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core.list_scripts()
@@ -521,7 +491,7 @@ function M.setup()
     if subcommand == 'list-installed' then
       ---@cast subcommand 'list-installed'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core.list_installed()
@@ -530,7 +500,7 @@ function M.setup()
     if subcommand == 'edit' then
       ---@cast subcommand 'edit'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core.edit()
@@ -539,7 +509,7 @@ function M.setup()
     if subcommand == 'remove' then
       ---@cast subcommand 'remove'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core.remove()
@@ -548,7 +518,7 @@ function M.setup()
     if in_list({ 'graph', 'scripts' }, subcommand) then
       ---@cast subcommand 'graph'|'scripts'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core[subcommand]({ python = python })
@@ -557,7 +527,7 @@ function M.setup()
     if in_list({ 'verify', 'clean', 'lock' }, subcommand) then
       ---@cast subcommand 'verify'|'clean'|'lock'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core[subcommand]({ verbose = ctx.bang, python = python })
@@ -566,7 +536,7 @@ function M.setup()
     if subcommand == 'run' then
       ---@cast subcommand 'run'
       if vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
 
@@ -576,7 +546,7 @@ function M.setup()
     if vim.list_contains({ 'sync', 'update', 'upgrade' }, subcommand) then
       ---@cast subcommand 'sync'|'upgrade'|'update'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core[subcommand]({ dev = dev, verbose = ctx.bang, python = python, pre = pre })
@@ -585,14 +555,14 @@ function M.setup()
     if subcommand == 'requirements' then
       ---@cast subcommand 'requirements'
       if not vim.tbl_isempty(subsubcmd) then
-        M.cmd_usage(WARN)
+        Core.help(WARN)
         return
       end
       Core.requirements({ file = file, dev = dev, python = python, verbose = ctx.bang })
       return
     end
 
-    M.cmd_usage(WARN)
+    Core.help(WARN)
   end, {
     nargs = '*',
     bang = true,

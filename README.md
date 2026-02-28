@@ -307,13 +307,13 @@ what flags are valid for parsing and its description.
 
 | Subcommand       | Nargs | Verbose | Dev | Pre | File | Python | Description                                                            |
 |------------------|-------|---------|-----|-----|------|--------|------------------------------------------------------------------------|
-| `help`           | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prints the usage message                                               |
-| `edit`           | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Edit the `Pipfile` or create a blank one if none exists                |
-| `list-installed` | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the installed packages in a window                               |
-| `list-scripts`   | `0`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the defined scripts in the Pipfile                               |
-| `graph`          | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] graph`              |
 | `clean`          | `*`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] clean`                               |
+| `edit`           | 0     | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Edit the `Pipfile` or create a blank one if none exists                |
+| `graph`          | `*`   | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Returns the output of `pipenv [--python <VERSION>] graph`              |
+| `help`           | 0     | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prints the usage message                                               |
 | `install`        | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] install [--dev] [ARGS...] [--pre]`   |
+| `list-installed` | 0     | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the installed packages in a window                               |
+| `list-scripts`   | 0     | 󰅖       | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Lists the defined scripts in the Pipfile                               |
 | `lock`           | `*`   | 󰄬       | 󰄬   | 󰄬   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] lock [--dev] [--pre]`                |
 | `requirements`   | `*`   | 󰄬       | 󰄬   | 󰅖   | 󰄬    | 󰄬      | Runs `pipenv [--python <VERSION>] requirements [--dev]`                |
 | `run`            | `+`   | 󰄬       | 󰅖   | 󰅖   | 󰅖    | 󰄬      | Runs `pipenv [--python <VERSION>] run ...`                             |
@@ -345,9 +345,9 @@ Examples:
 Note that the `remove` subcommand only supports a bang (`!`) and treats it as "force" instead of
 "verbose":
 
-| Subcommand | Nargs | Force | Dev | Pre | File | Python | Description                                                                                                            |
-|------------|-------|-------|-----|-----|------|--------|------------------------------------------------------------------------------------------------------------------------|
-| `remove`   | `0`   | 󰄬     | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prompts to run `pipenv --rm` and optionally removes your `Pipfile`. **If called with a bang you will not be prompted** |
+| Subcommand | Nargs | Force | Dev | Pre | File | Python | Description                                                                                                                                     |
+|------------|-------|-------|-----|-----|------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `remove`   | `0`   | 󰄬     | 󰅖   | 󰅖   | 󰅖    | 󰅖      | Prompts to run `pipenv --rm` and optionally removes your `Pipfile` and `Pipfile.lock` files. **If called with a bang you will not be prompted** |
 
 Examples:
 
@@ -379,12 +379,13 @@ The operations used by the `:Pipenv` user command are the following:
 | `:Pipenv clean`          | `require('pipenv.core').clean()`          |
 | `:Pipenv edit`           | `require('pipenv.core').edit()`           |
 | `:Pipenv graph`          | `require('pipenv.core').graph()`          |
+| `:Pipenv help`           | `require('pipenv.core').help()`           |
 | `:Pipenv install`        | `require('pipenv.core').install()`        |
 | `:Pipenv list-installed` | `require('pipenv.core').list_installed()` |
 | `:Pipenv list-scripts`   | `require('pipenv.core').list_scripts()`   |
 | `:Pipenv lock`           | `require('pipenv.core').lock()`           |
-| `:Pipenv requirements`   | `require('pipenv.core').requirements()`   |
 | `:Pipenv remove`         | `require('pipenv.core').remove()`         |
+| `:Pipenv requirements`   | `require('pipenv.core').requirements()`   |
 | `:Pipenv run`            | `require('pipenv.core').run()`            |
 | `:Pipenv scripts`        | `require('pipenv.core').scripts()`        |
 | `:Pipenv sync`           | `require('pipenv.core').sync()`           |
