@@ -1,5 +1,5 @@
 ---Non-legacy validation spec (>=v0.11)
----@class ValidateSpec
+---@class ValidateSpec: vim.validate.Spec
 ---@field [1] any
 ---@field [2] vim.validate.Validator
 ---@field [3]? boolean
@@ -31,12 +31,12 @@ end
 ---@param ... any[]
 ---@return any[] merged
 function M.merge_lists(allow_dups, ...)
-  vim.validate({ allow_dups = { allow_dups, { 'boolean' } } })
+  M.validate({ allow_dups = { allow_dups, { 'boolean' } } })
 
   local merged = {} ---@type any[]
   for i = 1, select('#', ...), 1 do
     local list_n = select(i, ...) ---@type any[]
-    vim.validate({ ['list_' .. tostring(i)] = { list_n, { 'table' } } })
+    M.validate({ ['list_' .. tostring(i)] = { list_n, { 'table' } } })
     if not vim.islist(list_n) then
       error(('list_%d is not a list!'):format(i), vim.log.levels.ERROR)
     end
