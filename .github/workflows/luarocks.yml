@@ -16,6 +16,7 @@ jobs:
           license: "GPLv2"
           dependencies: |
             job.nvim
+            spinner.nvim
           detailed_description: |
             Manage Pipenv from within Neovim.
           labels: |
