@@ -17,25 +17,37 @@ local function has_spinner()
   return Util.mod_exists('spinner') and Config.opts.spinner and Config.opts.spinner.enabled
 end
 
+---@class PipenvSpinner
+---@field id string
+---@field text string
+local S = {}
+
+function S:start()
+  require('spinner').start(self.id)
+end
+
+---@param force? boolean
+function S:stop(force)
+  require('spinner').stop(self.id, force)
+end
+
+---@param force? boolean
+function S:pause(force)
+  require('spinner').stop(self.id, force)
+end
+
 ---@param id string
 ---@param opts spinner.Opts|PipenvSpinner.Opts
-local function new_spinner(id, opts)
+---@return PipenvSpinner spinner
+function S.new(id, opts)
   local Spinner = require('spinner')
   Spinner.config(id, vim.tbl_deep_extend('keep', opts, Config.opts.spinner.opts or {}))
 
-  spinner = { ---@type PipenvSpinner
+  local s = setmetatable({ ---@type PipenvSpinner
     id = id,
     text = Spinner.render(id),
-    start = function(self)
-      Spinner.start(self.id)
-    end,
-    stop = function(self, force)
-      Spinner.stop(self.id, force)
-    end,
-    pause = function(self, force)
-      Spinner.stop(self.id, force)
-    end,
-  }
+  }, { __index = S })
+  return s
 end
 
 ---@param cmd string[]
@@ -63,7 +75,7 @@ local function run_cmd(cmd, on_exit, opts)
     local default_opts = { ---@type PipenvSpinner.Opts
       kind = 'cursor',
     }
-    new_spinner(
+    spinner = S.new(
       table.concat(cmd, ' '),
       vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts)
     )
@@ -101,7 +113,9 @@ end
 ---@return boolean pipfile
 local function has_pipfile(create)
   Util.validate({ create = { create, { 'boolean', 'nil' }, true } })
-  create = create ~= nil and create or false
+  if create == nil then
+    create = false
+  end
 
   if not vim.fn.filereadable('./Pipfile') then
     if not (create and Util.yes_no('No Pipfile found. Create?')) then
@@ -221,7 +235,9 @@ function M.remove(opts, cmd_opts)
   cmd_opts = cmd_opts or {}
 
   Util.validate({ verbose = { opts.verbose, { 'boolean', 'nil' }, true } })
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
 
   -- Treat as `force` for compatibility with other commands
   if not opts.verbose then
@@ -385,9 +401,15 @@ function M.lock(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -452,7 +474,9 @@ function M.clean(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -511,7 +535,9 @@ function M.verify(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -572,9 +598,15 @@ function M.sync(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -641,9 +673,15 @@ function M.update(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -710,9 +748,15 @@ function M.upgrade(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -831,9 +875,15 @@ function M.install(packages, opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -915,9 +965,15 @@ function M.uninstall(packages, opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
-  opts.pre = opts.pre ~= nil and opts.pre or false
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.pre == nil then
+    opts.pre = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd = { 'pipenv' }
@@ -998,7 +1054,9 @@ function M.run(command, opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.verbose = opts.verbose ~= nil and opts.verbose or false
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.python = opts.python or nil
 
   local cmd ---@type string[]
@@ -1076,7 +1134,12 @@ function M.requirements(opts, cmd_opts)
     python = { opts.python, { 'string', 'nil' }, true },
     verbose = { opts.verbose, { 'boolean', 'nil' }, true },
   })
-  opts.dev = opts.dev ~= nil and opts.dev or false
+  if opts.dev == nil then
+    opts.dev = false
+  end
+  if opts.verbose == nil then
+    opts.verbose = false
+  end
   opts.file = opts.file or nil
   opts.python = opts.python or nil
 
