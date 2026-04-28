@@ -3,19 +3,22 @@ on:
   push:
     tags:
       - "*.*.*"
-      - "*.*.*-*"
+      - "*.*.*-.*"
   merge_group:
     branches:
       - main
   release:
     types:
       - created
+permissions:
+  contents: write
+  discussions: write
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
       - name: Build Project Assets
         run: |
           mkdir -pv pipenv.nvim
@@ -41,7 +44,7 @@ jobs:
           echo ${{ github.sha }} > Release.txt
           cat Release.txt
       - name: Release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
           files: |
@@ -52,5 +55,4 @@ jobs:
             pipenv.nvim.tar.gz
             pipenv.nvim.tar.xz
             pipenv.nvim.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
 # vim: set ts=2 sts=2 sw=2 et ai si sta:
