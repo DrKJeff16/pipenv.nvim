@@ -1,6 +1,5 @@
 ---@module 'pipenv._meta'
 
-local in_list = vim.list_contains
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
@@ -87,12 +86,12 @@ local function complete_fun(_, lead)
     'verify',
   }
   for _, sub in ipairs(args) do
-    if in_list(subs, sub) then
+    if vim.list_contains(subs, sub) then
       subcmd = true
       subcmd_val = sub
-    elseif in_list(gen_candidates('dev'), sub) then
+    elseif vim.list_contains(gen_candidates('dev'), sub) then
       dev = true
-    elseif in_list(gen_candidates('pre'), sub) then
+    elseif vim.list_contains(gen_candidates('pre'), sub) then
       pre = true
     elseif vim.startswith(sub, 'python=') then
       python = true
@@ -132,15 +131,19 @@ local function complete_fun(_, lead)
   end
   if subcmd then
     if
-      in_list({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts', 'remove' }, subcmd_val)
-      and not (dev or python or file or dev)
+      vim.list_contains(
+        { 'edit', 'help', 'list-installed', 'list-scripts', 'scripts', 'remove' },
+        subcmd_val
+      ) and not (dev or python or file or dev)
     then
       return {}
     end
-    if in_list({ 'graph', 'verify', 'clean', 'run' }, subcmd_val) and not python then
+    if vim.list_contains({ 'graph', 'verify', 'clean', 'run' }, subcmd_val) and not python then
       return narrow_candidates(args[#args], gen_candidates('none', 'python='))
     end
-    if in_list({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
+    if
+      vim.list_contains({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val)
+    then
       if not (python or pre or dev) then
         return narrow_candidates(args[#args], gen_candidates('both', 'python='))
       end
@@ -319,7 +322,7 @@ function M.popup(valid, except, opts)
 
   local new_valid = {}
   for _, v in ipairs(valid) do
-    if not (in_list(new_valid, v) or in_list(except, v)) then
+    if not (vim.list_contains(new_valid, v) or vim.list_contains(except, v)) then
       table.insert(new_valid, v)
     end
   end
@@ -328,7 +331,7 @@ function M.popup(valid, except, opts)
     new_valid,
     { prompt = 'Select your operation:' },
     function(item) ---@param item nil|string|Pipenv.ValidOps
-      if not (item and in_list(new_valid, item)) then
+      if not (item and vim.list_contains(new_valid, item)) then
         return
       end
       if item == 'run' then
@@ -345,7 +348,7 @@ function M.popup(valid, except, opts)
         Core.list_installed()
         return
       end
-      if in_list({ 'install', 'uninstall' }, item) then
+      if vim.list_contains({ 'install', 'uninstall' }, item) then
         vim.ui.input(
           { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
           function(input)
@@ -359,7 +362,7 @@ function M.popup(valid, except, opts)
         return
       end
       if
-        not in_list({
+        not vim.list_contains({
           'clean',
           'edit',
           'graph',
@@ -416,13 +419,13 @@ function M.setup()
         local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = true })
         if #subsubcommand == 2 then
           if subsubcommand[1] == 'dev' then
-            if not in_list({ 'true', 'false' }, subsubcommand[2]) then
+            if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
               Core.help(WARN)
               return
             end
             dev = subsubcommand[2] == 'true' and true or false
           elseif subsubcommand[1] == 'pre' then
-            if not in_list({ 'true', 'false' }, subsubcommand[2]) then
+            if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
               Core.help(WARN)
               return
             end
@@ -515,7 +518,7 @@ function M.setup()
       Core.remove()
       return
     end
-    if in_list({ 'graph', 'scripts' }, subcommand) then
+    if vim.list_contains({ 'graph', 'scripts' }, subcommand) then
       ---@cast subcommand 'graph'|'scripts'
       if not vim.tbl_isempty(subsubcmd) then
         Core.help(WARN)
@@ -524,7 +527,7 @@ function M.setup()
       Core[subcommand]({ python = python })
       return
     end
-    if in_list({ 'verify', 'clean', 'lock' }, subcommand) then
+    if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
       ---@cast subcommand 'verify'|'clean'|'lock'
       if not vim.tbl_isempty(subsubcmd) then
         Core.help(WARN)
@@ -571,12 +574,5 @@ function M.setup()
   })
 end
 
-local Commands = setmetatable(M, { ---@type Pipenv.Commands
-  __index = M,
-  __newindex = function()
-    vim.notify('Pipenv.Commands module is read-only!', ERROR)
-  end,
-})
-
-return Commands
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

@@ -9,10 +9,10 @@
 ---@field border? 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
 ---@field float? boolean
 ---@field ft? string
+---@field height? number
 ---@field modifiable? boolean
 ---@field split? 'right'|'left'|'below'|'above'
 ---@field title? string
----@field height? number
 ---@field width? number
 ---@field zindex? integer
 
@@ -45,26 +45,6 @@ function M.merge_lists(allow_dups, ...)
   end
 
   return allow_dups and merged or M.dedup(merged)
-end
-
----@generic T
----@param T table
----@param keys T[]
----@param reference table
----@return table T
-function M.deep_clean(T, keys, reference)
-  if vim.tbl_isempty(T) then
-    return T
-  end
-
-  for k, v in pairs(T) do
-    if not in_list(keys, k) or (type(v) == 'table' and type(reference[k]) ~= 'table') then
-      T[k] = nil
-    elseif type(v) == 'table' and type(reference[k]) == 'table' then
-      T[k] = M.deep_clean(v, vim.tbl_keys(reference[k]), reference[k])
-    end
-  end
-  return T
 end
 
 ---@generic T
@@ -125,9 +105,9 @@ function M.format_per_type(t, data, sep, constraints)
 end
 
 ---@generic T
----@param T T[]
+---@param T T
 ---@param elem any
----@return T[] new_tbl
+---@return T new_tbl
 function M.remove_elem(T, elem)
   M.validate({ T = { T, { 'table' } } })
   if vim.tbl_isempty(T) or not vim.islist(T) then
@@ -594,12 +574,5 @@ function M.strip(char, str)
   return M.rstrip(char, M.lstrip(char, str))
 end
 
-local Util = setmetatable(M, { ---@type Pipenv.Util
-  __index = M,
-  __newindex = function()
-    vim.notify('Pipenv.Util is read-only!', vim.log.levels.ERROR)
-  end,
-})
-
-return Util
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

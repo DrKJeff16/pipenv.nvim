@@ -1230,18 +1230,10 @@ Subcommands:
   :Pipenv[!] uninstall [dev=true|false] [pre=true|false] [python=<VERSION>] <pkg1> [...]
   :Pipenv[!] update [dev=true|false] [pre=true|false] [python=<VERSION>]
   :Pipenv[!] upgrade [dev=true|false] [pre=true|false] [python=<VERSION>]
-  :Pipenv[!] verify [python=<VERSION>]
-]],
+  :Pipenv[!] verify [python=<VERSION>]\]],
     level
   )
 end
 
-local Core = setmetatable(M, { ---@type Pipenv.Core
-  __index = M,
-  __newindex = function()
-    vim.notify('Pipenv module is read-only!', ERROR)
-  end,
-})
-
-return Core
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

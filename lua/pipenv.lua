@@ -36,12 +36,5 @@ M.update = Core.update
 M.upgrade = Core.upgrade
 M.verify = Core.verify
 
-local Pipenv = setmetatable(M, { ---@type Pipenv
-  __index = M,
-  __newindex = function()
-    vim.notify('Pipenv module is read-only!', ERROR)
-  end,
-})
-
-return Pipenv
+return M
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:
