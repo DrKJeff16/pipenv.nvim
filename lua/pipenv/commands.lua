@@ -131,19 +131,15 @@ local function complete_fun(_, lead)
   end
   if subcmd then
     if
-      vim.list_contains(
-        { 'edit', 'help', 'list-installed', 'list-scripts', 'scripts', 'remove' },
-        subcmd_val
-      ) and not (dev or python or file or dev)
+      vim.list_contains({ 'edit', 'help', 'list-installed', 'list-scripts', 'scripts', 'remove' }, subcmd_val)
+      and not (dev or python or file or dev)
     then
       return {}
     end
     if vim.list_contains({ 'graph', 'verify', 'clean', 'run' }, subcmd_val) and not python then
       return narrow_candidates(args[#args], gen_candidates('none', 'python='))
     end
-    if
-      vim.list_contains({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val)
-    then
+    if vim.list_contains({ 'sync', 'lock', 'install', 'uninstall', 'update', 'upgrade' }, subcmd_val) then
       if not (python or pre or dev) then
         return narrow_candidates(args[#args], gen_candidates('both', 'python='))
       end
@@ -232,16 +228,7 @@ local function complete_fun(_, lead)
     if dev and not (subcmd or pre) then
       return narrow_candidates(
         args[#args],
-        gen_candidates(
-          'pre',
-          'install',
-          'lock',
-          'requirements',
-          'sync',
-          'uninstall',
-          'update',
-          'upgrade'
-        )
+        gen_candidates('pre', 'install', 'lock', 'requirements', 'sync', 'uninstall', 'update', 'upgrade')
       )
     end
     if pre and not (subcmd or dev) then
@@ -261,16 +248,7 @@ local function complete_fun(_, lead)
     if pre and not (subcmd or python) then
       return narrow_candidates(
         args[#args],
-        gen_candidates(
-          'none',
-          'python=',
-          'uninstall',
-          'install',
-          'lock',
-          'sync',
-          'update',
-          'upgrade'
-        )
+        gen_candidates('none', 'python=', 'uninstall', 'install', 'lock', 'sync', 'update', 'upgrade')
       )
     end
     if python and not (subcmd or pre) then
@@ -285,17 +263,7 @@ local function complete_fun(_, lead)
     if not (subcmd or pre or python) then
       return narrow_candidates(
         args[#args],
-        gen_candidates(
-          'pre',
-          'install',
-          'lock',
-          'python=',
-          'requirements',
-          'sync',
-          'uninstall',
-          'update',
-          'upgrade'
-        )
+        gen_candidates('pre', 'install', 'lock', 'python=', 'requirements', 'sync', 'uninstall', 'update', 'upgrade')
       )
     end
   end
@@ -349,16 +317,13 @@ function M.popup(valid, except, opts)
         return
       end
       if vim.list_contains({ 'install', 'uninstall' }, item) then
-        vim.ui.input(
-          { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
-          function(input)
-            if not input or input == '' then
-              return
-            end
-
-            Core[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+        vim.ui.input({ prompt = ('Type the packages to %s (separated by a space)'):format(item) }, function(input)
+          if not input or input == '' then
+            return
           end
-        )
+
+          Core[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
+        end)
         return
       end
       if

@@ -58,11 +58,7 @@ function M.check()
   vim.health.start('Requirements')
 
   local ver = vim.split(
-    vim.split(
-      vim.api.nvim_exec2('version', { output = true }).output,
-      '\n',
-      { trimempty = true, plain = true }
-    )[1],
+    vim.split(vim.api.nvim_exec2('version', { output = true }).output, '\n', { trimempty = true, plain = true })[1],
     ' ',
     { plain = true }
   )[2]
@@ -76,9 +72,7 @@ function M.check()
       vim.health.error(('`%s` not found in `PATH`!'):format(exe[1]))
       return
     end
-    vim.health.ok(
-      ('`%s %s` found in `PATH`'):format(exe[1], get_version(vim.fn.exepath(exe[1]), exe[2]))
-    )
+    vim.health.ok(('`%s %s` found in `PATH`'):format(exe[1], get_version(vim.fn.exepath(exe[1]), exe[2])))
     vim.health.info(('`%s`'):format(vim.fn.exepath(exe[1])))
   end
 

@@ -75,10 +75,7 @@ local function run_cmd(cmd, on_exit, opts)
     local default_opts = { ---@type PipenvSpinner.Opts
       kind = 'cursor',
     }
-    spinner = S.new(
-      table.concat(cmd, ' '),
-      vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts)
-    )
+    spinner = S.new(table.concat(cmd, ' '), vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts))
     if spinner then
       spinner:start()
     end
@@ -209,9 +206,7 @@ function M.retrieve_installed()
     end
 
     for _, pkg in ipairs(data) do
-      if
-        pkg.package.package_name and not vim.list_contains(installed, pkg.package.package_name)
-      then
+      if pkg.package.package_name and not vim.list_contains(installed, pkg.package.package_name) then
         table.insert(installed, pkg.package.package_name)
       end
     end

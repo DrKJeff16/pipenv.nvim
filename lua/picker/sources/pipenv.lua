@@ -28,18 +28,15 @@ local function run_item(item, opts)
     return
   end
   ---@cast opts Pipenv.InstallOpts|Pipenv.UninstallOpts
-  vim.ui.input(
-    { prompt = ('Type the packages to %s (separated by a space)'):format(item) },
-    function(input)
-      if not input or input == '' then
-        return
-      end
-      (item == 'install' and Core.install or Core.uninstall)(
-        vim.split(input, ' ', { plain = true, trimempty = true }),
-        opts
-      )
+  vim.ui.input({ prompt = ('Type the packages to %s (separated by a space)'):format(item) }, function(input)
+    if not input or input == '' then
+      return
     end
-  )
+    (item == 'install' and Core.install or Core.uninstall)(
+      vim.split(input, ' ', { plain = true, trimempty = true }),
+      opts
+    )
+  end)
 end
 
 ---@return string[] actions

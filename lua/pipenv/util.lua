@@ -139,8 +139,7 @@ function M.trim_output(data)
   end
 
   data_tbl = M.remove_elem(data_tbl, "To activate this project's virtualenv, run pipenv shell.")
-  data_tbl =
-    M.remove_elem(data_tbl, 'Alternatively, run a command inside the virtualenv with pipenv run.')
+  data_tbl = M.remove_elem(data_tbl, 'Alternatively, run a command inside the virtualenv with pipenv run.')
 
   if vim.startswith(data_tbl[1], 'Running command:') then
     table.remove(data_tbl, 1)
@@ -186,24 +185,13 @@ function M.open_win(data, opts)
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
   opts.zindex = (opts.zindex and M.is_int(opts.zindex, opts.zindex > 0)) and opts.zindex or 50
-  opts.border = (
-    opts.border
-    and in_list({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
-  )
+  opts.border = (opts.border and in_list({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border))
       and opts.border
     or 'single'
-  opts.split = (opts.split and in_list({ 'above', 'below', 'left', 'right' }, opts.split))
-      and opts.split
-    or 'right'
+  opts.split = (opts.split and in_list({ 'above', 'below', 'left', 'right' }, opts.split)) and opts.split or 'right'
 
   local bufnr = vim.api.nvim_create_buf(true, true)
-  vim.api.nvim_buf_set_lines(
-    bufnr,
-    0,
-    -1,
-    true,
-    vim.split(data, '\n', { plain = true, trimempty = false })
-  )
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
 
   local width, height ---@type integer, integer
   if opts.height <= 1 and opts.height > 0 then
