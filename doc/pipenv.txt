@@ -1,4 +1,5 @@
-*pipenv.txt*          For NVIM >=v0.9.0          Last change: 2026 February 28
+*pipenv.txt*
+                                For NVIM >=v0.9.0    Last change: 2026 June 09
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -279,7 +280,7 @@ You can also pass these flags:
 - `pre=true|false` - The command is called with a `--pre` flag.
 - `file=/path/to/file` - The command output will be written to the target `file`.
 - `python=PYTHON_VERSION` - The python version for Pipenv to use. Must be formatted correctly
-    (e.g. `python=3.10`, `python=3.13`, …).
+    (e.g. `python=3.10`, `python=3.13`, …).
 
 Keep in mind that any flag that doesn’t get parsed by a subcommand can still
 be passed, only it won’t make a difference!
