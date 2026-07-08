@@ -9,11 +9,6 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
 ## Table Of Contents
 
 - [Installation](#installation)
-  - [`lazy.nvim`](#lazynvim)
-  - [`pckr.nvim`](#pckrnvim)
-  - [`nvim-plug`](#nvim-plug)
-  - [`paq-nvim`](#paq-nvim)
-  - [LuaRocks](#luarocks)
 - [Configuration](#configuration)
   - [Pipenv Environment Variables](#pipenv-environment-variables)
 - [Usage](#usage)
@@ -35,7 +30,8 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
 - [`xieyonn/spinner.nvim`](https://github.com/xieyonn/spinner.nvim) - **(OPTIONAL, RECOMMENDED)**
 - [`wsdjeg/picker.nvim`](https://github.com/wsdjeg/picker.nvim) - **(OPTIONAL)**
 
-### `lazy.nvim`
+<details>
+<summary><code>lazy.nvim</code></summary>
 
 ```lua
 {
@@ -49,7 +45,9 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
 }
 ```
 
-### `nvim-plug`
+</details>
+<details>
+<summary><code>nvim-plug</code></summary>
 
 ```lua
 require('plug').add({
@@ -67,7 +65,9 @@ require('plug').add({
 })
 ```
 
-### `pckr.nvim`
+</details>
+<details>
+<summary><code>pckr.nvim</code></summary>
 
 ```lua
 require('pckr').add({
@@ -85,7 +85,9 @@ require('pckr').add({
 })
 ```
 
-### `paq-nvim`
+</details>
+<details>
+<summary><code>paq-nvim</code></summary>
 
 ```lua
 local paq = require('paq')
@@ -97,7 +99,9 @@ paq({
 })
 ```
 
-### LuaRocks
+</details>
+<details>
+<summary>LuaRocks</summary>
 
 You can also install this plugin through LuaRocks
 from [the `pipenv.nvim` module](https://luarocks.org/modules/drkjeff16/pipenv.nvim).
@@ -106,6 +110,8 @@ from [the `pipenv.nvim` module](https://luarocks.org/modules/drkjeff16/pipenv.nv
 luarocks install pipenv.nvim         # Global Install
 luarocks install --local pipenv.nvim # Local Install
 ```
+
+</details>
 
 ---
 
