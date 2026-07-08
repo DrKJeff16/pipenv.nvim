@@ -1,5 +1,5 @@
 *pipenv.txt*
-                                For NVIM >=v0.9.0    Last change: 2026 June 09
+                                For NVIM >=v0.9.0    Last change: 2026 July 08
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -14,11 +14,6 @@ https://github.com/user-attachments/assets/170e9897-c501-4a33-b96a-3e266d79045d
 TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 
 - |pipenv-installation|
-    - |pipenv-`lazy.nvim`|
-    - |pipenv-`pckr.nvim`|
-    - |pipenv-`nvim-plug`|
-    - |pipenv-`paq-nvim`|
-    - |pipenv-luarocks|
 - |pipenv-configuration|
     - |pipenv-pipenv-environment-variables|
 - |pipenv-usage|
@@ -40,8 +35,7 @@ INSTALLATION                                             *pipenv-installation*
 - `xieyonn/spinner.nvim` <https://github.com/xieyonn/spinner.nvim> - **(OPTIONAL, RECOMMENDED)**
 - `wsdjeg/picker.nvim` <https://github.com/wsdjeg/picker.nvim> - **(OPTIONAL)**
 
-
-LAZY.NVIM ~
+lazy.nvim ~
 
 >lua
     {
@@ -55,8 +49,7 @@ LAZY.NVIM ~
     }
 <
 
-
-NVIM-PLUG ~
+nvim-plug ~
 
 >lua
     require('plug').add({
@@ -74,8 +67,7 @@ NVIM-PLUG ~
     })
 <
 
-
-PCKR.NVIM ~
+pckr.nvim ~
 
 >lua
     require('pckr').add({
@@ -93,8 +85,7 @@ PCKR.NVIM ~
     })
 <
 
-
-PAQ-NVIM ~
+paq-nvim ~
 
 >lua
     local paq = require('paq')
@@ -106,8 +97,7 @@ PAQ-NVIM ~
     })
 <
 
-
-LUAROCKS ~
+LuaRocks ~
 
 You can also install this plugin through LuaRocks from the `pipenv.nvim` module
 <https://luarocks.org/modules/drkjeff16/pipenv.nvim>.
