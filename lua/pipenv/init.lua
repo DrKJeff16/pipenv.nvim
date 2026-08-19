@@ -23,18 +23,16 @@ local M = {}
 
 ---@param opts? PipenvOpts
 function M.setup(opts)
-  local Util = require('pipenv.util')
-  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
-  if not Util.executable('pipenv') then
+  require('pipenv.util').validate({ opts = { opts, { 'table', 'nil' }, true } })
+  if not require('pipenv.util').executable('pipenv') then
     error('Pipenv not found in your PATH!', vim.log.levels.ERROR)
   end
 
   require('pipenv.config').setup(opts or {})
-  if vim.g.pipenv_setup ~= 1 then
-    return
-  end
 
-  require('pipenv.commands').setup()
+  if vim.g.pipenv_setup == 1 then
+    require('pipenv.commands').setup()
+  end
 end
 
 local Pipenv = setmetatable(M, { ---@type Pipenv

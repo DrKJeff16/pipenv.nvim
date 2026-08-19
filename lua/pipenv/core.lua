@@ -3,51 +3,17 @@
 
 local Util = require('pipenv.util')
 local Config = require('pipenv.config')
-local uv = vim.uv or vim.loop
 local ERROR = vim.log.levels.ERROR
 local WARN = vim.log.levels.WARN
 local INFO = vim.log.levels.INFO
 
 local stdout, stderr = {}, {} ---@type string[], string[]
-local spinner = nil ---@type PipenvSpinner|nil
+local spinner = nil ---@type PipenvSpinner|nil|?
 local ec = -1 ---@type integer
 
 ---@return boolean spinner
 local function has_spinner()
   return Util.mod_exists('spinner') and Config.opts.spinner and Config.opts.spinner.enabled
-end
-
----@class PipenvSpinner
----@field id string
----@field text string
-local S = {}
-
-function S:start()
-  require('spinner').start(self.id)
-end
-
----@param force? boolean
-function S:stop(force)
-  require('spinner').stop(self.id, force)
-end
-
----@param force? boolean
-function S:pause(force)
-  require('spinner').stop(self.id, force)
-end
-
----@param id string
----@param opts spinner.Opts|PipenvSpinner.Opts
----@return PipenvSpinner spinner
-function S.new(id, opts)
-  local Spinner = require('spinner')
-  Spinner.config(id, vim.tbl_deep_extend('keep', opts, Config.opts.spinner.opts or {}))
-
-  local s = setmetatable({ ---@type PipenvSpinner
-    id = id,
-    text = Spinner.render(id),
-  }, { __index = S })
-  return s
 end
 
 ---@param cmd string[]
@@ -64,7 +30,7 @@ local function run_cmd(cmd, on_exit, opts)
     ['opts.cwd'] = { opts.cwd, { 'string', 'nil' }, true },
     ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
   })
-  opts.cwd = opts.cwd or uv.cwd()
+  opts.cwd = opts.cwd or vim.uv.cwd()
   if Config.env and not vim.tbl_isempty(Config.env) then
     opts.env = vim.tbl_deep_extend('keep', opts.env or {}, Config.env)
   end
@@ -75,7 +41,10 @@ local function run_cmd(cmd, on_exit, opts)
     local default_opts = { ---@type PipenvSpinner.Opts
       kind = 'cursor',
     }
-    spinner = S.new(table.concat(cmd, ' '), vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts))
+    spinner = require('pipenv.spinner').new(
+      table.concat(cmd, ' '),
+      vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts)
+    )
     if spinner then
       spinner:start()
     end
@@ -152,22 +121,22 @@ function M.edit()
   end)
 end
 
----@return string[]|nil res
+---@return string[]|nil|? res
 function M.retrieve_scripts()
   if not has_pipfile() then
     return
   end
-  local stat = uv.fs_stat('Pipfile')
+  local stat = vim.uv.fs_stat('Pipfile')
   if not stat or stat.size == 0 then
     return
   end
-  local fd = uv.fs_open('Pipfile', 'r', tonumber('644', 8))
+  local fd = vim.uv.fs_open('Pipfile', 'r', tonumber('644', 8))
   if not fd then
     return
   end
 
-  local data = uv.fs_read(fd, stat.size)
-  uv.fs_close(fd)
+  local data = vim.uv.fs_read(fd, stat.size)
+  vim.uv.fs_close(fd)
   if not data then
     return
   end
@@ -199,7 +168,7 @@ function M.retrieve_installed()
       error((err and err ~= '') and err or 'Could not parse JSON graph!', ERROR)
     end
 
-    ---@type boolean, PipenvJsonGraph[]|nil
+    ---@type boolean, PipenvJsonGraph[]|nil|?
     local ok, data = pcall(vim.json.decode, Util.trim_output(out))
     if not (ok and data) then
       error('Could not parse JSON graph!', ERROR)
@@ -846,7 +815,7 @@ function M.scripts(opts, cmd_opts)
   end, cmd_opts)
 end
 
----@param packages? string[]|string|nil
+---@param packages? string[]|string
 ---@param opts? Pipenv.InstallOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.install(packages, opts, cmd_opts)
@@ -1177,21 +1146,21 @@ function M.requirements(opts, cmd_opts)
       return
     end
 
-    local stat = uv.fs_stat(opts.file)
+    local stat = vim.uv.fs_stat(opts.file)
     if stat then
       if stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
         return
       end
     end
 
-    local fd = uv.fs_open(opts.file, 'w', tonumber('644', 8))
+    local fd = vim.uv.fs_open(opts.file, 'w', tonumber('644', 8))
     if not fd then
       vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
       return
     end
 
-    uv.fs_write(fd, vim.split(out, '\n', { trimempty = false }))
-    uv.fs_close(fd)
+    vim.uv.fs_write(fd, vim.split(out, '\n', { trimempty = false }))
+    vim.uv.fs_close(fd)
 
     if opts.verbose then
       vim.notify(('(%s): Wrote requirements to `%s`!'):format(cmd_str, opts.file), INFO)
