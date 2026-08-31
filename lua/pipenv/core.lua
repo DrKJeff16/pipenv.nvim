@@ -13,7 +13,8 @@ local ec = -1 ---@type integer
 
 ---@return boolean spinner
 local function has_spinner()
-  return Util.mod_exists('spinner') and Config.opts.spinner and Config.opts.spinner.enabled
+  local config = Config.get()
+  return Util.mod_exists('spinner') and config.spinner and config.spinner.enabled
 end
 
 ---@param cmd string[]
@@ -31,8 +32,9 @@ local function run_cmd(cmd, on_exit, opts)
     ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
   })
   opts.cwd = opts.cwd or vim.uv.cwd()
-  if Config.env and not vim.tbl_isempty(Config.env) then
-    opts.env = vim.tbl_deep_extend('keep', opts.env or {}, Config.env)
+  local env = Config.get_env()
+  if env and not vim.tbl_isempty(env) then
+    opts.env = vim.tbl_deep_extend('keep', opts.env or {}, env)
   end
 
   stdout, stderr = {}, {}
@@ -43,7 +45,7 @@ local function run_cmd(cmd, on_exit, opts)
     }
     spinner = require('pipenv.spinner').new(
       table.concat(cmd, ' '),
-      vim.tbl_deep_extend('keep', Config.opts.spinner.opts, default_opts)
+      vim.tbl_deep_extend('keep', Config.get().spinner.opts, default_opts)
     )
     if spinner then
       spinner:start()
@@ -215,14 +217,15 @@ function M.remove(opts, cmd_opts)
     local cmd_str = table.concat(cmd1, ' ')
     local txt = code ~= 1 and out or err
     if txt ~= '' then
+      local config = Config.get()
       Util.open_win(txt, {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -256,14 +259,15 @@ function M.list_installed()
     return
   end
 
+  local config = Config.get()
   Util.open_win(table.concat(installed, '\n'), {
+    border = config.output.border,
+    float = config.output.float,
     height = 0.7,
-    width = 0.4,
+    split = config.output.split,
     title = 'Installed Packages',
-    border = Config.opts.output.border,
-    float = Config.opts.output.float,
-    split = Config.opts.output.split,
-    zindex = Config.opts.output.zindex,
+    width = 0.4,
+    zindex = config.output.zindex,
   })
 end
 
@@ -286,14 +290,15 @@ function M.list_scripts()
     return
   end
 
+  local config = Config.get()
   Util.open_win(table.concat(data, '\n'), {
+    border = config.output.border,
+    float = config.output.float,
     height = 0.4,
-    width = 0.3,
+    split = config.output.split,
     title = 'Scripts',
-    border = Config.opts.output.border,
-    float = Config.opts.output.float,
-    split = Config.opts.output.split,
-    zindex = Config.opts.output.zindex,
+    width = 0.3,
+    zindex = config.output.zindex,
   })
 end
 
@@ -334,14 +339,15 @@ function M.graph(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -401,14 +407,15 @@ function M.lock(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -462,14 +469,15 @@ function M.clean(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -523,14 +531,15 @@ function M.verify(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -598,14 +607,15 @@ function M.sync(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -673,14 +683,15 @@ function M.update(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -748,14 +759,15 @@ function M.upgrade(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -800,14 +812,15 @@ function M.scripts(opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -888,14 +901,15 @@ function M.install(packages, opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -979,14 +993,15 @@ function M.uninstall(packages, opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -1059,14 +1074,15 @@ function M.run(command, opts, cmd_opts)
       return
     end
     if out and out ~= '' then
+      local config = Config.get()
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
@@ -1132,25 +1148,24 @@ function M.requirements(opts, cmd_opts)
       return
     end
 
+    local config = Config.get()
     if not opts.file or opts.file == '' then
       Util.open_win(Util.trim_output(out), {
+        border = config.output.border,
+        float = config.output.float,
         ft = 'requirements',
+        height = config.output.height,
+        split = config.output.split,
         title = cmd_str,
-        border = Config.opts.output.border,
-        float = Config.opts.output.float,
-        height = Config.opts.output.height,
-        split = Config.opts.output.split,
-        width = Config.opts.output.width,
-        zindex = Config.opts.output.zindex,
+        width = config.output.width,
+        zindex = config.output.zindex,
       })
       return
     end
 
     local stat = vim.uv.fs_stat(opts.file)
-    if stat then
-      if stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
-        return
-      end
+    if stat and stat.size ~= 0 and Util.yes_no(("Overwrite '%s'?"):format(opts.file)) then
+      return
     end
 
     local fd = vim.uv.fs_open(opts.file, 'w', tonumber('644', 8))

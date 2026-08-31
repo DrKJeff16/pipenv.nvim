@@ -7,19 +7,17 @@ local Util = require('pipenv.util')
 ---@class Pipenv.Config
 local M = {}
 
-M.env = {} ---@type table<string, string|number>
+local env = {} ---@type table<string, string|number>
 
----@return PipenvOpts defaults
+---@return table<string, string|number> env
+function M.get_env()
+  return env
+end
+
+---@return PipenvDefaults defaults
 function M.get_defaults()
-  return { ---@type PipenvOpts
-    output = {
-      float = true,
-      split = 'right',
-      border = 'single',
-      width = 0.85,
-      height = 0.85,
-      zindex = 100,
-    },
+  return { ---@type PipenvDefaults
+    output = { border = 'single', float = true, height = 0.85, split = 'right', width = 0.85, zindex = 100 },
     spinner = {
       enabled = false,
       opts = {
@@ -44,9 +42,16 @@ function M.get_defaults()
   }
 end
 
+local options = M.get_defaults()
+
+---@return PipenvDefaults options
+function M.get()
+  return options
+end
+
 function M.gen_env()
-  M.opts.env = M.opts.env or {}
-  if vim.tbl_isempty(M.opts.env) then
+  options.env = options.env or {}
+  if vim.tbl_isempty(options.env) then
     return
   end
 
@@ -92,11 +97,11 @@ function M.gen_env()
 
   local err = ''
   for key, T in pairs(types) do
-    local category = M.opts.env[key] or {}
+    local category = options.env[key] or {}
     if not vim.tbl_isempty(category) then
       for k, t in pairs(T) do
         if category[k] ~= nil and type(category[k]) == t.type then
-          M.env[t.var] = t.type == 'boolean' and (category[k] and 1 or 0) or category[k]
+          env[t.var] = t.type == 'boolean' and (category[k] and 1 or 0) or category[k]
         elseif category[k] ~= nil and type(category[k]) ~= t.type then
           err = ('%s%s- `env.%s.%s` is of incorrect type (`%s`). Ignoring.'):format(
             err,
@@ -123,12 +128,12 @@ function M.setup(opts)
     vim.g.pipenv_setup = 0
   end
 
-  M.opts = vim.tbl_deep_extend('keep', opts or {}, M.get_defaults())
+  options = vim.tbl_deep_extend('force', M.get_defaults(), opts or {})
   M.gen_env()
 
-  if M.opts.spinner.enabled and not Util.mod_exists('spinner') then
+  if options.spinner.enabled and not Util.mod_exists('spinner') then
     vim.notify("`spinner.nvim` integration enabled, but it's not installed!", WARN)
-    M.opts.spinner.enabled = false
+    options.spinner.enabled = false
   end
 
   vim.g.pipenv_setup = 1

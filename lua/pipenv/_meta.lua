@@ -42,6 +42,10 @@
 --- ---
 ---@field opts? PipenvSpinner.Opts|spinner.Opts
 
+---@class PipenvDefaults.Spinner: PipenvOpts.Spinner
+---@field enabled boolean
+---@field opts PipenvSpinner.Opts|spinner.Opts
+
 ---@class PipenvOpts.Output
 ---Can be a number between `0` and `1` (percentage) or a fixed width (only matters if `float` is `true`).
 --- ---
@@ -61,6 +65,14 @@
 ---The border type for the floating window (only matters if `float` is `true`).
 --- ---
 ---@field border? 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
+
+---@class PipenvDefaults.Output: PipenvOpts.Output
+---@field border 'none'|'single'|'double'|'rounded'|'solid'|'shadow'
+---@field float boolean
+---@field height number
+---@field split 'right'|'left'|'above'|'below'
+---@field width number
+---@field zindex integer
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#installation-and-dependencies
 --- ---
@@ -87,6 +99,15 @@
 --- ---
 ---@field timeout? integer
 
+---@class PipenvDefaults.Env.InstallAndDeps: PipenvOpts.Env.InstallAndDeps
+---@field install_dependencies boolean
+---@field install_timeout integer
+---@field max_depth integer
+---@field pypi_mirror string
+---@field resolve_vcs boolean
+---@field skip_lock boolean
+---@field timeout integer
+
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#virtual-environment
 --- ---
 ---@class PipenvOpts.Env.VirtualEnv
@@ -109,12 +130,23 @@
 --- ---
 ---@field venv_path? string
 
+---@class PipenvDefaults.Env.VirtualEnv: PipenvOpts.Env.VirtualEnv
+---@field ignore_virtual_envs boolean
+---@field python_path string
+---@field python_version string
+---@field venv_in_project boolean
+---@field venv_name string
+---@field venv_path string
+
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#security
 --- ---
 ---@class PipenvOpts.Env.Security
 ---If non-nil then `$PIPENV_PYUP_Core_KEY` will be set to its value.
 --- ---
 ---@field pyup_api_key? string
+
+---@class PipenvDefaults.Env.Security: PipenvOpts.Env.Security
+---@field pyup_api_key string
 
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
 --- ---
@@ -156,6 +188,20 @@
 --- ---
 ---@field site_packages? boolean
 
+---@class PipenvDefaults.Env.Behavior: PipenvOpts.Env.Behavior
+---@field auto_accept boolean
+---@field clear_cache boolean
+---@field fancy_shell boolean
+---@field ignore_pipfile boolean
+---@field no_asdf boolean
+---@field no_load_env boolean
+---@field no_pyenv boolean
+---@field no_spin boolean
+---@field quiet boolean
+---@field site_packages boolean
+---@field timeout integer
+---@field verbose boolean
+
 ---For more info see https://pipenv.pypa.io/en/latest/configuration.html#file-locations
 --- ---
 ---@class PipenvOpts.Env.FileLocations
@@ -169,22 +215,34 @@
 --- ---
 ---@field dotenv_location? string
 
+---@class PipenvDefaults.Env.FileLocations: PipenvOpts.Env.FileLocations
+---@field cache_dir string
+---@field dotenv_location string
+---@field pipfile_path string
+
 ---@class PipenvOpts.Env
----@field install? PipenvOpts.Env.InstallAndDeps
----@field virtual_env? PipenvOpts.Env.VirtualEnv
----@field file_location? PipenvOpts.Env.FileLocations
 ---@field behavior? PipenvOpts.Env.Behavior
+---@field file_location? PipenvOpts.Env.FileLocations
+---@field install? PipenvOpts.Env.InstallAndDeps
 ---@field security? PipenvOpts.Env.Security
+---@field virtual_env? PipenvOpts.Env.VirtualEnv
+
+---@class PipenvDefaults.Env: PipenvOpts.Env
+---@field behavior PipenvDefaults.Env.Behavior|nil
+---@field file_location PipenvDefaults.Env.FileLocations|nil
+---@field install PipenvDefaults.Env.InstallAndDeps|nil
+---@field security PipenvDefaults.Env.Security|nil
+---@field virtual_env PipenvDefaults.Env.VirtualEnv|nil
 
 ---@class Pipenv.CommandOpts
----@field verbose? boolean
 ---@field python? string
+---@field verbose? boolean
 
 ---@class Pipenv.RequirementsOpts
----@field verbose? boolean
 ---@field dev? boolean
----@field file? string[]|string|nil
+---@field file? string[]|string
 ---@field python? string
+---@field verbose? boolean
 
 ---@class Pipenv.RemoveOpts
 ---@field verbose? boolean
@@ -198,7 +256,6 @@
 
 ---@class Pipenv.UpgradeOpts: Pipenv.SyncOpts
 ---@class Pipenv.UpdateOpts: Pipenv.SyncOpts
-
 ---@class Pipenv.CleanOpts: Pipenv.CommandOpts
 ---@class Pipenv.InstallOpts: Pipenv.SyncOpts
 ---@class Pipenv.LockOpts: Pipenv.SyncOpts
@@ -208,18 +265,23 @@
 ---@class Pipenv.VerifyOpts: Pipenv.CommandOpts
 
 ---@class PipenvJsonPackage
+---@field installed_version string
 ---@field key string
 ---@field package_name string
----@field installed_version string
 
 ---@alias PipenvJsonGraph table<'package', PipenvJsonPackage>
 
 ---@class PipenvOpts
----@field output? PipenvOpts.Output
 ---@field env? PipenvOpts.Env
+---@field output? PipenvOpts.Output
 ---Options for customizing the `spinner.nvim` integration.
 --- ---
 ---@field spinner? PipenvOpts.Spinner
+
+---@class PipenvDefaults: PipenvOpts
+---@field env PipenvDefaults.Env
+---@field output PipenvDefaults.Output
+---@field spinner PipenvDefaults.Spinner
 
 ---@class PipenvEnvType
 ---@field type 'string'|'boolean'|'number'
@@ -232,131 +294,117 @@
 ---@field security table<string, PipenvEnvType>
 ---@field virtual_env table<string, PipenvEnvType>
 
----@enum (key) PipenvOpts.SpinnerPattern
-local patterns = {
-  aesthetic = 1,
-  arc = 1,
-  arrow = 1,
-  arrow3 = 1,
-  balloon = 1,
-  balloon2 = 1,
-  betaWave = 1,
-  binary = 1,
-  bounce = 1,
-  bouncingBall = 1,
-  bouncingBar = 1,
-  boxBounce = 1,
-  boxBounce2 = 1,
-  circle = 1,
-  circleHalves = 1,
-  circleQuarters = 1,
-  dots = 1,
-  dots10 = 1,
-  dots11 = 1,
-  dots12 = 1,
-  dots13 = 1,
-  dots14 = 1,
-  dots2 = 1,
-  dots3 = 1,
-  dots4 = 1,
-  dots5 = 1,
-  dots6 = 1,
-  dots7 = 1,
-  dots8 = 1,
-  dots8Bit = 1,
-  dots9 = 1,
-  dotsCircle = 1,
-  dqpb = 1,
-  dwarfFortress = 1,
-  fish = 1,
-  flip = 1,
-  grenade = 1,
-  growHorizontal = 1,
-  growVertical = 1,
-  hamburger = 1,
-  layer = 1,
-  line = 1,
-  line2 = 1,
-  material = 1,
-  noise = 1,
-  pipe = 1,
-  point = 1,
-  pong = 1,
-  rollingLine = 1,
-  sand = 1,
-  shark = 1,
-  simpleDots = 1,
-  simpleDotsScrolling = 1,
-  squareCorners = 1,
-  squish = 1,
-  star = 1,
-  star2 = 1,
-  toggle = 1,
-  toggle10 = 1,
-  toggle11 = 1,
-  toggle12 = 1,
-  toggle13 = 1,
-  toggle2 = 1,
-  toggle3 = 1,
-  toggle4 = 1,
-  toggle5 = 1,
-  toggle6 = 1,
-  toggle7 = 1,
-  toggle8 = 1,
-  toggle9 = 1,
-  triangle = 1,
-}
+---@alias PipenvOpts.SpinnerPattern
+---|'aesthetic'
+---|'arc'
+---|'arrow'
+---|'arrow3'
+---|'balloon'
+---|'balloon2'
+---|'betaWave'
+---|'binary'
+---|'bounce'
+---|'bouncingBall'
+---|'bouncingBar'
+---|'boxBounce'
+---|'boxBounce2'
+---|'circle'
+---|'circleHalves'
+---|'circleQuarters'
+---|'dots'
+---|'dots10'
+---|'dots11'
+---|'dots12'
+---|'dots13'
+---|'dots14'
+---|'dots2'
+---|'dots3'
+---|'dots4'
+---|'dots5'
+---|'dots6'
+---|'dots7'
+---|'dots8'
+---|'dots8Bit'
+---|'dots9'
+---|'dotsCircle'
+---|'dqpb'
+---|'dwarfFortress'
+---|'fish'
+---|'flip'
+---|'grenade'
+---|'growHorizontal'
+---|'growVertical'
+---|'hamburger'
+---|'layer'
+---|'line'
+---|'line2'
+---|'material'
+---|'noise'
+---|'pipe'
+---|'point'
+---|'pong'
+---|'rollingLine'
+---|'sand'
+---|'shark'
+---|'simpleDots'
+---|'simpleDotsScrolling'
+---|'squareCorners'
+---|'squish'
+---|'star'
+---|'star2'
+---|'toggle'
+---|'toggle10'
+---|'toggle11'
+---|'toggle12'
+---|'toggle13'
+---|'toggle2'
+---|'toggle3'
+---|'toggle4'
+---|'toggle5'
+---|'toggle6'
+---|'toggle7'
+---|'toggle8'
+---|'toggle9'
+---|'triangle'
 
----@enum (key) PipenvOpts.SpinnerEventStatus
-local spinner_status = {
-  delayed = 1,
-  paused = 1,
-  running = 1,
-  stopped = 1,
-}
+---@alias PipenvOpts.SpinnerEventStatus 'delayed'|'paused'|'running'|'stopped'
 
----@enum (key) PipenvOpts.SpinnerKind
-local kinds = {
-  ['window-footer'] = 1,
-  ['window-title'] = 1,
-  cmdline = 1,
-  cursor = 1,
-  extmark = 1,
-  statusline = 1,
-  tabline = 1,
-  winbar = 1,
-}
+---@alias PipenvOpts.SpinnerKind
+---|'cmdline'
+---|'cursor'
+---|'extmark'
+---|'statusline'
+---|'tabline'
+---|'winbar'
+---|'window-footer'
+---|'window-title'
 
----@enum (key) PipenvWinBorders
-local borders = {
-  bold = 1,
-  double = 1,
-  none = 1,
-  rounded = 1,
-  shadow = 1,
-  single = 1,
-  solid = 1,
-}
+---@alias PipenvWinBorders
+---|'bold'
+---|'double'
+---|'none'
+---|'rounded'
+---|'shadow'
+---|'single'
+---|'solid'
 
----@enum (key) Pipenv.ValidOps
-local valid_ops = {
-  clean = 1,
-  edit = 1,
-  graph = 1,
-  help = 1,
-  install = 1,
-  ['list-installed'] = 1,
-  ['list-scripts'] = 1,
-  lock = 1,
-  remove = 1,
-  requirements = 1,
-  run = 1,
-  scripts = 1,
-  sync = 1,
-  uninstall = 1,
-  update = 1,
-  upgrade = 1,
-  verify = 1,
-}
+---@alias Pipenv.ValidOps
+---|'clean'
+---|'edit'
+---|'graph'
+---|'help'
+---|'install'
+---|'list-installed'
+---|'list-scripts'
+---|'lock'
+---|'remove'
+---|'requirements'
+---|'run'
+---|'scripts'
+---|'sync'
+---|'uninstall'
+---|'update'
+---|'upgrade'
+---|'verify'
 
 -- vim: set ts=2 sts=2 sw=2 et ai si sta:

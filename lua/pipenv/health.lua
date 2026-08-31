@@ -34,7 +34,7 @@ function M.check()
   vim.health.ok('`pipenv.nvim` has been setup!')
 
   vim.health.start('Config')
-  for name, opt in pairs(Config.opts) do
+  for name, opt in pairs(Config.get()) do
     ---@cast name string
     ---@cast opt PipenvOpts.Env|PipenvOpts.Output
     if name ~= 'env' then
@@ -48,9 +48,9 @@ function M.check()
     end
   end
 
-  if not vim.tbl_isempty(Config.env) then
+  if not vim.tbl_isempty(Config.get_env()) then
     vim.health.start('Custom Env')
-    for var, val in pairs(Config.env) do
+    for var, val in pairs(Config.get_env()) do
       vim.health.info(('- `%s`: `%s`'):format(var, val))
     end
   end

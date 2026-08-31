@@ -16,8 +16,6 @@
 ---@field width? number
 ---@field zindex? integer
 
-local in_list = vim.list_contains
-
 ---@class Pipenv.Util
 local M = {}
 
@@ -68,12 +66,12 @@ function M.format_per_type(t, data, sep, constraints)
     if not M.is_type('table', constraints) then
       return res
     end
-    if constraints ~= nil and in_list(constraints, data) then
+    if constraints ~= nil and vim.list_contains(constraints, data) then
       return res
     end
     return res, true
   end
-  if in_list({ 'number', 'boolean' }, t) then
+  if vim.list_contains({ 'number', 'boolean' }, t) then
     return ('%s`%s`'):format(sep, tostring(data))
   end
   if t == 'function' then
@@ -185,10 +183,13 @@ function M.open_win(data, opts)
   opts.width = (opts.width and opts.width > 0) and opts.width or 0.85
   opts.title = opts.title or nil
   opts.zindex = (opts.zindex and M.is_int(opts.zindex, opts.zindex > 0)) and opts.zindex or 50
-  opts.border = (opts.border and in_list({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border))
+  opts.border = (
+    opts.border and vim.list_contains({ 'double', 'none', 'rounded', 'shadow', 'single', 'solid' }, opts.border)
+  )
       and opts.border
     or 'single'
-  opts.split = (opts.split and in_list({ 'above', 'below', 'left', 'right' }, opts.split)) and opts.split or 'right'
+  opts.split = (opts.split and vim.list_contains({ 'above', 'below', 'left', 'right' }, opts.split)) and opts.split
+    or 'right'
 
   local bufnr = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, vim.split(data, '\n', { plain = true, trimempty = false }))
@@ -298,7 +299,7 @@ function M.dedup(T)
         return vim.deep_equal(val, v)
       end, { predicate = true })
     else
-      not_dup = not in_list(NT, v)
+      not_dup = not vim.list_contains(NT, v)
     end
     if not_dup then
       table.insert(NT, v)

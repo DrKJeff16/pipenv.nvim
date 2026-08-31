@@ -23,7 +23,7 @@ end
 ---@nodiscard
 function M.new(id, opts)
   local Spinner = require('spinner')
-  Spinner.config(id, vim.tbl_deep_extend('keep', opts, require('pipenv.config').opts.spinner.opts or {}))
+  Spinner.config(id, vim.tbl_deep_extend('keep', opts, require('pipenv.config').get().spinner.opts or {}))
 
   return setmetatable({ id = id, text = Spinner.render(id) }, { __index = M })
 end
