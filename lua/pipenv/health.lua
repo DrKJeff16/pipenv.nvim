@@ -13,7 +13,7 @@ local function get_version(exe, idx)
     idx = { idx, { 'number' } },
   })
   if not Util.is_int(idx) then
-    error(('Not an integer `%s`!'):format(idx), vim.log.levels.ERROR)
+    error(('Not an integer `%s`!'):format(idx))
   end
 
   local out = vim.system({ exe, '--version' }):wait(1000).stdout

@@ -36,7 +36,7 @@ function M.merge_lists(allow_dups, ...)
     local list_n = select(i, ...) ---@type any[]
     M.validate({ ['list_' .. tostring(i)] = { list_n, { 'table' } } })
     if not vim.islist(list_n) then
-      error(('list_%d is not a list!'):format(i), vim.log.levels.ERROR)
+      error(('list_%d is not a list!'):format(i))
     end
 
     merged = { unpack(merged), unpack(list_n) }
@@ -561,6 +561,16 @@ function M.strip(char, str)
   end
 
   return M.rstrip(char, M.lstrip(char, str))
+end
+
+---@generic T: table, V
+---@param t T
+---@param k string|integer
+---@param v V
+---@return V v
+function M.rawset(t, k, v)
+  rawset(t, k, v)
+  return v
 end
 
 return M
