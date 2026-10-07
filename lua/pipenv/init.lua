@@ -1,3 +1,5 @@
+local Util = require('pipenv.util')
+
 ---@class Pipenv
 ---@field clean fun(opts?: Pipenv.CleanOpts, cmd_opts?: Pipenv.CommandOpts)
 ---@field commands Pipenv.Commands
@@ -23,8 +25,8 @@ local M = {}
 
 ---@param opts? PipenvOpts
 function M.setup(opts)
-  require('pipenv.util').validate({ opts = { opts, { 'table', 'nil' }, true } })
-  if require('pipenv.util').executable('pipenv') then
+  Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+  if Util.executable('pipenv') then
     require('pipenv.config').setup(opts or {})
     if vim.g.pipenv_setup == 1 then
       require('pipenv.commands').setup()
@@ -43,53 +45,55 @@ local Pipenv = setmetatable(M, { ---@type Pipenv
       return raw
     end
 
-    if require('pipenv.util').mod_exists('pipenv.' .. k) then
-      return require('pipenv.util').rawset(self, k, require('pipenv.' .. k))
+    if Util.mod_exists('pipenv.' .. k) then
+      return Util.rawset(self, k, require('pipenv.' .. k))
     end
+
+    local Core = require('pipenv.core')
     if k == 'clean' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').clean)
+      return Util.rawset(self, k, Core.clean)
     end
     if k == 'graph' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').graph)
+      return Util.rawset(self, k, Core.graph)
     end
     if k == 'edit' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').edit)
+      return Util.rawset(self, k, Core.edit)
     end
     if k == 'install' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').install)
+      return Util.rawset(self, k, Core.install)
     end
     if k == 'list_installed' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').list_installed)
+      return Util.rawset(self, k, Core.list_installed)
     end
     if k == 'list_scripts' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').list_scripts)
+      return Util.rawset(self, k, Core.list_scripts)
     end
     if k == 'lock' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').lock)
+      return Util.rawset(self, k, Core.lock)
     end
     if k == 'requirements' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').requirements)
+      return Util.rawset(self, k, Core.requirements)
     end
     if k == 'run' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').run)
+      return Util.rawset(self, k, Core.run)
     end
     if k == 'scripts' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').scripts)
+      return Util.rawset(self, k, Core.scripts)
     end
     if k == 'sync' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').sync)
+      return Util.rawset(self, k, Core.sync)
     end
     if k == 'uninstall' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').uninstall)
+      return Util.rawset(self, k, Core.uninstall)
     end
     if k == 'update' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').update)
+      return Util.rawset(self, k, Core.update)
     end
     if k == 'upgrade' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').upgrade)
+      return Util.rawset(self, k, Core.upgrade)
     end
     if k == 'verify' then
-      return require('pipenv.util').rawset(self, k, require('pipenv.core').verify)
+      return Util.rawset(self, k, Core.verify)
     end
   end,
 })
