@@ -91,8 +91,22 @@ local function has_pipfile(create)
       return false
     end
     ec = -1
-    run_cmd({ 'pipenv', 'install' }, function(code)
+    run_cmd({ 'pipenv', 'install' }, function(code, out, err)
       ec = code
+      local cmd_str = 'pipenv install'
+      local txt = code ~= 1 and out or err
+      if txt ~= '' then
+        local config = Config.get()
+        Util.open_win(txt, {
+          border = config.output.border,
+          float = config.output.float,
+          height = config.output.height,
+          split = config.output.split,
+          title = cmd_str,
+          width = config.output.width,
+          zindex = config.output.zindex,
+        })
+      end
     end)
     return ec == 0
   end
