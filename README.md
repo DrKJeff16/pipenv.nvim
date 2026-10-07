@@ -87,6 +87,21 @@ require('pckr').add({
 
 </details>
 <details>
+<summary><code>vim.pack</code></summary>
+
+```lua
+vim.pack.add({
+  { src = 'https://github.com/DrKJeff16/pipenv.nvim' },
+  { src = 'https://github.com/wsdjeg/job.nvim' }, -- REQUIRED!
+  { src = 'https://github.com/xieyonn/spinner.nvim' }, -- RECOMMENDED
+  { src = 'https://github.com/wsdjeg/picker.nvim' }, -- OPTIONAL
+})
+
+require('pipenv').setup()
+```
+
+</details>
+<details>
 <summary><code>paq-nvim</code></summary>
 
 ```lua
