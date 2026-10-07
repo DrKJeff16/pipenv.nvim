@@ -1,5 +1,5 @@
 *pipenv.txt*
-                                For NVIM >=v0.9.0    Last change: 2026 July 08
+                             For NVIM >=v0.9.0    Last change: 2026 October 07
 
 ==============================================================================
 1. pipenv.nvim                                            *pipenv-pipenv.nvim*
@@ -15,11 +15,11 @@ TABLE OF CONTENTS                                   *pipenv-table-of-contents*
 
 - |pipenv-installation|
 - |pipenv-configuration|
-    - |pipenv-pipenv-environment-variables|
+    - Pipenv Environment Variables
 - |pipenv-usage|
-    - |pipenv-no-subcommands|
-    - |pipenv-subcommands|
-    - |pipenv-`picker.nvim`-integration|
+    - No Subcommands
+    - Subcommands
+    - `picker.nvim` Integration
 - |pipenv-api|
 - |pipenv-license|
 
@@ -83,6 +83,19 @@ pckr.nvim ~
         end,
       },
     })
+<
+
+vim.pack ~
+
+>lua
+    vim.pack.add({
+      { src = 'https://github.com/DrKJeff16/pipenv.nvim' },
+      { src = 'https://github.com/wsdjeg/job.nvim' }, -- REQUIRED!
+      { src = 'https://github.com/xieyonn/spinner.nvim' }, -- RECOMMENDED
+      { src = 'https://github.com/wsdjeg/picker.nvim' }, -- OPTIONAL
+    })
+
+    require('pipenv').setup()
 <
 
 paq-nvim ~
@@ -363,16 +376,16 @@ Examples:
 >vim
     :Pipenv run <COMMANDS>                            " verbose=false
     :Pipenv! run <COMMANDS>                           " verbose=true
-    
+
     :Pipenv! edit                                     " The verbose flag doesn't matter
-    
+
     :Pipenv! sync dev=true                            " verbose=true, dev=false
     :Pipenv! dev=true sync                            " Same as above
-    
+
     :Pipenv pre=true install ...                      " Installs prerelease packages
-    
+
     :Pipenv! python=3.13 install <PACKAGES>           " verbose=true, python=3.13
-    
+
     :Pipenv dev=true file=/path/to/file requirements  " verbose=false, dev=true, file=/path/to/file
 <
 
