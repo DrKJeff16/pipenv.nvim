@@ -238,6 +238,13 @@
 ---@field python? string
 ---@field verbose? boolean
 
+---@class Pipenv.Util.PopupOpts: Pipenv.RunOpts,Pipenv.CommandOpts,Pipenv.SyncOpts,Pipenv.UpdateOpts,Pipenv.ScriptsOpts,Pipenv.RequirementsOpts,Pipenv.RemoveOpts,Pipenv.InstallOpts,Pipenv.VerifyOpts,Pipenv.GraphOpts
+---@field dev? boolean
+---@field file? string
+---@field pre? boolean
+---@field python? string
+---@field verbose? boolean
+
 ---@class Pipenv.RequirementsOpts
 ---@field dev? boolean
 ---@field file? string[]|string

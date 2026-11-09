@@ -2,7 +2,6 @@ local Util = require('pipenv.util')
 
 ---@class Pipenv
 ---@field clean fun(opts?: Pipenv.CleanOpts, cmd_opts?: Pipenv.CommandOpts)
----@field commands Pipenv.Commands
 ---@field config Pipenv.Config
 ---@field core Pipenv.Core
 ---@field edit function
@@ -26,25 +25,24 @@ local M = {}
 ---@param opts? PipenvOpts
 function M.setup(opts)
   Util.validate({ opts = { opts, { 'table', 'nil' }, true } })
-  if Util.executable('pipenv') then
-    require('pipenv.config').setup(opts or {})
-    if vim.g.pipenv_setup == 1 then
-      require('pipenv.commands').setup()
-    end
-  else
-    vim.notify('Pipenv not found in your PATH!', vim.log.levels.ERROR)
-  end
+  assert(Util.executable('pipenv'), 'Pipenv not found in your PATH')
+
+  require('pipenv.config').setup(opts or {})
 end
 
 local Pipenv = setmetatable(M, { ---@type Pipenv
   ---@param self Pipenv
-  ---@param k string|integer
   __index = function(self, k)
     local raw = rawget(self, k) or nil
     if raw then
       return raw
     end
 
+    if type(k) ~= 'string' then
+      return
+    end
+
+    ---@cast k string
     if Util.mod_exists('pipenv.' .. k) then
       return Util.rawset(self, k, require('pipenv.' .. k))
     end

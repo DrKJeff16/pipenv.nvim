@@ -1,19 +1,18 @@
----@module 'pipenv._meta'
+if vim.g.pipenv_command_loaded == 1 then
+  return
+end
+
+vim.g.pipenv_command_loaded = 1
 
 local INFO = vim.log.levels.INFO
 local WARN = vim.log.levels.WARN
 local ERROR = vim.log.levels.ERROR
-local Core = require('pipenv.core')
-local Util = require('pipenv.util')
-
----@class Pipenv.Commands
-local M = {}
 
 ---@param lead string
 ---@param choices string[]
 ---@return string[] candidates
 local function narrow_candidates(lead, choices)
-  Util.validate({
+  require('pipenv.util').validate({
     lead = { lead, { 'string' } },
     choices = { choices, { 'table' } },
   })
@@ -87,8 +86,7 @@ local function complete_fun(_, lead)
   }
   for _, sub in ipairs(args) do
     if vim.list_contains(subs, sub) then
-      subcmd = true
-      subcmd_val = sub
+      subcmd, subcmd_val = true, sub
     elseif vim.list_contains(gen_candidates('dev'), sub) then
       dev = true
     elseif vim.list_contains(gen_candidates('pre'), sub) then
@@ -99,9 +97,11 @@ local function complete_fun(_, lead)
       file = true
     end
   end
+
   if dev and subcmd and pre and python and file then
     return {}
   end
+
   if not (subcmd or dev or pre or python or file) then
     return narrow_candidates(
       args[#args],
@@ -270,18 +270,12 @@ local function complete_fun(_, lead)
   return {}
 end
 
----@class Pipenv.Util.PopupOpts
----@field dev? boolean
----@field pre? boolean
----@field verbose? boolean
----@field file? string
----@field python? string
-
 ---@param valid string[]
 ---@param except string[]
----@param opts? Pipenv.Util.PopupOpts
-function M.popup(valid, except, opts)
-  Util.validate({
+---@param opts Pipenv.Util.PopupOpts
+---@overload fun(valid: string[], except: string[])
+local function popup(valid, except, opts)
+  require('pipenv.util').validate({
     valid = { valid, { 'table' } },
     except = { except, { 'table' } },
     opts = { opts, { 'table', 'nil' }, true },
@@ -302,32 +296,26 @@ function M.popup(valid, except, opts)
       if not (item and vim.list_contains(new_valid, item)) then
         return
       end
+
+      local Core = require('pipenv.core')
       if item == 'run' then
         vim.ui.input({ prompt = 'Type the command to run' }, function(input)
           if not input or input == '' then
             return
           end
-
           Core.run(vim.split(input, ' ', { plain = true, trimempty = true }), opts)
         end)
-        return
-      end
-      if item == 'list' then
+      elseif item == 'list' then
         Core.list_installed()
-        return
-      end
-      if vim.list_contains({ 'install', 'uninstall' }, item) then
+      elseif vim.list_contains({ 'install', 'uninstall' }, item) then
         vim.ui.input({ prompt = ('Type the packages to %s (separated by a space)'):format(item) }, function(input)
           if not input or input == '' then
             return
           end
-
           Core[item](vim.split(input, ' ', { plain = true, trimempty = true }), opts)
         end)
-        return
-      end
-      if
-        not vim.list_contains({
+      elseif
+        vim.list_contains({
           'clean',
           'edit',
           'graph',
@@ -340,204 +328,105 @@ function M.popup(valid, except, opts)
           'verify',
         }, item)
       then
-        return
+        Core[item](opts)
       end
-
-      Core[item](opts)
     end
   )
 end
 
-function M.setup()
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
+vim.api.nvim_create_user_command('Pipenv', function(ctx)
+  local valid = {
+    'clean',
+    'edit',
+    'graph',
+    'help',
+    'install',
+    'list',
+    'list-installed',
+    'list-scripts',
+    'lock',
+    'remove',
+    'requirements',
+    'run',
+    'scripts',
+    'sync',
+    'uninstall',
+    'update',
+    'upgrade',
+    'verify',
+  }
 
-  vim.api.nvim_create_user_command('Pipenv', function(ctx)
-    local valid = {
-      'clean',
-      'edit',
-      'graph',
-      'help',
-      'install',
-      'list',
-      'list-installed',
-      'list-scripts',
-      'lock',
-      'remove',
-      'requirements',
-      'run',
-      'scripts',
-      'sync',
-      'uninstall',
-      'update',
-      'upgrade',
-      'verify',
-    }
-
-    local dev, pre = false, false ---@type boolean, boolean
-    local file, python, subcommand = nil, nil, nil ---@type nil|string, nil|string, string|Pipenv.ValidOps|nil
-    local subsubcmd = {} ---@type string[]
-    for _, arg in ipairs(ctx.fargs) do
-      if arg:find('=') then
-        local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = true })
-        if #subsubcommand == 2 then
-          if subsubcommand[1] == 'dev' then
-            if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
-              Core.help(WARN)
-              return
-            end
-            dev = subsubcommand[2] == 'true' and true or false
-          elseif subsubcommand[1] == 'pre' then
-            if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
-              Core.help(WARN)
-              return
-            end
-            pre = subsubcommand[2] == 'true' and true or false
-          elseif subsubcommand[1] == 'file' then
-            file = subsubcommand[2]
-          elseif subsubcommand[1] == 'python' then
-            python = subsubcommand[2]
-          else
-            Core.help(ERROR)
+  local Core = require('pipenv.core')
+  local dev, pre = false, false ---@type boolean, boolean
+  local file, python, subcommand = nil, nil, nil ---@type nil|string, nil|string, string|Pipenv.ValidOps|nil
+  local subsubcmd = {} ---@type string[]
+  for _, arg in ipairs(ctx.fargs) do
+    if arg:find('=') then
+      local subsubcommand = vim.split(arg, '=', { plain = true, trimempty = true })
+      if #subsubcommand == 2 then
+        if subsubcommand[1] == 'dev' then
+          if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
+            Core.help(WARN)
             return
           end
-        else
-          Core.help(ERROR)
-          return
-        end
-      elseif not subcommand then
-        if vim.list_contains(valid, arg) then
-          subcommand = arg ---@type Pipenv.ValidOps
+          dev = subsubcommand[2] == 'true' and true or false
+        elseif subsubcommand[1] == 'pre' then
+          if not vim.list_contains({ 'true', 'false' }, subsubcommand[2]) then
+            Core.help(WARN)
+            return
+          end
+          pre = subsubcommand[2] == 'true' and true or false
+        elseif subsubcommand[1] == 'file' then
+          file = subsubcommand[2]
+        elseif subsubcommand[1] == 'python' then
+          python = subsubcommand[2]
         else
           Core.help(ERROR)
           return
         end
       else
-        table.insert(subsubcmd, arg)
+        Core.help(ERROR)
+        return
       end
+    elseif not subcommand then
+      if vim.list_contains(valid, arg) then
+        subcommand = arg ---@type Pipenv.ValidOps
+      else
+        Core.help(ERROR)
+        return
+      end
+    else
+      table.insert(subsubcmd, arg)
     end
+  end
 
-    if not subcommand then
-      if vim.tbl_isempty(subsubcmd) then
-        M.popup(valid, { 'help', 'list-installed', 'list-scripts' }, {
-          verbose = ctx.bang,
-          dev = dev,
-          pre = pre,
-          file = file,
-          python = python,
-        })
-        return
-      end
-      Core.help(ERROR)
-      return
-    end
-
-    if subcommand == 'help' then
-      ---@cast subcommand 'help'
-      Core.help(INFO)
-      return
-    end
-    if subcommand == 'install' then
-      ---@cast subcommand 'install'
-      Core.install(
-        vim.tbl_isempty(subsubcmd) and nil or subsubcmd,
-        { dev = dev, verbose = ctx.bang, python = python, pre = pre }
-      )
-      return
-    end
-    if subcommand == 'list-scripts' then
-      ---@cast subcommand 'list-scripts'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core.list_scripts()
-      return
-    end
-    if subcommand == 'list-installed' then
-      ---@cast subcommand 'list-installed'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core.list_installed()
-      return
-    end
-    if subcommand == 'edit' then
-      ---@cast subcommand 'edit'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core.edit()
-      return
-    end
-    if subcommand == 'remove' then
-      ---@cast subcommand 'remove'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core.remove()
-      return
-    end
-    if vim.list_contains({ 'graph', 'scripts' }, subcommand) then
-      ---@cast subcommand 'graph'|'scripts'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core[subcommand]({ python = python })
-      return
-    end
-    if vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) then
-      ---@cast subcommand 'verify'|'clean'|'lock'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core[subcommand]({ verbose = ctx.bang, python = python })
-      return
-    end
-    if subcommand == 'run' then
-      ---@cast subcommand 'run'
-      if vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-
-      Core.run(subsubcmd, { verbose = ctx.bang, python = python })
-      return
-    end
-    if vim.list_contains({ 'sync', 'update', 'upgrade' }, subcommand) then
-      ---@cast subcommand 'sync'|'upgrade'|'update'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core[subcommand]({ dev = dev, verbose = ctx.bang, python = python, pre = pre })
-      return
-    end
-    if subcommand == 'requirements' then
-      ---@cast subcommand 'requirements'
-      if not vim.tbl_isempty(subsubcmd) then
-        Core.help(WARN)
-        return
-      end
-      Core.requirements({ file = file, dev = dev, python = python, verbose = ctx.bang })
-      return
-    end
-
+  if not subcommand and #subsubcmd == 0 then
+    popup(
+      valid,
+      { 'help', 'list-installed', 'list-scripts' },
+      { dev = dev, file = file, pre = pre, python = python, verbose = ctx.bang }
+    )
+  elseif subcommand == 'help' then
+    Core.help(INFO)
+  elseif subcommand == 'install' then
+    Core.install(#subsubcmd == 0 and nil or subsubcmd, { dev = dev, verbose = ctx.bang, python = python, pre = pre })
+  elseif subcommand == 'list-scripts' and #subsubcmd == 0 then
+    Core.list_scripts()
+  elseif subcommand == 'list-installed' and #subsubcmd == 0 then
+    Core.list_installed()
+  elseif vim.list_contains({ 'edit', 'remove' }, subcommand) and #subsubcmd == 0 then
+    Core[subcommand]()
+  elseif vim.list_contains({ 'graph', 'scripts' }, subcommand) and #subsubcmd == 0 then
+    Core[subcommand]({ python = python })
+  elseif vim.list_contains({ 'verify', 'clean', 'lock' }, subcommand) and #subsubcmd == 0 then
+    Core[subcommand]({ verbose = ctx.bang, python = python })
+  elseif subcommand == 'run' and #subsubcmd > 0 then
+    Core.run(subsubcmd, { verbose = ctx.bang, python = python })
+  elseif vim.list_contains({ 'sync', 'update', 'upgrade' }, subcommand) and #subsubcmd == 0 then
+    Core[subcommand]({ dev = dev, verbose = ctx.bang, python = python, pre = pre })
+  elseif subcommand == 'requirements' and #subsubcmd == 0 then
+    Core.requirements({ file = file, dev = dev, python = python, verbose = ctx.bang })
+  else
     Core.help(WARN)
-  end, {
-    nargs = '*',
-    bang = true,
-    desc = 'Pipenv user command',
-    complete = complete_fun,
-  })
-end
-
-return M
--- vim: set ts=2 sts=2 sw=2 et ai si sta:
+  end
+end, { bang = true, complete = complete_fun, desc = 'Pipenv user command', nargs = '*' })

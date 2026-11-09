@@ -31,7 +31,7 @@ local function run_cmd(cmd, on_exit, opts)
     ['opts.cwd'] = { opts.cwd, { 'string', 'nil' }, true },
     ['opts.env'] = { opts.env, { 'table', 'nil' }, true },
   })
-  opts.cwd = opts.cwd or vim.uv.cwd()
+  opts.cwd = opts.cwd or vim.uv.cwd() or vim.fn.getcwd()
   local env = Config.get_env()
   if env and not vim.tbl_isempty(env) then
     opts.env = vim.tbl_deep_extend('keep', opts.env or {}, env)
@@ -40,12 +40,9 @@ local function run_cmd(cmd, on_exit, opts)
   stdout, stderr = {}, {}
   local job = require('job')
   if has_spinner() then
-    local default_opts = { ---@type PipenvSpinner.Opts
-      kind = 'cursor',
-    }
     spinner = require('pipenv.spinner').new(
       table.concat(cmd, ' '),
-      vim.tbl_deep_extend('keep', Config.get().spinner.opts, default_opts)
+      vim.tbl_deep_extend('keep', Config.get().spinner.opts, { kind = 'cursor' })
     )
     if spinner then
       spinner:start()
@@ -77,56 +74,52 @@ local function run_cmd(cmd, on_exit, opts)
   end
 end
 
----@param create? boolean
+---@param create boolean
 ---@return boolean pipfile
+---@overload fun(): pipfile: boolean
 local function has_pipfile(create)
   Util.validate({ create = { create, { 'boolean', 'nil' }, true } })
   if create == nil then
     create = false
   end
 
+  local pipfile = true
   if not vim.fn.filereadable('./Pipfile') then
     if not (create and Util.yes_no('No Pipfile found. Create?')) then
-      vim.notify('No Pipfile found!', ERROR)
-      return false
+      vim.notify('No Pipfile found', ERROR)
+      pipfile = false
+    else
+      ec = -1
+      run_cmd({ 'pipenv', 'install' }, function(code, out, err)
+        ec = code
+        local txt = code ~= 1 and out or err
+        if txt ~= '' then
+          local config = Config.get()
+          Util.open_win(txt, {
+            border = config.output.border,
+            float = config.output.float,
+            height = config.output.height,
+            split = config.output.split,
+            title = 'pipenv install',
+            width = config.output.width,
+            zindex = config.output.zindex,
+          })
+        end
+      end)
+      pipfile = ec == 0
     end
-    ec = -1
-    run_cmd({ 'pipenv', 'install' }, function(code, out, err)
-      ec = code
-      local cmd_str = 'pipenv install'
-      local txt = code ~= 1 and out or err
-      if txt ~= '' then
-        local config = Config.get()
-        Util.open_win(txt, {
-          border = config.output.border,
-          float = config.output.float,
-          height = config.output.height,
-          split = config.output.split,
-          title = cmd_str,
-          width = config.output.width,
-          zindex = config.output.zindex,
-        })
-      end
-    end)
-    return ec == 0
   end
-
-  return true
+  return pipfile
 end
 
 ---@class Pipenv.Core
 local M = {}
 
 function M.edit()
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile(true) then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(true), 'No `Pipfile` could be created in the current working directory')
 
-  vim.cmd.tabedit('./Pipfile')
+  vim.cmd.tabedit({ args = { './Pipfile' } })
   vim.schedule(function()
     local bufnr = vim.api.nvim_get_current_buf()
     local tab = vim.api.nvim_get_current_tabpage()
@@ -139,9 +132,9 @@ end
 
 ---@return string[]|nil|? res
 function M.retrieve_scripts()
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
+
   local stat = vim.uv.fs_stat('Pipfile')
   if not stat or stat.size == 0 then
     return
@@ -151,11 +144,8 @@ function M.retrieve_scripts()
     return
   end
 
-  local data = vim.uv.fs_read(fd, stat.size)
-  vim.uv.fs_close(fd)
-  if not data then
-    return
-  end
+  local data = assert(vim.uv.fs_read(fd, stat.size), 'Unable to read data from Pipfile')
+  assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
 
   local l_data = vim.split(data, '\n', { plain = true, trimempty = false })
   local res, scripts = {}, false ---@type string[], boolean
@@ -180,15 +170,11 @@ end
 function M.retrieve_installed()
   local installed = {} ---@type string[]
   run_cmd({ 'pipenv', 'graph', '--json' }, function(code, out, err)
-    if code ~= 0 or not out or out == '' then
-      error((err and err ~= '') and err or 'Could not parse JSON graph!', ERROR)
-    end
+    assert(code == 0 and out and out ~= '', (err and err ~= '') and err or 'Could not parse JSON graph')
 
     ---@type boolean, PipenvJsonGraph[]|nil|?
     local ok, data = pcall(vim.json.decode, Util.trim_output(out))
-    if not (ok and data) then
-      error('Could not parse JSON graph!', ERROR)
-    end
+    assert(ok and data, 'Could not parse JSON graph')
 
     for _, pkg in ipairs(data) do
       if pkg.package.package_name and not vim.list_contains(installed, pkg.package.package_name) then
@@ -202,10 +188,8 @@ end
 ---@param opts? Pipenv.RemoveOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.remove(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(false), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -246,9 +230,6 @@ function M.remove(opts, cmd_opts)
     vim.notify(('%s - No output'):format(cmd_str), INFO)
   end, cmd_opts)
 
-  if not has_pipfile(false) then
-    return
-  end
   if not opts.verbose then
     if not Util.yes_no('Remove Pipfile and Pipfile.lock?') then
       return
@@ -259,19 +240,11 @@ function M.remove(opts, cmd_opts)
 end
 
 function M.list_installed()
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   local installed = M.retrieve_installed()
-  if vim.tbl_isempty(installed) then
-    vim.notify('No installed scripts found!', WARN)
-    return
-  end
+  assert(#installed > 0, 'No installed scripts found')
 
   local config = Config.get()
   Util.open_win(table.concat(installed, '\n'), {
@@ -286,23 +259,11 @@ function M.list_installed()
 end
 
 function M.list_scripts()
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
-  local data = M.retrieve_scripts()
-  if not data then
-    vim.notify('Unable to retrieve scripts from Pipfile!', ERROR)
-    return
-  end
-  if vim.tbl_isempty(data) then
-    vim.notify('No scripts in Pipfile!', WARN)
-    return
-  end
+  local data = assert(M.retrieve_scripts(), 'Unable to retrieve scripts from Pipfile')
+  assert(#data > 0, 'No scripts in Pipfile')
 
   local config = Config.get()
   Util.open_win(table.concat(data, '\n'), {
@@ -319,13 +280,8 @@ end
 ---@param opts? Pipenv.GraphOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.graph(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -339,8 +295,7 @@ function M.graph(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'graph')
 
@@ -398,8 +353,7 @@ function M.lock(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   if opts.dev then
     table.insert(cmd, '--dev')
@@ -412,11 +366,8 @@ function M.lock(opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -440,13 +391,8 @@ end
 ---@param opts? Pipenv.CleanOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.clean(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -466,19 +412,15 @@ function M.clean(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'clean')
 
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -502,13 +444,8 @@ end
 ---@param opts? Pipenv.VerifyOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.verify(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -528,19 +465,15 @@ function M.verify(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'verify')
 
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -564,13 +497,8 @@ end
 ---@param opts? Pipenv.SyncOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.sync(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -598,8 +526,7 @@ function M.sync(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'sync')
   if opts.dev then
@@ -612,11 +539,8 @@ function M.sync(opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -640,13 +564,8 @@ end
 ---@param opts? Pipenv.UpgradeOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.update(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -674,8 +593,7 @@ function M.update(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'update')
   if opts.dev then
@@ -688,11 +606,8 @@ function M.update(opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -716,13 +631,8 @@ end
 ---@param opts? Pipenv.UpgradeOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.upgrade(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -750,8 +660,7 @@ function M.upgrade(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'upgrade')
   if opts.dev then
@@ -764,11 +673,8 @@ function M.upgrade(opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -792,13 +698,8 @@ end
 ---@param opts? Pipenv.ScriptsOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.scripts(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -812,19 +713,15 @@ function M.scripts(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'scripts')
 
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if out and out ~= '' then
       local config = Config.get()
       Util.open_win(Util.trim_output(out), {
@@ -846,10 +743,7 @@ end
 ---@param opts? Pipenv.InstallOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.install(packages, opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
 
   Util.validate({
     packages = { packages, { 'string', 'table', 'nil' }, true },
@@ -879,8 +773,7 @@ function M.install(packages, opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'install')
   if opts.dev then
@@ -889,16 +782,13 @@ function M.install(packages, opts, cmd_opts)
   if opts.pre then
     table.insert(cmd, '--pre')
   end
-  if packages then
-    if Util.is_type('string', packages) then
-      ---@cast packages string
-      table.insert(cmd, packages)
-    elseif not vim.tbl_isempty(packages) then
-      ---@cast packages string[]
-      for _, pkg in ipairs(packages) do
-        if Util.is_type('string', pkg) and pkg ~= '' then
-          table.insert(cmd, pkg)
-        end
+
+  if packages and type(packages) == 'string' then
+    table.insert(cmd, packages)
+  elseif packages and type(packages) == 'table' then
+    for _, pkg in ipairs(packages) do
+      if type(pkg) == 'string' and pkg ~= '' then
+        table.insert(cmd, pkg)
       end
     end
   end
@@ -906,11 +796,8 @@ function M.install(packages, opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -935,13 +822,8 @@ end
 ---@param opts? Pipenv.UninstallOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.uninstall(packages, opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     packages = { packages, { 'string', 'table' } },
@@ -970,8 +852,7 @@ function M.uninstall(packages, opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'uninstall')
   if opts.dev then
@@ -980,29 +861,22 @@ function M.uninstall(packages, opts, cmd_opts)
   if opts.pre then
     table.insert(cmd, '--pre')
   end
-  if Util.is_type('string', packages) then
-    ---@cast packages string
+  if type(packages) == 'string' then
     table.insert(cmd, packages)
-  elseif not vim.tbl_isempty(packages) then
-    ---@cast packages string[]
+  else
+    assert(#packages > 0, 'Empty packages table')
     for _, pkg in ipairs(packages) do
-      if Util.is_type('string', pkg) and pkg ~= '' then
+      if type(pkg) == 'string' and pkg ~= '' then
         table.insert(cmd, pkg)
       end
     end
-  else
-    vim.notify('(pipenv uninstall): Empty packages table!', ERROR)
-    return
   end
 
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -1027,13 +901,8 @@ end
 ---@param opts? Pipenv.RunOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.run(command, opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     command = { command, { 'string', 'table' } },
@@ -1053,20 +922,16 @@ function M.run(command, opts, cmd_opts)
   opts.python = opts.python or nil
 
   local cmd ---@type string[]
-  if Util.is_type('string', command) then
-    ---@cast command string
+  if type(command) == 'string' then
     cmd = { 'pipenv' }
     if opts.python and opts.python ~= '' then
-      table.insert(cmd, '--python')
-      table.insert(cmd, opts.python)
+      vim.list_extend(cmd, { '--python', opts.python })
     end
     table.insert(cmd, 'run')
     table.insert(cmd, command)
-  elseif vim.tbl_isempty(command) then
-    vim.notify('(pipenv run): Empty command table!')
-    return
   else
-    ---@cast command string[]
+    assert(#command > 0, 'Empty command table')
+
     cmd = vim.deepcopy(command)
     if opts.python and opts.python ~= '' then
       table.insert(cmd, 1, opts.python)
@@ -1079,11 +944,8 @@ function M.run(command, opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
+    assert(code == 0, err)
 
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
     if not opts.verbose then
       return
     end
@@ -1100,20 +962,15 @@ function M.run(command, opts, cmd_opts)
       })
       return
     end
-    vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
+    vim.notify(('(%s): No output given'):format(cmd_str), INFO)
   end, cmd_opts)
 end
 
 ---@param opts? Pipenv.RequirementsOpts
 ---@param cmd_opts? Pipenv.CommandOpts
 function M.requirements(opts, cmd_opts)
-  if vim.g.pipenv_setup ~= 1 then
-    vim.notify('pipenv.nvim is not configured!', ERROR)
-    return
-  end
-  if not has_pipfile() then
-    return
-  end
+  assert(vim.g.pipenv_setup == 1, 'pipenv.nvim is not configured')
+  assert(has_pipfile(), 'No `Pipfile` in the current working directory')
 
   Util.validate({
     opts = { opts, { 'table', 'nil' }, true },
@@ -1139,8 +996,7 @@ function M.requirements(opts, cmd_opts)
 
   local cmd = { 'pipenv' }
   if opts.python and opts.python ~= '' then
-    table.insert(cmd, '--python')
-    table.insert(cmd, opts.python)
+    vim.list_extend(cmd, { '--python', opts.python })
   end
   table.insert(cmd, 'requirements')
 
@@ -1151,14 +1007,10 @@ function M.requirements(opts, cmd_opts)
   run_cmd(cmd, function(code, out, err)
     local cmd_str = table.concat(cmd, ' ')
     err = (err and err ~= '') and err or ('Error when running `%s`'):format(cmd_str)
-
-    if code ~= 0 then
-      vim.notify(err, ERROR)
-      return
-    end
+    assert(code == 0, err)
 
     if not out or out == '' then
-      vim.notify(('(%s): No output given!'):format(cmd_str), INFO)
+      vim.notify(('(%s): No output given'):format(cmd_str), INFO)
       return
     end
 
@@ -1182,14 +1034,15 @@ function M.requirements(opts, cmd_opts)
       return
     end
 
-    local fd = vim.uv.fs_open(opts.file, 'w', tonumber('644', 8))
-    if not fd then
-      vim.notify(('(%s): Unable to write to `%s`!'):format(cmd_str, opts.file), ERROR)
-      return
-    end
-
-    vim.uv.fs_write(fd, vim.split(out, '\n', { trimempty = false }))
-    vim.uv.fs_close(fd)
+    local fd = assert(
+      vim.uv.fs_open(opts.file, 'w', tonumber('644', 8)),
+      ('(%s): Unable to open file: `%s`'):format(cmd_str, opts.file)
+    )
+    assert(
+      vim.uv.fs_write(fd, vim.split(out, '\n', { trimempty = false })),
+      ('(%s): Unable to write data to `%s`'):format(cmd_str, opts.file)
+    )
+    assert(vim.uv.fs_close(fd), 'Unable to close file descriptor')
 
     if opts.verbose then
       vim.notify(('(%s): Wrote requirements to `%s`!'):format(cmd_str, opts.file), INFO)
